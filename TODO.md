@@ -13,7 +13,7 @@
  * pyethapp & pyethereum compilation recipe
    * https://stackoverflow.com/a/22268636/185510
    * checking from requirements:
-     * [TODO]   bitcoin
+     * [ok]   bitcoin
      * [error]  pysha3>=1.0.1
        * it uses a ASM/C package https://github.com/gvanas/KeccakCodePackage
        * maybe try to use pycryptodome sha3 module:
