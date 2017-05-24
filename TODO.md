@@ -24,7 +24,7 @@
      * [error] pycryptodome>=3.3.1
      * [error] scrypt
      * [ok] rlp>=0.4.7
-     * [TODO] https://github.com/ethereum/ethash/tarball/master
+     * [error] https://github.com/ethereum/ethash/tarball/master
      * [TODO] secp256k1
  * Automate / Document dev requirements
    * Automate VM or Docker
