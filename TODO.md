@@ -23,6 +23,8 @@
      * [ok] pbkdf2
      * [error] pycryptodome>=3.3.1
      * [error] scrypt
+       * It could be skipped in a way that it doesn't seem totally mandatory, see:
+         https://github.com/ethereum/pyethereum/blob/v1.6.1/ethereum/keys.py
      * [ok] rlp>=0.4.7
      * [error] https://github.com/ethereum/ethash/tarball/master
      * [ok] secp256k1
