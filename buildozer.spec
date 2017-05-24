@@ -36,6 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
+# requirements = hostpython2,kivy,pyethereum
 requirements = hostpython2,kivy
 
 # (str) Custom source folders for requirements

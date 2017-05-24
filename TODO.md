@@ -25,7 +25,7 @@
      * [error] scrypt
      * [ok] rlp>=0.4.7
      * [error] https://github.com/ethereum/ethash/tarball/master
-     * [TODO] secp256k1
+     * [ok] secp256k1
  * Automate / Document dev requirements
    * Automate VM or Docker
    * https://developer.android.com/studio/run/device.html
