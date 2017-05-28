@@ -14,19 +14,16 @@
    * https://stackoverflow.com/a/22268636/185510
    * checking from requirements:
      * [ok]   bitcoin
-     * [error]  pysha3>=1.0.1
-       * it uses a ASM/C package https://github.com/gvanas/KeccakCodePackage
-       * maybe try to use pycryptodome sha3 module:
-         https://github.com/ethereum/pyethereum/commit/6d6324bf3e99e15f3613990376555db970406534
+     * [FIXED]  pysha3>=1.0.1
      * [ok] PyYAML
      * [ok] repoze.lru
      * [ok] pbkdf2
-     * [error] pycryptodome>=3.3.1
-     * [error] scrypt
+     * [FIXED] pycryptodome>=3.3.1
+     * [error] scrypt -> TODO this is the next up as in 2017/05/28
        * It could be skipped in a way that it doesn't seem totally mandatory, see:
          https://github.com/ethereum/pyethereum/blob/v1.6.1/ethereum/keys.py
      * [ok] rlp>=0.4.7
-     * [error] https://github.com/ethereum/ethash/tarball/master
+     * [FIXED] https://github.com/ethereum/ethash/tarball/master
      * [ok] secp256k1
  * Automate / Document dev requirements
    * Automate VM or Docker
