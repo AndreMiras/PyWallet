@@ -1,13 +1,10 @@
 from pythonforandroid.recipe import PythonRecipe
 
 
-
 class Pysha3Recipe(PythonRecipe):
-    # TODO take a look at:
-    # https://github.com/tiran/pysha3/blob/master/Makefile
-    # we may need "build_ext -i" (--inplace flag)
+    version = '1.0.2'
 
-    url = 'https://github.com/ethereum/ethash/archive/master.zip'
+    url = 'https://github.com/tiran/pysha3/archive/1.0.2.zip'
 
     depends = ['python2','setuptools']
 
