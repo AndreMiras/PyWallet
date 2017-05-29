@@ -23,11 +23,30 @@ def test_scrypt():
     print("decrypted:", decrypted)
     # 'a secret message'
 
+def test_pyethereum():
+    print("pyethereum begin")
+    from ethereum import compress, utils
+    print("pyethereum end")
+
+def test_pyethapp():
+    print("pyethapp begin")
+    print("import Account")
+    from pyethapp.accounts import AccountsService, Account
+    password = "foobar"
+    uuid = None
+    print("pyethapp Account.new")
+    account = Account.new(password, uuid=uuid)
+    print("Address: ", account.address.encode('hex'))
+    print("pyethapp end")
+
+
 def main():
     print("sys.version_info:", sys.version_info)
     test_pyethash()
     test_hashlib_sha3()
     test_scrypt()
+    test_pyethereum()
+    test_pyethapp()
     print("end")
 
 
