@@ -19,9 +19,7 @@
      * [ok] repoze.lru
      * [ok] pbkdf2
      * [FIXED] pycryptodome>=3.3.1
-     * [error] scrypt -> TODO this is the next up as in 2017/05/28
-       * It could be skipped in a way that it doesn't seem totally mandatory, see:
-         https://github.com/ethereum/pyethereum/blob/v1.6.1/ethereum/keys.py
+     * [FIXED] scrypt
      * [ok] rlp>=0.4.7
      * [FIXED] https://github.com/ethereum/ethash/tarball/master
      * [ok] secp256k1
