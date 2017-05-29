@@ -19,7 +19,8 @@ def test_scrypt():
     data = scrypt.encrypt('a secret message', 'password', maxtime=0.1) # This will take at least 0.1 seconds
     print("data[:20]:", data[:20])
     # 'scrypt\x00\r\x00\x00\x00\x08\x00\x00\x00\x01RX9H'
-    scrypt.decrypt(data, 'password', maxtime=0.1) # This will also take at least 0.1 seconds
+    decrypted = scrypt.decrypt(data, 'password', maxtime=0.1) # This will also take at least 0.1 seconds
+    print("decrypted:", decrypted)
     # 'a secret message'
 
 def main():
