@@ -9,8 +9,8 @@ class ScryptRecipe(CythonRecipe):
 
     url = 'https://bitbucket.org/mhallin/py-scrypt/get/default.zip'
 
-    # TODO: pyopenssl may not be required
     depends = ['python2','setuptools', 'openssl']
+
     call_hostpython_via_targetpython = False
 
     patches = ["remove_librt.patch"]
