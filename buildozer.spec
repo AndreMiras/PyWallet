@@ -36,8 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-# requirements = hostpython2,kivy,pyethereum
-requirements = hostpython2,kivy
+requirements = hostpython2,kivy,setuptools,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -195,6 +194,7 @@ android.arch = armeabi-v7a
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
 #p4a.local_recipes =
+# p4a.local_recipes = ./python-for-android/recipes/
 
 # (str) Filename to the hook for p4a
 #p4a.hook =
