@@ -1,3 +1,5 @@
+# TODO:
+# _pysha3.so: is missing DT_SONAME will use basename as a replacement: "_pysha3.so"
 from pythonforandroid.recipe import PythonRecipe
 
 
