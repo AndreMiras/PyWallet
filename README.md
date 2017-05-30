@@ -1,4 +1,4 @@
-# README #
+# README
 
 Just trying to build a Ethereum wallet with Kivy.
 
