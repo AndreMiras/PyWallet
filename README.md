@@ -35,3 +35,8 @@ pyethapp --profile testnet run
 buildozer android debug deploy run logcat
 buildozer android adb -- logcat
 ```
+
+## Ubuntu dependencies
+```
+sudo apt install zlib1g-dev default-jdk
+```
