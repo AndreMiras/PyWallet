@@ -4,7 +4,8 @@ Just trying to build a Ethereum wallet with Kivy.
 
 ## Debug
 
-### Mine on the Testnet
+### Mine on the Testnet (geth)
+
 Latest Testnet is Ropsten (networkid 3):
 ```
 geth --networkid 3 --mine
@@ -18,6 +19,12 @@ geth --networkid 3 account list
 To set the reward address to a different account use the `--etherbase` flag:
 ```
 geth --networkid 3 --mine --etherbase value
+```
+
+### Run on the Testnet (pyethapp)
+
+```
+pyethapp --profile testnet run
 ```
 
 
