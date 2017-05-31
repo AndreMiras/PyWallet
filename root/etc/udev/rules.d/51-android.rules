@@ -1,1 +1,3 @@
+# https://developer.android.com/studio/run/device.html
+# Huawei (12d1)
 SUBSYSTEM=="usb", ATTR{idVendor}=="12d1", MODE="0666", GROUP="plugdev"
