@@ -18,6 +18,8 @@
      * [ok] PyYAML
      * [ok] repoze.lru
      * [ok] pbkdf2
+       # reduce key derivation iterations
+       ethereum.keys.PBKDF2_CONSTANTS['c'] = 100
      * [FIXED] pycryptodome>=3.3.1
      * [FIXED] scrypt
      * [ok] rlp>=0.4.7
