@@ -4,6 +4,10 @@
    * Try to open a wallet
    * Try to send a transaction
      * https://github.com/ethereum/pyethapp/wiki/Account-Management
+     * https://github.com/ethereum/pyethapp/issues/218
+       * so make sure we have peers
+       * so make sure we have ETH or disable validate transaction method call
+       * make sure time is sync
  * Take a look at:
    * https://github.com/ethereum/pyethereum
    * https://github.com/ethereum/pyethapp
@@ -33,3 +37,7 @@
    * https://kivy.org/docs/guide/packaging-android.html#packaging-your-application-into-apk
    * https://python-for-android.readthedocs.io/en/latest/quickstart/#installing-dependencies
    * https://kivy.org/docs/guide/packaging-android.html
+  * Upstream
+    * pydevp2p
+      * fix broken tests:
+        * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
