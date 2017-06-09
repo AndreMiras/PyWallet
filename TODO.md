@@ -5,9 +5,18 @@
    * Try to send a transaction
      * https://github.com/ethereum/pyethapp/wiki/Account-Management
      * https://github.com/ethereum/pyethapp/issues/218
-       * so make sure we have peers
-       * so make sure we have ETH or disable validate transaction method call
-       * make sure time is sync
+     * https://github.com/AndreMiras/PyWallet/issues/5
+       * checklist
+         * so make sure we have peers
+         * so make sure we have ETH (or disable validate transaction method call)
+         * make sure time is sync
+       * next up
+         * update PyWallet ticket with recent findings
+         * findout why I get no peers
+           * https://github.com/AndreMiras/PyWallet/issues/6
+         * give it a try on the VM and latest develop branch
+           * make sure TZ is correct and time is ntp sync
+           * make sure it's running @develop branch
  * Take a look at:
    * https://github.com/ethereum/pyethereum
    * https://github.com/ethereum/pyethapp
