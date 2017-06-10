@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from os.path import expanduser
 import requests
-from pyethapp.accounts import AccountsService
+from pyethapp.accounts import AccountsService, Account
 from devp2p.app import BaseApp
 import os
 
@@ -39,6 +39,19 @@ def get_balance(address):
     balance_eth = balance_wei / float(pow(10, 18))
     balance_eth = round(balance_eth, 2)
     return balance_eth
+
+
+def create_and_sign_transaction(
+        account, password, receiver_address, amount_eth):
+    print "account.locked:", account.locked
+    print("unlocking...")
+    account.unlock(password)
+    print("unlocked")
+    print("sending...")
+    transaction = None
+    # TODO: convert from ETH to expected unit
+    # transaction = eth.transact(receiver_address, sender=account, value=100)
+    return transaction
 
 
 def get_main_account():
