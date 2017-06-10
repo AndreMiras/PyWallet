@@ -1,7 +1,6 @@
 # TODO
 
  * with Kivy
-   * Try to open a wallet
    * Try to send a transaction
      * https://github.com/ethereum/pyethapp/wiki/Account-Management
      * https://github.com/ethereum/pyethapp/issues/218

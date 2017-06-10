@@ -11,6 +11,4 @@ class PyethereumRecipe(PythonRecipe):
 
     call_hostpython_via_targetpython = False
 
-    patches = ["bug731.patch"]
-
 recipe = PyethereumRecipe()
