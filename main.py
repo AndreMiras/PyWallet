@@ -1,53 +1,63 @@
-import sys
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from os.path import expanduser
+import requests
+from pyethapp.accounts import AccountsService
+from devp2p.app import BaseApp
+import os
 
-def test_pyethash():
-    import pyethash
-    result = pyethash.get_seedhash(0)
-    print("result:", result)
 
-def test_hashlib_sha3():
-    import hashlib
-    import sha3
-    print("hashlib:", hashlib)
-    print("sha3:", sha3)
-    print("hashlib.sha3_512():", hashlib.sha3_512())
-    print("sha3.keccak_512():", sha3.keccak_512())
+ETHERSCAN_API_KEY = None
 
-def test_scrypt():
-    import scrypt
-    print("scrypt")
-    data = scrypt.encrypt('a secret message', 'password', maxtime=0.1) # This will take at least 0.1 seconds
-    print("data[:20]:", data[:20])
-    # 'scrypt\x00\r\x00\x00\x00\x08\x00\x00\x00\x01RX9H'
-    decrypted = scrypt.decrypt(data, 'password', maxtime=0.1) # This will also take at least 0.1 seconds
-    print("decrypted:", decrypted)
-    # 'a secret message'
 
-def test_pyethereum():
-    print("pyethereum begin")
-    from ethereum import compress, utils
-    print("pyethereum end")
+def handle_etherscan_error(response_json):
+    """
+    Raises an exception on unexpected response.
+    """
+    status = response_json["status"]
+    message = response_json["message"]
+    assert status == "1"
+    assert message == "OK"
 
-def test_pyethapp():
-    print("pyethapp begin")
-    print("import Account")
-    from pyethapp.accounts import AccountsService, Account
-    password = "foobar"
-    uuid = None
-    print("pyethapp Account.new")
-    account = Account.new(password, uuid=uuid)
-    print("Address: ", account.address.encode('hex'))
-    print("pyethapp end")
+
+def get_balance(address):
+    """
+    Retrieves the balance from etherscan.io.
+    The balance is returned in ETH rounded to the second decimal.
+    """
+    url = 'https://api.etherscan.io/api'
+    url += '?module=account&action=balance'
+    url += '&address=%s' % address
+    url += '&tag=latest'
+    if ETHERSCAN_API_KEY:
+        '&apikey=%' % ETHERSCAN_API_KEY
+    response = requests.get(url)
+    response_json = response.json()
+    handle_etherscan_error(response_json)
+    balance_wei = int(response_json["result"])
+    balance_eth = balance_wei / float(pow(10, 18))
+    balance_eth = round(balance_eth, 2)
+    return balance_eth
+
+
+def get_main_account():
+    """
+    Returns the main Account.
+    """
+    home = expanduser("~")
+    keystore_relative_dir = ".config/pyethapp/keystore/"
+    keystore_dir = os.path.join(home, keystore_relative_dir)
+    app = BaseApp(config=dict(accounts=dict(keystore_dir=keystore_dir)))
+    AccountsService.register_with_app(app)
+    account = app.services.accounts[0]
+    return account
 
 
 def main():
-    print("sys.version_info:", sys.version_info)
-    test_pyethash()
-    test_hashlib_sha3()
-    test_scrypt()
-    test_pyethereum()
-    test_pyethapp()
-    print("end")
+    account = get_main_account()
+    balance = get_balance(account.address.encode("hex"))
+    print "balance:", balance
 
 
 if __name__ == '__main__':
