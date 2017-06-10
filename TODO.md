@@ -17,6 +17,8 @@
          * give it a try on the VM and latest develop branch
            * make sure TZ is correct and time is ntp sync
            * make sure it's running @develop branch
+   * other way to broadcast transaction:
+     * https://etherscan.io/pushTx
  * Take a look at:
    * https://github.com/ethereum/pyethereum
    * https://github.com/ethereum/pyethapp
