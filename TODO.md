@@ -40,6 +40,10 @@
      * [ok] rlp>=0.4.7
      * [FIXED] https://github.com/ethereum/ethash/tarball/master
      * [ok] secp256k1
+ * Test
+   * isort
+   * flake8
+   * pylint
  * Automate / Document dev requirements
    * Automate VM or Docker
    * https://developer.android.com/studio/run/device.html
@@ -48,7 +52,7 @@
    * https://kivy.org/docs/guide/packaging-android.html#packaging-your-application-into-apk
    * https://python-for-android.readthedocs.io/en/latest/quickstart/#installing-dependencies
    * https://kivy.org/docs/guide/packaging-android.html
-  * Upstream
-    * pydevp2p
-      * fix broken tests:
-        * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
+   * Upstream
+     * pydevp2p
+       * fix broken tests:
+         * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
