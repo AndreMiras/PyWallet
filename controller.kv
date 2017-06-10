@@ -1,0 +1,16 @@
+#:kivy 1.0
+
+<Controller>:
+    balance_label: balance_label_id
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+
+        Label:
+            id: balance_label_id
+            text: 'Balance:'
+
+        Button:
+            text: 'Get balance'
+            on_press: root.do_action()
