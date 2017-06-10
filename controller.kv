@@ -9,8 +9,23 @@
 
         Label:
             id: balance_label_id
+            size_hint: 1, 0.7
             text: 'Balance:'
 
-        Button:
-            text: 'Get balance'
-            on_press: root.do_action()
+        BoxLayout:
+            size_hint: 1, 0.3
+
+            orientation: 'horizontal'
+            padding: 20
+
+            Button:
+                text: 'Overview'
+                on_press: root.do_action()
+
+            Button:
+                text: 'Send'
+                # on_press: root.do_action()
+
+            Button:
+                text: 'Receive'
+                # on_press: root.do_action()
