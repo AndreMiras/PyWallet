@@ -1,5 +1,11 @@
 #:kivy 1.0
 
+
+# transactions history
+<History@BoxLayout>:
+    # TODO
+    # TODO: dynamic size
+
 <Controller>:
     balance_label: balance_label_id
 
@@ -7,13 +13,25 @@
         orientation: 'vertical'
         padding: 20
 
+        # Balance
         Label:
             id: balance_label_id
-            size_hint: 1, 0.7
+            # TODO: fixed size
+            # size_hint: 1, 0.7
             text: 'Balance:'
 
+        # transactions history
+        History:
+            # TODO
+            # TODO: dynamic size
+
+            Label:
+                text: 'History'
+
+        # bottom navigation
         BoxLayout:
-            size_hint: 1, 0.3
+            # TODO: fixed size
+            # size_hint: 1, 0.3
 
             orientation: 'horizontal'
             padding: 20
