@@ -54,6 +54,13 @@ def create_and_sign_transaction(
     return transaction
 
 
+def new_account(password):
+    uuid = None
+    print("pyethapp Account.new")
+    account = Account.new(password, uuid=uuid)
+    print("Address: ", account.address.encode('hex'))
+
+
 def get_main_account():
     """
     Returns the main Account.
