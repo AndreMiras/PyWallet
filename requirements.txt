@@ -1,5 +1,5 @@
 # 2017/06/08 develop
-https://github.com/ethereum/pyethereum/archive/5e8e5a9a40d376089776c307df5bfbfc351933e4.zip
+https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip
 # 2017/06/10 develop
 https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip
 # 2017/06/10 develop
