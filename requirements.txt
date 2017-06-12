@@ -1,3 +1,4 @@
+Cython==0.25.2
 # 2017/06/08 develop
 https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip
 # 2017/06/10 develop
