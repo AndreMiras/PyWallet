@@ -14,3 +14,8 @@ buildozer android adb -- logcat
 ```
 sudo apt install zlib1g-dev default-jdk
 ```
+
+## Documentation
+
+* Miscellaneous documentation in the [docs](docs/) directory
+* Recipes documentation in the [python-for-android](python-for-android/) directory
