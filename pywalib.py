@@ -38,7 +38,7 @@ class PyWalib(object):
             '&apikey=%' % ETHERSCAN_API_KEY
         response = requests.get(url)
         response_json = response.json()
-        handle_etherscan_error(response_json)
+        PyWalib.handle_etherscan_error(response_json)
         balance_wei = int(response_json["result"])
         balance_eth = balance_wei / float(pow(10, 18))
         balance_eth = round(balance_eth, 2)
