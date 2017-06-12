@@ -6,6 +6,10 @@ https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f1
 # 2017/06/10 develop
 https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip
 pyethash==0.1.27
+# on Ubuntu 16.04 Xenial, the error:
+# x11 - ImportError: No module named window_x11
+# is fixed by installing kivy master
+# https://github.com/kivy/kivy/archive/27e3b90eae2a0155b22a435f1b6f65c913519db6.zip
 Kivy==1.10.0
 Kivy-Garden==0.1.4
 # 2017/06/08 master
