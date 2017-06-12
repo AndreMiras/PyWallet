@@ -13,6 +13,11 @@ ETHERSCAN_API_KEY = None
 
 class PyWalib(object):
 
+    def __init__(self):
+        keystore_dir = PyWalib.get_keystore_path()
+        self.app = BaseApp(config=dict(accounts=dict(keystore_dir=keystore_dir)))
+        AccountsService.register_with_app(self.app)
+
     @staticmethod
     def handle_etherscan_error(response_json):
         """
@@ -38,7 +43,7 @@ class PyWalib(object):
             '&apikey=%' % ETHERSCAN_API_KEY
         response = requests.get(url)
         response_json = response.json()
-        handle_etherscan_error(response_json)
+        PyWalib.handle_etherscan_error(response_json)
         balance_wei = int(response_json["result"])
         balance_eth = balance_wei / float(pow(10, 18))
         balance_eth = round(balance_eth, 2)
@@ -75,21 +80,25 @@ class PyWalib(object):
         keystore_dir = os.path.join(home, keystore_relative_dir)
         return keystore_dir
 
-    @staticmethod
-    def get_main_account():
+    def get_account_list(self):
+        """
+        Returns the Account list.
+        """
+        account = self.app.services.accounts
+        return account
+
+    def get_main_account(self):
         """
         Returns the main Account.
         """
-        keystore_dir = PyWalib.get_keystore_path()
-        app = BaseApp(config=dict(accounts=dict(keystore_dir=keystore_dir)))
-        AccountsService.register_with_app(app)
-        account = app.services.accounts[0]
+        account = self.get_account_list()[0]
         return account
 
 
 def main():
-    account = PyWalib.get_main_account()
-    balance = PyWalib.get_balance(account.address.encode("hex"))
+    pywalib = PyWalib()
+    account = pywalib.get_main_account()
+    balance = pywalib.get_balance(account.address.encode("hex"))
     print "balance:", balance
 
 
