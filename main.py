@@ -19,14 +19,29 @@ class Controller(FloatLayout):
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
-        Clock.schedule_once(self._load_balance)
+        Clock.schedule_once(self._load_landing_page)
 
-    def _load_balance(self, dt=None):
+    def _load_landing_page(self, dt=None):
+        """
+        Loads the landing page.
+        """
+        try:
+            self._load_balance()
+        except IndexError:
+            self._load_manage_keystores()
+
+    def _load_balance(self):
         account = pywalib.get_main_account()
         balance = pywalib.get_balance(account.address.encode("hex"))
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = 'Balance: %s' % balance
+
+    def _load_manage_keystores(self):
+        """
+        Loads the manage keystores screen.
+        """
+        self.ids.screen_manager_id.current = 'manage_keystores'
 
 
 class ControllerApp(App):
