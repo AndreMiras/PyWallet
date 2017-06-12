@@ -3,7 +3,10 @@
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
+#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import QRCodeWidget kivy.garden.qrcode
+
 
 
 
@@ -18,6 +21,12 @@
     MDLabel:
         font_style: 'Display1'
         text: 'Receive:'
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: address_list_id
+    QRCodeWidget:
+        id: qr_code_id
 
 <Overview@BoxLayout>:
     orientation: 'vertical'
