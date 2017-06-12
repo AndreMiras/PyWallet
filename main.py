@@ -10,7 +10,7 @@ from kivymd.theming import ThemeManager
 from kivy.clock import Clock
 
 
-import pywalib
+from pywalib import PyWalib
 
 
 class Controller(FloatLayout):
@@ -31,8 +31,8 @@ class Controller(FloatLayout):
             self._load_manage_keystores()
 
     def _load_balance(self):
-        account = pywalib.get_main_account()
-        balance = pywalib.get_balance(account.address.encode("hex"))
+        account = PyWalib.get_main_account()
+        balance = PyWalib.get_balance(account.address.encode("hex"))
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = 'Balance: %s' % balance
