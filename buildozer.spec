@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = PyWallet
 
 # (str) Package name
-package.name = myapp
+package.name = pywallet
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
@@ -36,7 +36,9 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = hostpython2,kivy,setuptools,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp
+requirements = hostpython2,kivy,setuptools,openssl,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp,https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,requests,pyelliptic==1.5.7,cffi,secp256k1
+# requirements = hostpython2,kivy,setuptools,openssl,cffi,secp256k1
+# requirements = hostpython2,kivy,setuptools,openssl,cffi,libsecp256k1,secp256k1
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
