@@ -38,7 +38,10 @@
      * [FIXED] scrypt
      * [ok] rlp>=0.4.7
      * [FIXED] https://github.com/ethereum/ethash/tarball/master
-     * [ok] secp256k1
+     * [TODO] secp256k1
+       * unknown type https
+       * apt install libssl-dev
+       * buildozer clean all and rebuild
  * Test
    * isort
    * flake8
