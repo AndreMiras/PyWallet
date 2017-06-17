@@ -4,6 +4,7 @@ from __future__ import print_function
 import os
 import kivy
 kivy.require('1.10.0')
+from kivy.utils import platform
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
@@ -51,6 +52,8 @@ class Controller(FloatLayout):
         This is the Kivy default keystore path.
         """
         pywalib_default_keystore_path = PyWalib.get_default_keystore_path()
+        if platform != "android":
+            return pywalib_default_keystore_path
         # makes sure the leading slash gets removed
         pywalib_default_keystore_path = pywalib_default_keystore_path.strip('/')
         user_data_dir = App.get_running_app().user_data_dir
