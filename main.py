@@ -31,7 +31,7 @@ class Receive(BoxLayout):
         account_list = self.pywalib.get_account_list()
         for account in account_list:
             address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(text=address, on_release=lambda x: self._show_address(x.text))
+            item = OneLineListItem(text=address, on_release=lambda x: self.show_address(x.text))
             address_list_id = self.ids.address_list_id
             address_list_id.add_widget(item)
 
