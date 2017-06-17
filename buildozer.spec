@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = PyWallet
 
 # (str) Package name
-package.name = myapp
+package.name = pywallet
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
@@ -23,6 +23,7 @@ source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 #source.exclude_dirs = tests, bin
+source.exclude_dirs = tests, bin, venv, python-for-android
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
@@ -36,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = hostpython2,kivy,setuptools,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp
+requirements = hostpython2,kivy,setuptools,openssl,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp,https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,requests,pyelliptic==1.5.7,cffi,secp256k1,qrcode
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -44,6 +45,7 @@ requirements = hostpython2,kivy,setuptools,pycryptodome,pysha3,ethash,scrypt,bit
 
 # (list) Garden requirements
 #garden_requirements =
+garden_requirements = qrcode
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -86,6 +88,7 @@ fullscreen = 0
 
 # (list) Permissions
 #android.permissions = INTERNET
+android.permissions = INTERNET
 
 # (int) Android API to use
 #android.api = 19

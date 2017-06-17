@@ -3,7 +3,10 @@
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
+#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import QRCodeWidget kivy.garden.qrcode
+
 
 
 
@@ -15,9 +18,12 @@
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        text: 'Receive:'
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: address_list_id
+    QRCodeWidget:
+        id: qr_code_id
 
 <Overview@BoxLayout>:
     orientation: 'vertical'
@@ -68,27 +74,41 @@
             right_action_items: [['dots-vertical', lambda x: None]]
         ScreenManager:
             id: screen_manager_id
-            Screen:
-                name: 'bottomsheet'
 
-				name: 'bottom_navigation'
-				MDBottomNavigation:
-					id: bottom_navigation_id
-					MDBottomNavigationItem:
-						name: 'overview'
-						text: "Overview"
-						icon: 'format-list-bulleted'
-						Overview:
+            Screen:
+                name: 'overview'
+                MDBottomNavigation:
+                    id: bottom_navigation_id
+                    MDBottomNavigationItem:
+                        name: 'overview'
+                        text: "Overview"
+                        icon: 'format-list-bulleted'
+                        Overview:
                             id: overview_id
-					MDBottomNavigationItem:
-						name: 'send'
-						text: "Send"
-						icon: 'arrow-up-bold'
-						Send:
+                    MDBottomNavigationItem:
+                        name: 'send'
+                        text: "Send"
+                        icon: 'arrow-up-bold'
+                        Send:
                             id: send_id
-					MDBottomNavigationItem:
-						name: 'receive'
-						text: "Receive"
-						icon: 'arrow-down-bold'
-						Receive:
+                    MDBottomNavigationItem:
+                        name: 'receive'
+                        text: "Receive"
+                        icon: 'arrow-down-bold'
+                        Receive:
                             id: send_id
+
+            Screen:
+                name: 'manage_keystores'
+                BoxLayout:
+                    orientation: 'vertical'
+                    MDLabel:
+                        # size_hint_y: None
+                        font_style: 'Display1'
+                        halign: 'center'
+                        valign: 'middle'
+                        text: 'Keystore not found'
+                    MDLabel:
+                        halign: 'center'
+                        valign: 'middle'
+                        text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()
