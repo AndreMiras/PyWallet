@@ -19,6 +19,8 @@ class LibSecp256k1Recipe(Recipe):
                     '--prefix=' + self.ctx.get_python_install_dir(),
                     '--enable-shared',
                     '--enable-module-recovery',
+                    '--enable-experimental',
+                    '--enable-module-ecdh',
                     _env=env)
             shprint(sh.make, '-j' + str(cpu_count()), _env=env)
             libs = ['.libs/libsecp256k1.so']
