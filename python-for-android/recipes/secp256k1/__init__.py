@@ -1,10 +1,7 @@
-from pythonforandroid.toolchain import PythonRecipe, shprint, shutil, current_directory
-from pythonforandroid.recipe import CompiledComponentsPythonRecipe, Recipe
-from os.path import join, exists
-import sh
+from os.path import join
+from pythonforandroid.recipe import CompiledComponentsPythonRecipe
 
 
-# class Secp256k1Recipe(PythonRecipe):
 class Secp256k1Recipe(CompiledComponentsPythonRecipe):
 
     url = 'https://github.com/ludbb/secp256k1-py/archive/master.zip'
