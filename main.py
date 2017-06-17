@@ -44,6 +44,10 @@ class Controller(FloatLayout):
         self.pywalib = PyWalib()
         Clock.schedule_once(self._load_landing_page)
 
+    @staticmethod
+    def get_keystore_path():
+        return PyWalib.get_keystore_path()
+
     def _load_landing_page(self, dt=None):
         """
         Loads the landing page.
