@@ -17,7 +17,9 @@ class LibSecp256k1Recipe(Recipe):
                 shprint(sh.Command('./autogen.sh'), _env=env)
             shprint(sh.Command('./configure'), '--host=' + arch.toolchain_prefix,
                     '--prefix=' + self.ctx.get_python_install_dir(),
-                    '--enable-shared', _env=env)
+                    '--enable-shared',
+                    '--enable-module-recovery',
+                    _env=env)
             shprint(sh.make, '-j' + str(cpu_count()), _env=env)
             libs = ['.libs/libsecp256k1.so']
             self.install_libs(arch, *libs)
