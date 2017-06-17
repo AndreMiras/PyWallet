@@ -10,14 +10,12 @@ class Secp256k1Recipe(CompiledComponentsPythonRecipe):
 
     depends = ['openssl', 'hostpython2', 'python2', 'setuptools', 'libffi', 'cffi', 'libsecp256k1']
 
-    patches = ["cross_compile.patch", "pkg-config.patch"]
+    patches = ["cross_compile.patch", "pkg-config.patch", "find_lib.patch"]
 
     def get_recipe_env(self, arch=None):
         env = super(Secp256k1Recipe, self).get_recipe_env(arch)
         libsecp256k1 = self.get_recipe('libsecp256k1', self.ctx)
-        # includes = libsecp256k1.get_include_dirs(arch)
         libsecp256k1_dir = libsecp256k1.get_build_dir(arch.arch)
-        # env['CFLAGS'] = ' -I'.join([env.get('CFLAGS', '')] + includes)
         env['PYTHON_ROOT'] = self.ctx.get_python_install_dir()
         env['CFLAGS'] = ' -I' + join(libsecp256k1_dir, 'include')
         env['CFLAGS'] += ' -I' + env['PYTHON_ROOT'] + '/include/python2.7'
