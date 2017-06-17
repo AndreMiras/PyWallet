@@ -24,7 +24,7 @@ class Secp256k1Recipe(CompiledComponentsPythonRecipe):
         env['LDSHARED'] = env['CC'] + ' -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions'
         env['LDFLAGS'] += ' -L{}'.format(libsecp256k1_dir)
         # TODO: hardcoded Python version
-        env['LDFLAGS'] += " -landroid -lpython2.7"
+        env['LDFLAGS'] += " -landroid -lpython2.7 -lsecp256k1"
         return env
 
 recipe = Secp256k1Recipe()
