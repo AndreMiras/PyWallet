@@ -36,9 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = hostpython2,kivy,setuptools,openssl,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp,https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,requests,pyelliptic==1.5.7,cffi,secp256k1
-# requirements = hostpython2,kivy,setuptools,openssl,cffi,secp256k1
-# requirements = hostpython2,kivy,setuptools,openssl,cffi,libsecp256k1,secp256k1
+requirements = hostpython2,kivy,setuptools,openssl,pycryptodome,pysha3,ethash,scrypt,bitcoin,rlp,pyethereum,devp2p,gevent,pbkdf2,pyethapp,https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,requests,pyelliptic==1.5.7,cffi,secp256k1,qrcode
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -46,6 +44,7 @@ requirements = hostpython2,kivy,setuptools,openssl,pycryptodome,pysha3,ethash,sc
 
 # (list) Garden requirements
 #garden_requirements =
+garden_requirements = qrcode
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
