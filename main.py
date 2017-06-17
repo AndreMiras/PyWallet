@@ -21,19 +21,22 @@ class Receive(BoxLayout):
 
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
-        self.pywalib = PyWalib()
         Clock.schedule_once(self._load_address_list)
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
     def _load_address_list(self, dt=None):
-        account_list = self.pywalib.get_account_list()
+        pywalib = App.get_running_app().controller.pywalib
+        account_list = pywalib.get_account_list()
         for account in account_list:
             address = '0x' + account.address.encode("hex")
             item = OneLineListItem(text=address, on_release=lambda x: self.show_address(x.text))
             address_list_id = self.ids.address_list_id
             address_list_id.add_widget(item)
+        # by default select the first address
+        address = '0x' + account_list[0].address.encode("hex")
+        self.show_address(address)
 
 
 class Controller(FloatLayout):
@@ -88,9 +91,17 @@ class Controller(FloatLayout):
 class ControllerApp(App):
     theme_cls = ThemeManager()
 
-    def build(self):
-        return Controller(info='Hello world')
+    def __init__(self, **kwargs):
+        super(ControllerApp, self).__init__(**kwargs)
+        self._controller = None
 
+    def build(self):
+        self._controller = Controller(info='PyWallet')
+        return self._controller
+
+    @property
+    def controller(self):
+        return self._controller
 
 if __name__ == '__main__':
     ControllerApp().run()
