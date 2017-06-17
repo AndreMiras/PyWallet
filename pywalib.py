@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from __future__ import unicode_literals
 from os.path import expanduser
 import requests
@@ -13,8 +14,9 @@ ETHERSCAN_API_KEY = None
 
 class PyWalib(object):
 
-    def __init__(self):
-        keystore_dir = PyWalib.get_keystore_path()
+    def __init__(self, keystore_dir=None):
+        if keystore_dir is None:
+            keystore_dir = PyWalib.get_default_keystore_path()
         self.app = BaseApp(config=dict(accounts=dict(keystore_dir=keystore_dir)))
         AccountsService.register_with_app(self.app)
 
@@ -52,7 +54,7 @@ class PyWalib(object):
     @staticmethod
     def create_and_sign_transaction(
             account, password, receiver_address, amount_eth):
-        print "account.locked:", account.locked
+        print("account.locked: %s" % account.locked)
         print("unlocking...")
         account.unlock(password)
         print("unlocked")
@@ -71,7 +73,7 @@ class PyWalib(object):
 
 
     @staticmethod
-    def get_keystore_path():
+    def get_default_keystore_path():
         """
         Returns the keystore path.
         """
@@ -99,7 +101,7 @@ def main():
     pywalib = PyWalib()
     account = pywalib.get_main_account()
     balance = pywalib.get_balance(account.address.encode("hex"))
-    print "balance:", balance
+    print("balance: %s" % balance)
 
 
 if __name__ == '__main__':

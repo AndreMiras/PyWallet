@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import os
 import kivy
 kivy.require('1.10.0')
-
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
@@ -41,12 +41,23 @@ class Controller(FloatLayout):
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
-        self.pywalib = PyWalib()
+        keystore_path = Controller.get_keystore_path()
+        self.pywalib = PyWalib(keystore_path)
         Clock.schedule_once(self._load_landing_page)
 
     @staticmethod
     def get_keystore_path():
-        return PyWalib.get_keystore_path()
+        """
+        This is the Kivy default keystore path.
+        """
+        pywalib_default_keystore_path = PyWalib.get_default_keystore_path()
+        # makes sure the leading slash gets removed
+        pywalib_default_keystore_path = pywalib_default_keystore_path.strip('/')
+        user_data_dir = App.get_running_app().user_data_dir
+        # preprends with kivy user_data_dir
+        keystore_path = os.path.join(
+            user_data_dir, pywalib_default_keystore_path)
+        return keystore_path
 
     def _load_landing_page(self, dt=None):
         """
