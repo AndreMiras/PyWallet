@@ -52,6 +52,22 @@ class PyWalib(object):
         return balance_eth
 
     @staticmethod
+    def get_transaction_history(address):
+        """
+        Retrieves the transaction history from etherscan.io.
+        """
+        url = 'https://api.etherscan.io/api'
+        url += '?module=account&action=txlist'
+        url += '&sort=asc'
+        url += '&address=%s' % address
+        if ETHERSCAN_API_KEY:
+            '&apikey=%' % ETHERSCAN_API_KEY
+        response = requests.get(url)
+        response_json = response.json()
+        PyWalib.handle_etherscan_error(response_json)
+        return response_json['result']
+
+    @staticmethod
     def create_and_sign_transaction(
             account, password, receiver_address, amount_eth):
         print("account.locked: %s" % account.locked)

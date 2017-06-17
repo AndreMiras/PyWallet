@@ -39,6 +39,21 @@ class Receive(BoxLayout):
         self.show_address(address)
 
 
+class History(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(History, self).__init__(**kwargs)
+        Clock.schedule_once(self._load_history)
+
+    def _load_history(self, dt=None):
+        pywalib = App.get_running_app().controller.pywalib
+        account = pywalib.get_main_account()
+        address = '0x' + account.address.encode("hex")
+        transactions = pywalib.get_transaction_history(address)
+        for transaction in transactions:
+            print("transaction:", transaction)
+
+
 class Controller(FloatLayout):
 
     balance_label = ObjectProperty()
