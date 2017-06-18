@@ -21,8 +21,6 @@
  * perform a transaction:
    * https://github.com/ethereum/pyethapp/wiki/Account-Management
  * Test
-   * isort
-   * flake8
    * pylint
  * Automate / Document dev requirements
    * Automate VM or Docker
