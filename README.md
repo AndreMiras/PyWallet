@@ -1,6 +1,8 @@
-# README
+# PyWallet
 
-Just trying to build a Ethereum wallet with Kivy.
+[![Build Status](https://secure.travis-ci.org/AndreMiras/PyWallet.png?branch=develop)](http://travis-ci.org/AndreMiras/PyWallet)
+
+Cross platform Ethereum Wallet built with Python and Kivy.
 
 ## Features
 
