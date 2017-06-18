@@ -79,30 +79,6 @@ class History(BoxLayout):
         list_item = History.create_item(sent, amount, from_to)
         return list_item
 
-    @staticmethod
-    def on_connection_error():
-        """
-        Pop-up an error dialog.
-        """
-        content = MDLabel(
-                    font_style='Body1',
-                    theme_text_color='Secondary',
-                    text="Couldn't load history, no network access.",
-                    size_hint_y=None,
-                    valign='top')
-        content.bind(texture_size=content.setter('size'))
-        dialog = MDDialog(
-                        title="Network error",
-                        content=content,
-                        size_hint=(.8, None),
-                        height=dp(200),
-                        auto_dismiss=False)
-
-        dialog.add_action_button("Dismiss",
-                                      action=lambda *x: dialog.dismiss())
-        dialog.open()
-
-
     def _load_history(self, dt=None):
         pywalib = App.get_running_app().controller.pywalib
         account = pywalib.get_main_account()
@@ -110,7 +86,7 @@ class History(BoxLayout):
         try:
             transactions = pywalib.get_transaction_history(address)
         except ConnectionError:
-            History.on_connection_error()
+            Controller.on_history_connection_error()
             return
         history_list_id = self.ids.history_list_id
         for transaction in transactions:
@@ -144,6 +120,43 @@ class Controller(FloatLayout):
             user_data_dir, pywalib_default_keystore_path)
         return keystore_path
 
+    @staticmethod
+    def create_dialog(title, body):
+        """
+        Creates a dialog from given title and body.
+        """
+        content = MDLabel(
+                    font_style='Body1',
+                    theme_text_color='Secondary',
+                    text=body,
+                    size_hint_y=None,
+                    valign='top')
+        content.bind(texture_size=content.setter('size'))
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(200),
+                        auto_dismiss=False)
+        dialog.add_action_button(
+                "Dismiss",
+                action=lambda *x: dialog.dismiss())
+        return dialog
+
+    @staticmethod
+    def on_balance_connection_error():
+        title = "Network error"
+        body = "Couldn't load balance, no network access."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
+    def on_history_connection_error():
+        title = "Network error"
+        body = "Couldn't load history, no network access."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
     def _load_landing_page(self, dt=None):
         """
         Loads the landing page.
@@ -155,7 +168,11 @@ class Controller(FloatLayout):
 
     def _load_balance(self):
         account = self.pywalib.get_main_account()
-        balance = self.pywalib.get_balance(account.address.encode("hex"))
+        try:
+            balance = self.pywalib.get_balance(account.address.encode("hex"))
+        except ConnectionError:
+            Controller.on_balance_connection_error()
+            return
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
