@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170618]
 
   - Show transactions history, refs #16
 
