@@ -36,7 +36,6 @@
         id: history_id
 
 
-
 # transactions history
 <History@BoxLayout>:
     orientation: 'vertical'
@@ -46,17 +45,7 @@
         text: 'History:'
     ScrollView:
         MDList:
-            id: ml
-            OneLineListItem:
-                text: "Some history 1"
-            OneLineListItem:
-                text: "Some history 2"
-            OneLineListItem:
-                text: "Some history 3"
-            OneLineListItem:
-                text: "Some history 4"
-            OneLineListItem:
-                text: "Some history 5"
+            id: history_list_id
 
 <Controller>:
     # balance_label: balance_label_id

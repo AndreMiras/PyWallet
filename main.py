@@ -9,13 +9,15 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty, ListProperty
-from kivymd.list import MDList, OneLineListItem
+from kivymd.list import MDList, OneLineListItem, ILeftBodyTouch, TwoLineIconListItem
+from kivymd.button import MDIconButton
 from kivymd.theming import ThemeManager
 from kivy.clock import Clock
-
-
 from pywalib import PyWalib
 
+
+class IconLeftWidget(ILeftBodyTouch, MDIconButton):
+    pass
 
 class Receive(BoxLayout):
 
@@ -29,14 +31,59 @@ class Receive(BoxLayout):
     def _load_address_list(self, dt=None):
         pywalib = App.get_running_app().controller.pywalib
         account_list = pywalib.get_account_list()
+        address_list_id = self.ids.address_list_id
         for account in account_list:
             address = '0x' + account.address.encode("hex")
             item = OneLineListItem(text=address, on_release=lambda x: self.show_address(x.text))
-            address_list_id = self.ids.address_list_id
             address_list_id.add_widget(item)
         # by default select the first address
         address = '0x' + account_list[0].address.encode("hex")
         self.show_address(address)
+
+
+class History(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(History, self).__init__(**kwargs)
+        Clock.schedule_once(self._load_history)
+
+    @staticmethod
+    def create_item(sent, amount, from_to):
+        """
+        Creates a history list item from parameters.
+        """
+        send_receive = "Sent" if sent else "Received"
+        text = "%s %sETH" % (send_receive, amount)
+        secondary_text = from_to
+        icon = "arrow-up-bold" if sent else "arrow-down-bold"
+        list_item = TwoLineIconListItem(text=text, secondary_text=secondary_text)
+        icon_widget = IconLeftWidget(icon=icon)
+        list_item.add_widget(icon_widget)
+        return list_item
+
+    @staticmethod
+    def create_item_from_dict(transaction_dict):
+        """
+        Creates a history list item from a transaction dictionary.
+        """
+        extra_dict = transaction_dict['extra_dict']
+        sent = extra_dict['sent']
+        amount = extra_dict['value_eth']
+        from_address = extra_dict['from_address']
+        to_address = extra_dict['to_address']
+        from_to = to_address if sent else from_address
+        list_item = History.create_item(sent, amount, from_to)
+        return list_item
+
+    def _load_history(self, dt=None):
+        pywalib = App.get_running_app().controller.pywalib
+        account = pywalib.get_main_account()
+        address = '0x' + account.address.encode("hex")
+        transactions = pywalib.get_transaction_history(address)
+        history_list_id = self.ids.history_list_id
+        for transaction in transactions:
+            list_item = History.create_item_from_dict(transaction)
+            history_list_id.add_widget(list_item)
 
 
 class Controller(FloatLayout):
