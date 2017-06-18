@@ -1,9 +1,7 @@
-#:kivy 1.0
+#:kivy 1.10.0
 
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
-#:import MDTextField kivymd.textfields.MDTextField
-#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import QRCodeWidget kivy.garden.qrcode
 
@@ -45,11 +43,9 @@
             id: history_list_id
 
 <Controller>:
-    # balance_label: balance_label_id
 
     BoxLayout:
         orientation: 'vertical'
-        # padding: 20
         Toolbar:
             id: toolbar_id
             title: 'PyWallet'
@@ -89,7 +85,6 @@
                 BoxLayout:
                     orientation: 'vertical'
                     MDLabel:
-                        # size_hint_y: None
                         font_style: 'Display1'
                         halign: 'center'
                         valign: 'middle'
