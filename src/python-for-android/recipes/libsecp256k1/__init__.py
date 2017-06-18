@@ -15,15 +15,18 @@ class LibSecp256k1Recipe(Recipe):
         with current_directory(self.get_build_dir(arch.arch)):
             if not exists('configure'):
                 shprint(sh.Command('./autogen.sh'), _env=env)
-            shprint(sh.Command('./configure'), '--host=' + arch.toolchain_prefix,
-                    '--prefix=' + self.ctx.get_python_install_dir(),
-                    '--enable-shared',
-                    '--enable-module-recovery',
-                    '--enable-experimental',
-                    '--enable-module-ecdh',
-                    _env=env)
+            shprint(
+                sh.Command('./configure'),
+                '--host=' + arch.toolchain_prefix,
+                '--prefix=' + self.ctx.get_python_install_dir(),
+                '--enable-shared',
+                '--enable-module-recovery',
+                '--enable-experimental',
+                '--enable-module-ecdh',
+                _env=env)
             shprint(sh.make, '-j' + str(cpu_count()), _env=env)
             libs = ['.libs/libsecp256k1.so']
             self.install_libs(arch, *libs)
+
 
 recipe = LibSecp256k1Recipe()
