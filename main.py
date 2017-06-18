@@ -4,12 +4,16 @@ from __future__ import print_function
 import os
 import kivy
 kivy.require('1.10.0')
+from requests.exceptions import ConnectionError
+from kivy.metrics import dp
 from kivy.utils import platform
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty, ListProperty
 from kivymd.list import MDList, OneLineListItem, ILeftBodyTouch, TwoLineIconListItem
+from kivymd.label import MDLabel
+from kivymd.dialog import MDDialog
 from kivymd.button import MDIconButton
 from kivymd.theming import ThemeManager
 from kivy.clock import Clock
@@ -75,11 +79,39 @@ class History(BoxLayout):
         list_item = History.create_item(sent, amount, from_to)
         return list_item
 
+    @staticmethod
+    def on_connection_error():
+        """
+        Pop-up an error dialog.
+        """
+        content = MDLabel(
+                    font_style='Body1',
+                    theme_text_color='Secondary',
+                    text="Couldn't load history, no network access.",
+                    size_hint_y=None,
+                    valign='top')
+        content.bind(texture_size=content.setter('size'))
+        dialog = MDDialog(
+                        title="Network error",
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(200),
+                        auto_dismiss=False)
+
+        dialog.add_action_button("Dismiss",
+                                      action=lambda *x: dialog.dismiss())
+        dialog.open()
+
+
     def _load_history(self, dt=None):
         pywalib = App.get_running_app().controller.pywalib
         account = pywalib.get_main_account()
         address = '0x' + account.address.encode("hex")
-        transactions = pywalib.get_transaction_history(address)
+        try:
+            transactions = pywalib.get_transaction_history(address)
+        except ConnectionError:
+            History.on_connection_error()
+            return
         history_list_id = self.ids.history_list_id
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
