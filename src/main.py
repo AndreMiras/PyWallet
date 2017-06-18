@@ -28,6 +28,13 @@ class IconLeftWidget(ILeftBodyTouch, MDIconButton):
     pass
 
 
+class Send(BoxLayout):
+
+    def on_send_click(self):
+        # TODO
+        Controller.show_not_implemented_dialog()
+
+
 class Receive(BoxLayout):
 
     def __init__(self, **kwargs):
@@ -161,6 +168,13 @@ class Controller(FloatLayout):
     def on_history_connection_error():
         title = "Network error"
         body = "Couldn't load history, no network access."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
+    def show_not_implemented_dialog():
+        title = "Not implemented"
+        body = "This feature is not yet implemented."
         dialog = Controller.create_dialog(title, body)
         dialog.open()
 

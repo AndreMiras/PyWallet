@@ -2,6 +2,7 @@
 
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
+#:import MDTextField kivymd.textfields.MDTextField
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import QRCodeWidget kivy.garden.qrcode
 
@@ -10,9 +11,18 @@
 
 <Send@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        text: 'Send:'
+    # TODO: handle from address
+    MDTextField:
+        hint_text: "To"
+        helper_text: "Receiver Ethereum address"
+        helper_text_mode: "persistent"
+        require: True
+    MDTextField:
+        hint_text: "Amount ETH (e.g. 1.10)"
+        require: True
+    MDRaisedButton:
+        text: "Send"
+        on_release: self.parent.on_send_click()
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
