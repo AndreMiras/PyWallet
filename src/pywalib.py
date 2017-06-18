@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from __future__ import unicode_literals
-from os.path import expanduser
-import requests
-from pyethapp.accounts import AccountsService, Account
-from ethereum.utils import normalize_address
-from devp2p.app import BaseApp
-import os
+from __future__ import print_function, unicode_literals
 
+import os
+from os.path import expanduser
+
+import requests
+from devp2p.app import BaseApp
+from ethereum.utils import normalize_address
+from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
 

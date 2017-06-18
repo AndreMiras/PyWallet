@@ -1,22 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
 import os
+
 import kivy
-from requests.exceptions import ConnectionError
-from kivy.metrics import dp
-from kivy.utils import platform
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
-from kivy.properties import ObjectProperty
-from kivymd.list import OneLineListItem, ILeftBodyTouch, TwoLineIconListItem
-from kivymd.label import MDLabel
-from kivymd.dialog import MDDialog
-from kivymd.button import MDIconButton
-from kivymd.theming import ThemeManager
 from kivy.clock import Clock
+from kivy.metrics import dp
+from kivy.properties import ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.utils import platform
+from kivymd.button import MDIconButton
+from kivymd.dialog import MDDialog
+from kivymd.label import MDLabel
+from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.theming import ThemeManager
+from requests.exceptions import ConnectionError
+
 from pywalib import PyWalib
+
 kivy.require('1.10.0')
 
 
