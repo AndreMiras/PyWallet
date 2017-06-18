@@ -101,7 +101,7 @@ class PyWalib(object):
         print("unlocked")
         print("sending...")
         transaction = None
-        # TODO: convert from ETH to expected unit
+        # TODO: convert from ETH to wei (expected) unit
         # transaction = eth.transact(
         #   receiver_address, sender=account, value=100)
         return transaction
