@@ -19,6 +19,7 @@ from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
+from ethereum.utils import normalize_address
 from requests.exceptions import ConnectionError
 
 from pywalib import PyWalib
@@ -47,8 +48,39 @@ class FloatInput(MDTextField):
 
 class Send(BoxLayout):
 
+    def verify_to_address_field(self):
+        send_to_address_id = self.ids.send_to_address_id
+        title = "Input error"
+        body = "Invalid address field"
+        try:
+            normalize_address(send_to_address_id.text)
+        except Exception:
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+            return False
+        return True
+
+    def verify_amount_field(self):
+        send_amount_id = self.ids.send_amount_id
+        title = "Input error"
+        body = "Invalid amount field"
+        if float(send_amount_id) == 0:
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+            return False
+        return True
+
+    def verify_fields(self):
+        """
+        Verifies address and amount fields are valid.
+        """
+        return self.verify_to_address_field() \
+            and self.verify_amount_field()
+
     def on_send_click(self):
         # TODO
+        if self.verify_fields():
+            pass
         Controller.show_not_implemented_dialog()
 
 

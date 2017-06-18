@@ -13,11 +13,13 @@
     orientation: 'vertical'
     # TODO: handle from address
     MDTextField:
+        id: send_to_address_id
         hint_text: "To"
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
         required: True
     FloatInput:
+        id: send_amount_id
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
     MDRaisedButton:
