@@ -15,9 +15,15 @@ Cross platform Ethereum Wallet built with Python and Kivy.
   * Handle multi keystores (TODO)
   * Manage wallets (TODO)
 
-## Buildozer
+## Run
 
-### Debug
+### Linux
+```
+./src/main.py
+```
+
+### Android
+Run on Android using buildozer:
 ```
 buildozer android debug deploy run logcat
 buildozer android adb -- logcat

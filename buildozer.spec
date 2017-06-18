@@ -10,7 +10,7 @@ package.name = pywallet
 package.domain = org.test
 
 # (str) Source code where the main.py live
-source.dir = .
+source.dir = src/
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
