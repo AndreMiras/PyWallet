@@ -16,10 +16,10 @@
         hint_text: "To"
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
-        require: True
-    MDTextField:
+        required: True
+    FloatInput:
         hint_text: "Amount ETH (e.g. 1.10)"
-        require: True
+        required: True
     MDRaisedButton:
         text: "Send"
         on_release: self.parent.on_send_click()

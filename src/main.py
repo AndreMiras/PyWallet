@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 
+import re
 import kivy
 from kivy.app import App
 from kivy.clock import Clock
@@ -16,6 +17,7 @@ from kivymd.button import MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from requests.exceptions import ConnectionError
 
@@ -26,6 +28,21 @@ kivy.require('1.10.0')
 
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
     pass
+
+
+class FloatInput(MDTextField):
+    """
+    Accepts float numbers only.
+    """
+
+    pat = re.compile('[^0-9]')
+    def insert_text(self, substring, from_undo=False):
+        pat = self.pat
+        if '.' in self.text:
+            s = re.sub(pat, '', substring)
+        else:
+            s = '.'.join([re.sub(pat, '', s) for s in substring.split('.', 1)])
+        return super(FloatInput, self).insert_text(s, from_undo=from_undo)
 
 
 class Send(BoxLayout):
