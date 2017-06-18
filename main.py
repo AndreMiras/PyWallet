@@ -3,25 +3,26 @@
 from __future__ import print_function
 import os
 import kivy
-kivy.require('1.10.0')
 from requests.exceptions import ConnectionError
 from kivy.metrics import dp
 from kivy.utils import platform
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
-from kivy.properties import ObjectProperty, StringProperty, ListProperty
-from kivymd.list import MDList, OneLineListItem, ILeftBodyTouch, TwoLineIconListItem
+from kivy.properties import ObjectProperty
+from kivymd.list import OneLineListItem, ILeftBodyTouch, TwoLineIconListItem
 from kivymd.label import MDLabel
 from kivymd.dialog import MDDialog
 from kivymd.button import MDIconButton
 from kivymd.theming import ThemeManager
 from kivy.clock import Clock
 from pywalib import PyWalib
+kivy.require('1.10.0')
 
 
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
     pass
+
 
 class Receive(BoxLayout):
 
@@ -38,7 +39,8 @@ class Receive(BoxLayout):
         address_list_id = self.ids.address_list_id
         for account in account_list:
             address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(text=address, on_release=lambda x: self.show_address(x.text))
+            item = OneLineListItem(
+                text=address, on_release=lambda x: self.show_address(x.text))
             address_list_id.add_widget(item)
         # by default select the first address
         address = '0x' + account_list[0].address.encode("hex")
@@ -60,7 +62,8 @@ class History(BoxLayout):
         text = "%s %sETH" % (send_receive, amount)
         secondary_text = from_to
         icon = "arrow-up-bold" if sent else "arrow-down-bold"
-        list_item = TwoLineIconListItem(text=text, secondary_text=secondary_text)
+        list_item = TwoLineIconListItem(
+            text=text, secondary_text=secondary_text)
         icon_widget = IconLeftWidget(icon=icon)
         list_item.add_widget(icon_widget)
         return list_item
@@ -109,15 +112,15 @@ class Controller(FloatLayout):
         """
         This is the Kivy default keystore path.
         """
-        pywalib_default_keystore_path = PyWalib.get_default_keystore_path()
+        default_keystore_path = PyWalib.get_default_keystore_path()
         if platform != "android":
-            return pywalib_default_keystore_path
+            return default_keystore_path
         # makes sure the leading slash gets removed
-        pywalib_default_keystore_path = pywalib_default_keystore_path.strip('/')
+        default_keystore_path = default_keystore_path.strip('/')
         user_data_dir = App.get_running_app().user_data_dir
         # preprends with kivy user_data_dir
         keystore_path = os.path.join(
-            user_data_dir, pywalib_default_keystore_path)
+            user_data_dir, default_keystore_path)
         return keystore_path
 
     @staticmethod
@@ -198,6 +201,7 @@ class ControllerApp(App):
     @property
     def controller(self):
         return self._controller
+
 
 if __name__ == '__main__':
     ControllerApp().run()
