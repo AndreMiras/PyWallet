@@ -6,7 +6,7 @@ python:
 
 # command to install dependencies
 install:
-  - pip install --install-option="--no-cython-compile" $(grep Cython requirements.txt)
+  - pip install --install-option="--no-cython-compile" $(grep Cython requirements/requirements.txt)
   - pip install -r requirements/test_requirements.txt
   - pip install -r requirements.txt
 
