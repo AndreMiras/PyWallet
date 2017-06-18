@@ -3,9 +3,10 @@
 from __future__ import print_function
 
 import os
-
 import re
+
 import kivy
+from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.metrics import dp
@@ -19,7 +20,6 @@ from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
-from ethereum.utils import normalize_address
 from requests.exceptions import ConnectionError
 
 from pywalib import PyWalib
