@@ -31,7 +31,8 @@
         id: balance_label_id
         size_hint_y: None
         font_style: 'Display1'
-        text: 'Balance:'
+        halign: 'center'
+        text: '0 ETH'
     History:
         id: history_id
 
@@ -39,10 +40,6 @@
 # transactions history
 <History@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        size_hint_y: None
-        font_style: 'Display1'
-        text: 'History:'
     ScrollView:
         MDList:
             id: history_list_id

@@ -126,7 +126,7 @@ class Controller(FloatLayout):
         balance = self.pywalib.get_balance(account.address.encode("hex"))
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
-        balance_label_id.text = 'Balance: %s' % balance
+        balance_label_id.text = '%s ETH' % balance
 
     def _load_manage_keystores(self):
         """
