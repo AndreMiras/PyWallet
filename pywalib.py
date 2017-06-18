@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from os.path import expanduser
 import requests
 from pyethapp.accounts import AccountsService, Account
+from ethereum.utils import normalize_address
 from devp2p.app import BaseApp
 import os
 
@@ -30,6 +31,12 @@ class PyWalib(object):
         assert status == "1"
         assert message == "OK"
 
+    @staticmethod
+    def address_hex(address):
+        prefix = "0x"
+        address_hex = prefix + normalize_address(address).encode("hex")
+        return address_hex
+
 
     @staticmethod
     def get_balance(address):
@@ -37,6 +44,7 @@ class PyWalib(object):
         Retrieves the balance from etherscan.io.
         The balance is returned in ETH rounded to the second decimal.
         """
+        address = PyWalib.address_hex(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=balance'
         url += '&address=%s' % address
@@ -56,6 +64,7 @@ class PyWalib(object):
         """
         Retrieves the transaction history from etherscan.io.
         """
+        address = PyWalib.address_hex(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=txlist'
         url += '&sort=asc'
@@ -65,7 +74,23 @@ class PyWalib(object):
         response = requests.get(url)
         response_json = response.json()
         PyWalib.handle_etherscan_error(response_json)
-        return response_json['result']
+        transactions = response_json['result']
+        for transaction in transactions:
+            value_wei = int(transaction['value'])
+            value_eth = value_wei / float(pow(10, 18))
+            from_address = PyWalib.address_hex(transaction['from'])
+            to_address = PyWalib.address_hex(transaction['to'])
+            sent = from_address == address
+            received = not sent
+            extra_dict = {
+                'value_eth': value_eth,
+                'sent': sent,
+                'received': received,
+                'from_address': from_address,
+                'to_address': to_address,
+            }
+            transaction.update({'extra_dict': extra_dict})
+        return transactions
 
     @staticmethod
     def create_and_sign_transaction(

@@ -9,13 +9,15 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.properties import ObjectProperty, StringProperty, ListProperty
-from kivymd.list import MDList, OneLineListItem
+from kivymd.list import MDList, OneLineListItem, ILeftBodyTouch
+from kivymd.button import MDIconButton
 from kivymd.theming import ThemeManager
 from kivy.clock import Clock
-
-
 from pywalib import PyWalib
 
+
+class IconLeftWidget(ILeftBodyTouch, MDIconButton):
+    pass
 
 class Receive(BoxLayout):
 
