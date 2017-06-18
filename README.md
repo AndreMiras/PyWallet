@@ -4,7 +4,7 @@
 
 Cross platform Ethereum Wallet built with Python and Kivy.
 
-![Screenshot](https://raw.githubusercontent.com/AndreMiras/PyWallet/develop/docs/images/preview_nexus_6p.png)
+<img src="https://raw.githubusercontent.com/AndreMiras/PyWallet/develop/docs/images/preview_nexus_6p.png" alt="Screenshot Nexus" width="300">
 
 ## Features
 
