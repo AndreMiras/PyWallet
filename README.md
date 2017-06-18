@@ -13,6 +13,7 @@ Cross platform Ethereum Wallet built with Python and Kivy.
   * Receive Ethers via QR code
   * Send Ethers (TODO)
   * Handle multi keystores (TODO)
+  * Manage wallets (TODO)
 
 ## Buildozer
 
