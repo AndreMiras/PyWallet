@@ -165,7 +165,7 @@ class History(BoxLayout):
 
     def _start_load_history_thread(self):
         """
-        Run _load_history() in a thread.
+        Runs _load_history() in a thread.
         """
         load_history_thread = Thread(target=self._load_history)
         load_history_thread.start()
@@ -179,7 +179,8 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        Clock.schedule_once(self._load_landing_page)
+        Clock.schedule_once(
+            lambda dt: self._start_load_balance_thread())
 
     @staticmethod
     def get_keystore_path():
@@ -241,6 +242,12 @@ class Controller(FloatLayout):
         dialog = Controller.create_dialog(title, body)
         dialog.open()
 
+    @mainthread
+    def update_balance_label(self, balance):
+        overview_id = self.ids.overview_id
+        balance_label_id = overview_id.ids.balance_label_id
+        balance_label_id.text = '%s ETH' % balance
+
     def _load_landing_page(self, dt=None):
         """
         Loads the landing page.
@@ -257,9 +264,14 @@ class Controller(FloatLayout):
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
-        overview_id = self.ids.overview_id
-        balance_label_id = overview_id.ids.balance_label_id
-        balance_label_id.text = '%s ETH' % balance
+        self.update_balance_label(balance)
+
+    def _start_load_balance_thread(self):
+        """
+        Runs _load_balance() in a thread.
+        """
+        load_balance_thread = Thread(target=self._load_balance)
+        load_balance_thread.start()
 
     def _load_manage_keystores(self):
         """
