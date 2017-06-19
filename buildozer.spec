@@ -48,6 +48,7 @@ requirements =
     scrypt,
     bitcoin,
     rlp,
+    PyYAML,
     https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip,
     https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip,
     gevent,
