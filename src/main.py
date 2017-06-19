@@ -4,11 +4,12 @@ from __future__ import print_function
 
 import os
 import re
+from threading import Thread
 
 import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -112,7 +113,8 @@ class History(BoxLayout):
 
     def __init__(self, **kwargs):
         super(History, self).__init__(**kwargs)
-        Clock.schedule_once(self._load_history)
+        Clock.schedule_once(
+            lambda dt: self._start_load_history_thread())
 
     @staticmethod
     def create_item(sent, amount, from_to):
@@ -143,7 +145,12 @@ class History(BoxLayout):
         list_item = History.create_item(sent, amount, from_to)
         return list_item
 
-    def _load_history(self, dt=None):
+    @mainthread
+    def update_history_list(self, list_item):
+        history_list_id = self.ids.history_list_id
+        history_list_id.add_widget(list_item)
+
+    def _load_history(self):
         pywalib = App.get_running_app().controller.pywalib
         account = pywalib.get_main_account()
         address = '0x' + account.address.encode("hex")
@@ -152,10 +159,16 @@ class History(BoxLayout):
         except ConnectionError:
             Controller.on_history_connection_error()
             return
-        history_list_id = self.ids.history_list_id
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
-            history_list_id.add_widget(list_item)
+            self.update_history_list(list_item)
+
+    def _start_load_history_thread(self):
+        """
+        Run _load_history() in a thread.
+        """
+        load_history_thread = Thread(target=self._load_history)
+        load_history_thread.start()
 
 
 class Controller(FloatLayout):
