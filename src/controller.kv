@@ -1,9 +1,8 @@
-#:kivy 1.0
+#:kivy 1.10.0
 
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
-#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import QRCodeWidget kivy.garden.qrcode
 
@@ -12,15 +11,24 @@
 
 <Send@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        text: 'Send:'
+    # TODO: handle from address
+    MDTextField:
+        id: send_to_address_id
+        hint_text: "To"
+        helper_text: "Receiver Ethereum address"
+        helper_text_mode: "persistent"
+        required: True
+    FloatInput:
+        id: send_amount_id
+        hint_text: "Amount ETH (e.g. 1.10)"
+        required: True
+    MDRaisedButton:
+        pos_hint: {'center_x': 0.5}
+        text: "Send"
+        on_release: self.parent.on_send_click()
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        text: 'Receive:'
     ScrollView:
         do_scroll_x: False
         MDList:
@@ -34,39 +42,23 @@
         id: balance_label_id
         size_hint_y: None
         font_style: 'Display1'
-        text: 'Balance:'
+        halign: 'center'
+        text: '0 ETH'
     History:
         id: history_id
-
 
 
 # transactions history
 <History@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        size_hint_y: None
-        font_style: 'Display1'
-        text: 'History:'
     ScrollView:
         MDList:
-            id: ml
-            OneLineListItem:
-                text: "Some history 1"
-            OneLineListItem:
-                text: "Some history 2"
-            OneLineListItem:
-                text: "Some history 3"
-            OneLineListItem:
-                text: "Some history 4"
-            OneLineListItem:
-                text: "Some history 5"
+            id: history_list_id
 
 <Controller>:
-    # balance_label: balance_label_id
 
     BoxLayout:
         orientation: 'vertical'
-        # padding: 20
         Toolbar:
             id: toolbar_id
             title: 'PyWallet'
@@ -93,6 +85,8 @@
                         text: "Send"
                         icon: 'arrow-up-bold'
                         Send:
+                            pos_hint: {'top': 0.8}
+                            size_hint_y: None
                             id: send_id
                     MDBottomNavigationItem:
                         name: 'receive'
@@ -106,7 +100,6 @@
                 BoxLayout:
                     orientation: 'vertical'
                     MDLabel:
-                        # size_hint_y: None
                         font_style: 'Display1'
                         halign: 'center'
                         valign: 'middle'
@@ -114,4 +107,4 @@
                     MDLabel:
                         halign: 'center'
                         valign: 'middle'
-                        text: 'Copy it in to the keystore directory.'
+                        text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()

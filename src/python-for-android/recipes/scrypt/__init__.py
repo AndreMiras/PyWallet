@@ -1,15 +1,12 @@
-# TODO:
-# _scrypt.so: is missing DT_SONAME will use basename as a replacement: "_scrypt.so"
 from pythonforandroid.toolchain import CythonRecipe
 from os.path import join
-
 
 
 class ScryptRecipe(CythonRecipe):
 
     url = 'https://bitbucket.org/mhallin/py-scrypt/get/default.zip'
 
-    depends = ['python2','setuptools', 'openssl']
+    depends = ['python2', 'setuptools', 'openssl']
 
     call_hostpython_via_targetpython = False
 
@@ -20,7 +17,8 @@ class ScryptRecipe(CythonRecipe):
         Adds openssl recipe to include and library path.
         """
         env = super(ScryptRecipe, self).get_recipe_env(arch, with_flags_in_cc)
-        openssl_build_dir = self.get_recipe('openssl', self.ctx).get_build_dir(arch.arch)
+        openssl_build_dir = self.get_recipe(
+            'openssl', self.ctx).get_build_dir(arch.arch)
         print("openssl_build_dir:", openssl_build_dir)
         env['CC'] = '%s -I%s' % (env['CC'], join(openssl_build_dir, 'include'))
         env['LDFLAGS'] = env['LDFLAGS'] + ' -L{}'.format(
@@ -28,5 +26,6 @@ class ScryptRecipe(CythonRecipe):
             '-L{}'.format(self.ctx.libs_dir)) + ' -L{}'.format(
             openssl_build_dir)
         return env
+
 
 recipe = ScryptRecipe()
