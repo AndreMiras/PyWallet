@@ -4,8 +4,8 @@
 #:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import QRCodeWidget kivy.garden.qrcode
-
 
 
 
@@ -44,6 +44,10 @@
         font_style: 'Display1'
         halign: 'center'
         text: '0 ETH'
+    MDFlatButton:
+        id: address_button_id
+        text: "Ethereum Address"
+        on_release: root.open_account_list()
     History:
         id: history_id
 
