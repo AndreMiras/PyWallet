@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170621]
 
   - Travis-CI integration, refs #15
   - Handle ConnectionError gracefully
