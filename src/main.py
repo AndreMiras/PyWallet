@@ -191,17 +191,20 @@ class Overview(BoxLayout):
 
 class PWSelectList(BoxLayout):
 
+    selected_item = ObjectProperty()
+
     def __init__(self, **kwargs):
         self._items = kwargs.pop('items')
-        self._on_release = kwargs.pop('on_release')
         super(PWSelectList, self).__init__(**kwargs)
         self._setup()
+
+    def on_release(self, item):
+        self.selected_item = item
 
     def _setup(self):
         address_list = self.ids.address_list_id
         for item in self._items:
-            print("item:", item)
-            item.bind(on_release=self._on_release)
+            item.bind(on_release=lambda x: self.on_release(x))
             address_list.add_widget(item)
 
 
@@ -235,9 +238,10 @@ class Controller(FloatLayout):
             item.account = account
             items.append(item)
 
-        def on_release(x): self.set_current_account(x.account)
+        def on_selected_item(instance, value):
+            self.set_current_account(value.account)
         dialog = Controller.create_list_dialog(
-            title, items, on_release)
+            title, items, on_selected_item)
         dialog.open()
 
     def set_current_account(self, account):
@@ -269,12 +273,14 @@ class Controller(FloatLayout):
         return keystore_path
 
     @staticmethod
-    def create_list_dialog(title, items, on_release):
+    def create_list_dialog(title, items, on_selected_item):
         """
         Creates a dialog from given title and list.
         items is a list of BaseListItem objects.
         """
-        select_list = PWSelectList(items=items, on_release=on_release)
+        # select_list = PWSelectList(items=items, on_release=on_release)
+        select_list = PWSelectList(items=items)
+        select_list.bind(selected_item=on_selected_item)
         content = select_list
         dialog = MDDialog(
                         title=title,
@@ -283,7 +289,8 @@ class Controller(FloatLayout):
         # workaround for MDDialog container size (too small by default)
         dialog.ids.container.size_hint_y = 1
         # close the dialog as we select the element
-        # dialog.bind(on_touch_up=dialog.dismiss)
+        select_list.bind(
+            selected_item=lambda instance, value: dialog.dismiss())
         dialog.add_action_button(
                 "Dismiss",
                 action=lambda *x: dialog.dismiss())
