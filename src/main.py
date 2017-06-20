@@ -18,8 +18,7 @@ from kivy.utils import platform
 from kivymd.button import MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
-from kivymd.list import (ILeftBodyTouch, OneLineListItem,
-                         TwoLineIconListItem)
+from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from requests.exceptions import ConnectionError
