@@ -14,12 +14,11 @@ from kivy.metrics import dp
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
-from kivymd.list import (ILeftBodyTouch, MDList, OneLineListItem,
+from kivymd.list import (ILeftBodyTouch, OneLineListItem,
                          TwoLineIconListItem)
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
@@ -190,6 +189,7 @@ class Overview(BoxLayout):
         controller = App.get_running_app().controller
         controller.open_account_list()
 
+
 class PWSelectList(BoxLayout):
 
     def __init__(self, **kwargs):
@@ -280,8 +280,9 @@ class Controller(FloatLayout):
         dialog = MDDialog(
                         title=title,
                         content=content,
-                        size_hint=(.8, None),
-                        height=dp(300))
+                        size_hint=(.8, .8))
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
         # close the dialog as we select the element
         # dialog.bind(on_touch_up=dialog.dismiss)
         dialog.add_action_button(
