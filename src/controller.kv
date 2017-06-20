@@ -47,11 +47,14 @@
     MDLabel:
         id: balance_label_id
         size_hint_y: None
+        height: dp(40)
         font_style: 'Display1'
         halign: 'center'
         text: '0 ETH'
     MDFlatButton:
         id: address_button_id
+        pos_hint: {'center_x': 0.5, 'top': 1}
+        size_hint: None, None
         text: "Ethereum Address"
         on_release: root.open_account_list()
     History:
