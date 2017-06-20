@@ -190,6 +190,21 @@ class Overview(BoxLayout):
         controller = App.get_running_app().controller
         controller.open_account_list()
 
+class PWSelectList(BoxLayout):
+
+    def __init__(self, **kwargs):
+        self._items = kwargs.pop('items')
+        self._on_release = kwargs.pop('on_release')
+        super(PWSelectList, self).__init__(**kwargs)
+        self._setup()
+
+    def _setup(self):
+        address_list = self.ids.address_list_id
+        for item in self._items:
+            print("item:", item)
+            item.bind(on_release=self._on_release)
+            address_list.add_widget(item)
+
 
 class Controller(FloatLayout):
 
@@ -260,18 +275,8 @@ class Controller(FloatLayout):
         Creates a dialog from given title and list.
         items is a list of BaseListItem objects.
         """
-        boxlayout = BoxLayout()
-        boxlayout.orientation = 'vertical'
-        boxlayout.size_hint_y = None
-        scrollview = ScrollView()
-        scrollview.do_scroll_x = False
-        md_list = MDList()
-        scrollview.add_widget(md_list)
-        boxlayout.add_widget(scrollview)
-        for item in items:
-            item.bind(on_release=on_release)
-            md_list.add_widget(item)
-        content = boxlayout
+        select_list = PWSelectList(items=items, on_release=on_release)
+        content = select_list
         dialog = MDDialog(
                         title=title,
                         content=content,

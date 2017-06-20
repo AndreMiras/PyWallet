@@ -8,6 +8,13 @@
 #:import QRCodeWidget kivy.garden.qrcode
 
 
+<PWSelectList@BoxLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: address_list_id
 
 <Send@BoxLayout>:
     orientation: 'vertical'
