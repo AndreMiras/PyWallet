@@ -111,10 +111,11 @@ class Receive(BoxLayout):
 
 class History(BoxLayout):
 
-    def __init__(self, **kwargs):
-        super(History, self).__init__(**kwargs)
-        Clock.schedule_once(
-            lambda dt: self._start_load_history_thread())
+    current_account = ObjectProperty(None, allownone=True)
+
+    def on_current_account(self, instance, account):
+        print("History.on_current_account:")
+        self._start_load_history_thread()
 
     @staticmethod
     def create_item(sent, amount, from_to):
@@ -146,22 +147,26 @@ class History(BoxLayout):
         return list_item
 
     @mainthread
-    def update_history_list(self, list_item):
+    def update_history_list(self, list_items):
         history_list_id = self.ids.history_list_id
-        history_list_id.add_widget(list_item)
+        history_list_id.clear_widgets()
+        for list_item in list_items:
+            history_list_id.add_widget(list_item)
 
     def _load_history(self):
-        pywalib = App.get_running_app().controller.pywalib
-        account = pywalib.get_main_account()
+        account = self.current_account
         address = '0x' + account.address.encode("hex")
+        print("History._load_history address:", address)
         try:
-            transactions = pywalib.get_transaction_history(address)
+            transactions = PyWalib.get_transaction_history(address)
         except ConnectionError:
             Controller.on_history_connection_error()
             return
+        list_items = []
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
-            self.update_history_list(list_item)
+            list_items.append(list_item)
+        self.update_history_list(list_items)
 
     def _start_load_history_thread(self):
         """
@@ -171,16 +176,85 @@ class History(BoxLayout):
         load_history_thread.start()
 
 
+class Overview(BoxLayout):
+
+    current_account = ObjectProperty(None, allownone=True)
+
+    def on_current_account(self, instance, account):
+        address = "0x" + account.address.encode("hex")
+        self.ids.address_button_id.text = address
+
+    def open_account_list(self):
+        controller = App.get_running_app().controller
+        controller.open_account_list()
+
+
+class PWSelectList(BoxLayout):
+
+    selected_item = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        self._items = kwargs.pop('items')
+        super(PWSelectList, self).__init__(**kwargs)
+        self._setup()
+
+    def on_release(self, item):
+        self.selected_item = item
+
+    def _setup(self):
+        address_list = self.ids.address_list_id
+        for item in self._items:
+            item.bind(on_release=lambda x: self.on_release(x))
+            address_list.add_widget(item)
+
+
 class Controller(FloatLayout):
 
-    balance_label = ObjectProperty()
+    current_account = ObjectProperty(None, allownone=True)
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        Clock.schedule_once(
-            lambda dt: self._start_load_balance_thread())
+        # will trigger account data fetching
+        self.current_account = self.pywalib.get_main_account()
+
+    @property
+    def overview(self):
+        return self.ids.overview_id
+
+    @property
+    def history(self):
+        return self.overview.ids.history_id
+
+    def open_account_list(self):
+        title = "Select account"
+        items = []
+        pywalib = self.pywalib
+        account_list = pywalib.get_account_list()
+        for account in account_list:
+            address = '0x' + account.address.encode("hex")
+            item = OneLineListItem(text=address)
+            item.account = account
+            items.append(item)
+
+        def on_selected_item(instance, value):
+            self.set_current_account(value.account)
+        dialog = Controller.create_list_dialog(
+            title, items, on_selected_item)
+        dialog.open()
+
+    def set_current_account(self, account):
+        self.current_account = account
+
+    def on_current_account(self, instance, value):
+        """
+        Updates Overview.current_account and History.current_account,
+        then fetch account data.
+        """
+        self.overview.current_account = value
+        self.history.current_account = value
+        self._start_load_balance_thread()
 
     @staticmethod
     def get_keystore_path():
@@ -197,6 +271,30 @@ class Controller(FloatLayout):
         keystore_path = os.path.join(
             user_data_dir, default_keystore_path)
         return keystore_path
+
+    @staticmethod
+    def create_list_dialog(title, items, on_selected_item):
+        """
+        Creates a dialog from given title and list.
+        items is a list of BaseListItem objects.
+        """
+        # select_list = PWSelectList(items=items, on_release=on_release)
+        select_list = PWSelectList(items=items)
+        select_list.bind(selected_item=on_selected_item)
+        content = select_list
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, .8))
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
+        # close the dialog as we select the element
+        select_list.bind(
+            selected_item=lambda instance, value: dialog.dismiss())
+        dialog.add_action_button(
+                "Dismiss",
+                action=lambda *x: dialog.dismiss())
+        return dialog
 
     @staticmethod
     def create_dialog(title, body):
@@ -258,7 +356,7 @@ class Controller(FloatLayout):
             self._load_manage_keystores()
 
     def _load_balance(self):
-        account = self.pywalib.get_main_account()
+        account = self.current_account
         try:
             balance = self.pywalib.get_balance(account.address.encode("hex"))
         except ConnectionError:
