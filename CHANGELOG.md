@@ -1,5 +1,13 @@
 # Change Log
 
+## [v20170621]
+
+  - Travis-CI integration, refs #15
+  - Handle ConnectionError gracefully
+  - Fetch history in a thread, refs #22
+  - Load balance in a thread, refs #23
+  - Account selection on overview, refs #17
+
 ## [v20170618]
 
   - Show transactions history, refs #16

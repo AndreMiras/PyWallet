@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from __future__ import unicode_literals
-from os.path import expanduser
-import requests
-from pyethapp.accounts import AccountsService, Account
-from ethereum.utils import normalize_address
-from devp2p.app import BaseApp
-import os
+from __future__ import print_function, unicode_literals
 
+import os
+from os.path import expanduser
+
+import requests
+from devp2p.app import BaseApp
+from ethereum.utils import normalize_address
+from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
 
@@ -18,7 +18,8 @@ class PyWalib(object):
     def __init__(self, keystore_dir=None):
         if keystore_dir is None:
             keystore_dir = PyWalib.get_default_keystore_path()
-        self.app = BaseApp(config=dict(accounts=dict(keystore_dir=keystore_dir)))
+        self.app = BaseApp(
+            config=dict(accounts=dict(keystore_dir=keystore_dir)))
         AccountsService.register_with_app(self.app)
 
     @staticmethod
@@ -36,7 +37,6 @@ class PyWalib(object):
         prefix = "0x"
         address_hex = prefix + normalize_address(address).encode("hex")
         return address_hex
-
 
     @staticmethod
     def get_balance(address):
@@ -101,8 +101,9 @@ class PyWalib(object):
         print("unlocked")
         print("sending...")
         transaction = None
-        # TODO: convert from ETH to expected unit
-        # transaction = eth.transact(receiver_address, sender=account, value=100)
+        # TODO: convert from ETH to wei (expected) unit
+        # transaction = eth.transact(
+        #   receiver_address, sender=account, value=100)
         return transaction
 
     @staticmethod
@@ -111,7 +112,6 @@ class PyWalib(object):
         print("pyethapp Account.new")
         account = Account.new(password, uuid=uuid)
         print("Address: ", account.address.encode('hex'))
-
 
     @staticmethod
     def get_default_keystore_path():

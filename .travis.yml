@@ -1,0 +1,18 @@
+language: python
+
+python:
+    - 2.7
+    # - 3.6
+
+# command to install dependencies
+install:
+  - pip install --install-option="--no-cython-compile" $(grep Cython requirements/requirements.txt)
+  - pip install -r requirements/test_requirements.txt
+  - pip install -r requirements.txt
+
+before_script:
+  - isort --check-only --recursive src/
+  - flake8 src/
+
+script:
+  - python -m unittest discover --start-directory=src/tests/
