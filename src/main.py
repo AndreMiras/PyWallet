@@ -135,7 +135,7 @@ class Send(BoxLayout):
         pywalib = controller.pywalib
         address = normalize_address(self.send_to_address)
         amount_eth = self.send_amount
-        amount_wei = amount_eth * pow(10, 18)
+        amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
         # TODO: update UI with some wait cursor
         account.unlock(password)
