@@ -66,7 +66,7 @@ class Send(BoxLayout):
         send_amount_id = self.ids.send_amount_id
         title = "Input error"
         body = "Invalid amount field"
-        if float(send_amount_id) == 0:
+        if float(send_amount_id.text) == 0:
             dialog = Controller.create_dialog(title, body)
             dialog.open()
             return False
@@ -79,11 +79,26 @@ class Send(BoxLayout):
         return self.verify_to_address_field() \
             and self.verify_amount_field()
 
+    @staticmethod
+    def show_invalid_form_dialog():
+        title = "Invalid form"
+        body = "Please check form fields."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
     def on_send_click(self):
+        if not self.verify_fields():
+            Send.show_invalid_form_dialog()
+            return
+        controller = App.get_running_app().controller
+        pywalib = controller.pywalib
+        send_to_address_id = self.ids.send_to_address_id
+        address = normalize_address(send_to_address_id.text)
+        send_amount_id = self.ids.send_amount_id
+        amount_eth = float(send_amount_id.text)
+        amount_wei = amount_eth * pow(10, 18)
         # TODO
-        if self.verify_fields():
-            pass
-        Controller.show_not_implemented_dialog()
+        pywalib.transact(address, value=amount_wei, data='', sender=None)
 
 
 class Receive(BoxLayout):
