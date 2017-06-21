@@ -97,8 +97,8 @@ class Send(BoxLayout):
         send_amount_id = self.ids.send_amount_id
         amount_eth = float(send_amount_id.text)
         amount_wei = amount_eth * pow(10, 18)
-        # TODO
-        pywalib.transact(address, value=amount_wei, data='', sender=None)
+        sender = controller.pywalib.get_main_account().address
+        pywalib.transact(address, value=amount_wei, data='', sender=sender)
 
 
 class Receive(BoxLayout):
