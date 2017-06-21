@@ -11,7 +11,7 @@ from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
@@ -88,25 +88,34 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
+    current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
+
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
-        Clock.schedule_once(self._load_address_list)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Default state setup.
+        """
+        self.controller = App.get_running_app().controller
+        self.current_account = self.controller.pywalib.get_main_account()
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def _load_address_list(self, dt=None):
-        pywalib = App.get_running_app().controller.pywalib
-        account_list = pywalib.get_account_list()
-        address_list_id = self.ids.address_list_id
-        for account in account_list:
-            address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(
-                text=address, on_release=lambda x: self.show_address(x.text))
-            address_list_id.add_widget(item)
-        # by default select the first address
-        address = '0x' + account_list[0].address.encode("hex")
+    def on_current_account_string(self, instance, address):
         self.show_address(address)
+
+    def on_current_account(self, instance, account):
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
+
+    def open_account_list(self):
+        def on_selected_item(instance, value):
+            self.current_account = value.account
+        self.controller.open_account_list_helper(on_selected_item)
 
 
 class History(BoxLayout):
@@ -179,14 +188,15 @@ class History(BoxLayout):
 class Overview(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
-        self.ids.address_button_id.text = address
+        self.current_account_string = address
 
     def open_account_list(self):
         controller = App.get_running_app().controller
-        controller.open_account_list()
+        controller.open_account_list_overview()
 
 
 class PWSelectList(BoxLayout):
@@ -227,7 +237,7 @@ class Controller(FloatLayout):
     def history(self):
         return self.overview.ids.history_id
 
-    def open_account_list(self):
+    def open_account_list_helper(self, on_selected_item):
         title = "Select account"
         items = []
         pywalib = self.pywalib
@@ -237,12 +247,14 @@ class Controller(FloatLayout):
             item = OneLineListItem(text=address)
             item.account = account
             items.append(item)
-
-        def on_selected_item(instance, value):
-            self.set_current_account(value.account)
         dialog = Controller.create_list_dialog(
             title, items, on_selected_item)
         dialog.open()
+
+    def open_account_list_overview(self):
+        def on_selected_item(instance, value):
+            self.set_current_account(value.account)
+        self.open_account_list_helper(on_selected_item)
 
     def set_current_account(self, account):
         self.current_account = account

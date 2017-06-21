@@ -35,10 +35,11 @@
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
-    ScrollView:
-        do_scroll_x: False
-        MDList:
-            id: address_list_id
+    MDFlatButton:
+        pos_hint: {'center_x': 0.5, 'top': 1}
+        size_hint: None, None
+        text: root.current_account_string
+        on_release: root.open_account_list()
     QRCodeWidget:
         id: qr_code_id
 
@@ -52,10 +53,9 @@
         halign: 'center'
         text: '0 ETH'
     MDFlatButton:
-        id: address_button_id
         pos_hint: {'center_x': 0.5, 'top': 1}
         size_hint: None, None
-        text: "Ethereum Address"
+        text: root.current_account_string
         on_release: root.open_account_list()
     History:
         id: history_id
@@ -106,7 +106,7 @@
                         text: "Receive"
                         icon: 'arrow-down-bold'
                         Receive:
-                            id: send_id
+                            id: receive_id
 
             Screen:
                 name: 'manage_keystores'
