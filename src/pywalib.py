@@ -7,7 +7,8 @@ from os.path import expanduser
 
 import requests
 from devp2p.app import BaseApp
-from ethereum.utils import normalize_address
+from ethereum.transactions import Transaction
+from ethereum.utils import denoms, normalize_address
 from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
@@ -93,18 +94,33 @@ class PyWalib(object):
         return transactions
 
     @staticmethod
-    def create_and_sign_transaction(
-            account, password, receiver_address, amount_eth):
-        print("account.locked: %s" % account.locked)
-        print("unlocking...")
-        account.unlock(password)
-        print("unlocked")
-        print("sending...")
-        transaction = None
-        # TODO: convert from ETH to wei (expected) unit
-        # transaction = eth.transact(
-        #   receiver_address, sender=account, value=100)
-        return transaction
+    def get_nonce(address):
+        # TODO:
+        return 0
+
+    @staticmethod
+    def add_transaction(tx):
+        # TODO:
+        pass
+
+    def transact(self, to, value=0, data='', sender=None, startgas=25000,
+                 gasprice=60 * denoms.shannon):
+        """
+        Inspired from pyethapp/console_service.py except that we use
+        Etherscan for retrieving the nonce as we as for broadcasting the
+        transaction.
+        """
+        # account.unlock(password)
+        sender = normalize_address(sender or self.get_main_account().address)
+        to = normalize_address(to, allow_blank=True)
+        nonce = PyWalib.get_nonce(sender)
+        # creates the transaction
+        tx = Transaction(nonce, gasprice, startgas, to, value, data)
+        # then signs it
+        self.app.services.accounts.sign_tx(sender, tx)
+        assert tx.sender == sender
+        PyWalib.add_transaction(tx)
+        return tx
 
     @staticmethod
     def new_account(password):
