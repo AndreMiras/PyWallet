@@ -6,6 +6,7 @@ import os
 from os.path import expanduser
 
 import requests
+import rlp
 from devp2p.app import BaseApp
 from ethereum.transactions import Transaction
 from ethereum.utils import denoms, normalize_address
@@ -100,8 +101,22 @@ class PyWalib(object):
 
     @staticmethod
     def add_transaction(tx):
-        # TODO:
-        pass
+        """
+        POST transaction to etherscan.io.
+        """
+        tx_hex = rlp.encode(tx).encode("hex")
+        print("tx_hex:", tx_hex)
+        url = 'https://api.etherscan.io/api'
+        url += '?module=proxy&action=eth_sendRawTransaction'
+        url += '&hex=%s' % rlp
+        if ETHERSCAN_API_KEY:
+            '&apikey=%' % ETHERSCAN_API_KEY
+        response = requests.get(url)
+        response_json = response.json()
+        print("response_json:", response_json)
+        PyWalib.handle_etherscan_error(response_json)
+        # TODO: return something
+        return
 
     def transact(self, to, value=0, data='', sender=None, startgas=25000,
                  gasprice=60 * denoms.shannon):
