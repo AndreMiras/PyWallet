@@ -11,7 +11,7 @@ from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
@@ -48,14 +48,28 @@ class FloatInput(MDTextField):
         return super(FloatInput, self).insert_text(s, from_undo=from_undo)
 
 
+class PasswordForm(BoxLayout):
+
+    password = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(PasswordForm, self).__init__(**kwargs)
+
+
 class Send(BoxLayout):
 
+    password = StringProperty("")
+    send_to_address = StringProperty("")
+    send_amount = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super(Send, self).__init__(**kwargs)
+
     def verify_to_address_field(self):
-        send_to_address_id = self.ids.send_to_address_id
         title = "Input error"
         body = "Invalid address field"
         try:
-            normalize_address(send_to_address_id.text)
+            normalize_address(self.send_to_address)
         except Exception:
             dialog = Controller.create_dialog(title, body)
             dialog.open()
@@ -63,10 +77,9 @@ class Send(BoxLayout):
         return True
 
     def verify_amount_field(self):
-        send_amount_id = self.ids.send_amount_id
         title = "Input error"
         body = "Invalid amount field"
-        if float(send_amount_id.text) == 0:
+        if self.send_amount == 0:
             dialog = Controller.create_dialog(title, body)
             dialog.open()
             return False
@@ -79,6 +92,10 @@ class Send(BoxLayout):
         return self.verify_to_address_field() \
             and self.verify_amount_field()
 
+    def on_unlock(self, password):
+        print("on_unlock, password:", password)
+        self.password = password
+
     @staticmethod
     def show_invalid_form_dialog():
         title = "Invalid form"
@@ -86,18 +103,43 @@ class Send(BoxLayout):
         dialog = Controller.create_dialog(title, body)
         dialog.open()
 
+    def prompt_password_dialog(self):
+        """
+        Prompt the password dialog.
+        """
+        title = "Enter your password"
+        content = PasswordForm()
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(250),
+                        auto_dismiss=False)
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
+        dialog.add_action_button(
+                "Unlock",
+                action=lambda *x: self.on_unlock(content.password))
+        return dialog
+
     def on_send_click(self):
         if not self.verify_fields():
             Send.show_invalid_form_dialog()
             return
+        dialog = self.prompt_password_dialog()
+        dialog.open()
+
+    def on_password(self, instance, password):
+        print("on_password")
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
-        send_to_address_id = self.ids.send_to_address_id
-        address = normalize_address(send_to_address_id.text)
-        send_amount_id = self.ids.send_amount_id
-        amount_eth = float(send_amount_id.text)
+        address = normalize_address(self.send_to_address)
+        amount_eth = self.send_amount
         amount_wei = amount_eth * pow(10, 18)
-        sender = controller.pywalib.get_main_account().address
+        account = controller.pywalib.get_main_account()
+        # TODO: update UI with some wait cursor
+        account.unlock(password)
+        sender = account.address
         pywalib.transact(address, value=amount_wei, data='', sender=sender)
 
 
