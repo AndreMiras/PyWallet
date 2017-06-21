@@ -105,6 +105,7 @@ class PyWalib(object):
         POST transaction to etherscan.io.
         """
         tx_hex = rlp.encode(tx).encode("hex")
+        # use https://etherscan.io/pushTx to debug
         print("tx_hex:", tx_hex)
         url = 'https://api.etherscan.io/api'
         url += '?module=proxy&action=eth_sendRawTransaction'
