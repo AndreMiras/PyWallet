@@ -8,6 +8,17 @@
 #:import QRCodeWidget kivy.garden.qrcode
 
 
+<PasswordForm@BoxLayout>:
+    orientation: 'vertical'
+    # TODO: use a password field if available
+    MDTextField:
+        id: password_id
+        hint_text: "Password"
+        helper_text: "Enter the password to unlock your account"
+        helper_text_mode: "on_focus"
+        text: root.password
+        on_text: root.password = args[1]
+
 <PWSelectList@BoxLayout>:
     orientation: 'vertical'
     ScrollView:
@@ -19,15 +30,17 @@
     orientation: 'vertical'
     # TODO: handle from address
     MDTextField:
-        id: send_to_address_id
         hint_text: "To"
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
         required: True
+        text: root.send_to_address
+        on_text: root.send_to_address = args[1]
     FloatInput:
-        id: send_amount_id
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
+        text: str(root.send_amount)
+        on_text: root.send_amount = args[1]
     MDRaisedButton:
         pos_hint: {'center_x': 0.5}
         text: "Send"

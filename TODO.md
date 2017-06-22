@@ -17,6 +17,7 @@
          * make sure it's running @develop branch
  * other way to broadcast transaction:
    * https://etherscan.io/pushTx
+   * https://github.com/corpetty/py-etherscan-api
  * use the test net
  * perform a transaction:
    * https://github.com/ethereum/pyethapp/wiki/Account-Management
