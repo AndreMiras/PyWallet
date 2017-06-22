@@ -92,8 +92,7 @@ class Send(BoxLayout):
         return self.verify_to_address_field() \
             and self.verify_amount_field()
 
-    def on_unlock(self, password):
-        print("on_unlock, password:", password)
+    def on_unlock_clicked(self, password):
         self.password = password
 
     @staticmethod
@@ -119,7 +118,7 @@ class Send(BoxLayout):
         dialog.ids.container.size_hint_y = 1
         dialog.add_action_button(
                 "Unlock",
-                action=lambda *x: self.on_unlock(content.password))
+                action=lambda *x: self.on_unlock_clicked(content.password))
         return dialog
 
     def on_send_click(self):
@@ -129,8 +128,7 @@ class Send(BoxLayout):
         dialog = self.prompt_password_dialog()
         dialog.open()
 
-    def on_password(self, instance, password):
-        print("on_password")
+    def unlock_send_transaction(self, password):
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
         address = normalize_address(self.send_to_address)
@@ -141,6 +139,9 @@ class Send(BoxLayout):
         account.unlock(password)
         sender = account.address
         pywalib.transact(address, value=amount_wei, data='', sender=sender)
+
+    def on_password(self, instance, password):
+        self.unlock_send_transaction(password)
 
 
 class Receive(BoxLayout):
