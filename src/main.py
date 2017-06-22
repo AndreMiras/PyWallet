@@ -19,6 +19,7 @@ from kivymd.button import MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from requests.exceptions import ConnectionError
@@ -119,7 +120,8 @@ class Send(BoxLayout):
         dialog.ids.container.size_hint_y = 1
         dialog.add_action_button(
                 "Unlock",
-                action=lambda *x: self.on_unlock_clicked(dialog, content.password))
+                action=lambda *x: self.on_unlock_clicked(
+                    dialog, content.password))
         return dialog
 
     def on_send_click(self):
@@ -128,6 +130,10 @@ class Send(BoxLayout):
             return
         dialog = self.prompt_password_dialog()
         dialog.open()
+
+    @mainthread
+    def snackbar_message(self, text):
+        Snackbar(text=text).show()
 
     def unlock_send_transaction(self):
         """
@@ -140,11 +146,12 @@ class Send(BoxLayout):
         amount_eth = self.send_amount
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
-        # TODO: update UI "unlocking account"
+        self.snackbar_message("Unlocking account...")
         account.unlock(self.password)
+        self.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
-        # TODO: update UI "posting transaction"
         pywalib.transact(address, value=amount_wei, data='', sender=sender)
+        self.snackbar_message("Sent!")
 
     def _start_unlock_send_transaction_thread(self):
         """
