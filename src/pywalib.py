@@ -95,9 +95,26 @@ class PyWalib(object):
         return transactions
 
     @staticmethod
+    def get_out_transaction_history(address):
+        """
+        Retrieves the outbound transaction history from Etherscan.
+        """
+        transactions = PyWalib.get_transaction_history(address)
+        out_transactions = []
+        for transaction in transactions:
+            if transaction['extra_dict']['sent']:
+                out_transactions.append(transaction)
+        return out_transactions
+
+    @staticmethod
     def get_nonce(address):
-        # TODO:
-        return 0
+        """
+        Gets the nonce by counting the list of outbound transactions from
+        Etherscan.
+        """
+        out_transactions = PyWalib.get_out_transaction_history(address)
+        nonce = len(out_transactions)
+        return nonce
 
     @staticmethod
     def add_transaction(tx):
