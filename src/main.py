@@ -24,7 +24,8 @@ from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from requests.exceptions import ConnectionError
 
-from pywalib import PyWalib
+from pywalib import (InsufficientFundsException, PyWalib,
+                     UnknownEtherscanException)
 
 kivy.require('1.10.0')
 
@@ -155,7 +156,14 @@ class Send(BoxLayout):
 
         self.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
-        pywalib.transact(address, value=amount_wei, data='', sender=sender)
+        try:
+            pywalib.transact(address, value=amount_wei, data='', sender=sender)
+        except InsufficientFundsException:
+            self.snackbar_message("Insufficient funds")
+            return
+        except UnknownEtherscanException:
+            self.snackbar_message("Unknown error")
+            return
         self.snackbar_message("Sent!")
 
     def _start_unlock_send_transaction_thread(self):

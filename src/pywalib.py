@@ -15,6 +15,14 @@ from pyethapp.accounts import Account, AccountsService
 ETHERSCAN_API_KEY = None
 
 
+class InsufficientFundsException(Exception):
+    pass
+
+
+class UnknownEtherscanException(Exception):
+    pass
+
+
 class PyWalib(object):
 
     def __init__(self, keystore_dir=None):
@@ -117,6 +125,19 @@ class PyWalib(object):
         return nonce
 
     @staticmethod
+    def handle_etherscan_tx_error(response_json):
+        """
+        Raises an exception on unexpected response.
+        """
+        error = response_json.get("error")
+        if error is not None:
+            code = error.get("code")
+            if code == -32010:
+                raise InsufficientFundsException()
+            else:
+                raise UnknownEtherscanException()
+
+    @staticmethod
     def add_transaction(tx):
         """
         POST transaction to etherscan.io.
@@ -131,11 +152,14 @@ class PyWalib(object):
         response = requests.post(url, data={'hex': tx_hex})
         # response is like:
         # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
+        # or on error like this:
+        # {'jsonrpc': '2.0', 'id': 1, 'error': {
+        #   'message': 'Insufficient funds...', 'code': -32010, 'data': None}}
         response_json = response.json()
         print("response_json:", response_json)
+        PyWalib.handle_etherscan_tx_error(response_json)
         tx_hash = response_json['result']
         # the response differs from the other responses
-        # PyWalib.handle_etherscan_error(response_json)
         return tx_hash
 
     def transact(self, to, value=0, data='', sender=None, startgas=25000,
