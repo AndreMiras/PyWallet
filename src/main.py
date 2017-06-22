@@ -147,7 +147,12 @@ class Send(BoxLayout):
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
         self.snackbar_message("Unlocking account...")
-        account.unlock(self.password)
+        try:
+            account.unlock(self.password)
+        except ValueError:
+            self.snackbar_message("Could not unlock account")
+            return
+
         self.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
         pywalib.transact(address, value=amount_wei, data='', sender=sender)
