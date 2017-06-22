@@ -10,13 +10,13 @@
 
 <PasswordForm@BoxLayout>:
     orientation: 'vertical'
-    # TODO: use a password field if available
     MDTextField:
         id: password_id
         hint_text: "Password"
         helper_text: "Enter the password to unlock your account"
         helper_text_mode: "on_focus"
         text: root.password
+        password: True
         on_text: root.password = args[1]
 
 <PWSelectList@BoxLayout>:
