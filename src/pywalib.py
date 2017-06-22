@@ -126,15 +126,17 @@ class PyWalib(object):
         print("tx_hex:", tx_hex)
         url = 'https://api.etherscan.io/api'
         url += '?module=proxy&action=eth_sendRawTransaction'
-        url += '&hex=%s' % rlp
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
-        response = requests.get(url)
+        response = requests.post(url, data={'hex': tx_hex})
+        # response is like:
+        # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
         response_json = response.json()
         print("response_json:", response_json)
-        PyWalib.handle_etherscan_error(response_json)
-        # TODO: return something
-        return
+        tx_hash = response_json['result']
+        # the response differs from the other responses
+        # PyWalib.handle_etherscan_error(response_json)
+        return tx_hash
 
     def transact(self, to, value=0, data='', sender=None, startgas=25000,
                  gasprice=60 * denoms.shannon):
