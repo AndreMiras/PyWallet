@@ -256,7 +256,6 @@ class History(BoxLayout):
     def _load_history(self):
         account = self.current_account
         address = '0x' + account.address.encode("hex")
-        print("History._load_history address:", address)
         try:
             transactions = PyWalib.get_transaction_history(address)
         except ConnectionError:
