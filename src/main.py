@@ -316,8 +316,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        # will trigger account data fetching
-        self.current_account = self.pywalib.get_main_account()
+        self._load_landing_page()
 
     @property
     def overview(self):
@@ -448,12 +447,13 @@ class Controller(FloatLayout):
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
 
-    def _load_landing_page(self, dt=None):
+    def _load_landing_page(self):
         """
         Loads the landing page.
         """
         try:
-            self._load_balance()
+            # will trigger account data fetching
+            self.current_account = self.pywalib.get_main_account()
         except IndexError:
             self._load_manage_keystores()
 
