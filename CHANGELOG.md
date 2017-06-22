@@ -1,5 +1,10 @@
 # Change Log
 
+## [Unreleased]
+
+  - Address selection widget fixes
+  - Send transaction through Etherscan, refs #21
+
 ## [v20170621]
 
   - Travis-CI integration, refs #15

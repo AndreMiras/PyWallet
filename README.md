@@ -11,7 +11,7 @@ Cross platform Ethereum Wallet built with Python and Kivy.
   * Show balance
   * Show transaction history
   * Receive Ethers via QR code
-  * Send Ethers (TODO)
+  * Send Ethers
   * Handle multiple keystores
   * Manage wallets (TODO)
 
