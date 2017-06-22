@@ -92,8 +92,9 @@ class Send(BoxLayout):
         return self.verify_to_address_field() \
             and self.verify_amount_field()
 
-    def on_unlock_clicked(self, password):
+    def on_unlock_clicked(self, dialog, password):
         self.password = password
+        dialog.dismiss()
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -118,7 +119,7 @@ class Send(BoxLayout):
         dialog.ids.container.size_hint_y = 1
         dialog.add_action_button(
                 "Unlock",
-                action=lambda *x: self.on_unlock_clicked(content.password))
+                action=lambda *x: self.on_unlock_clicked(dialog, content.password))
         return dialog
 
     def on_send_click(self):
@@ -128,20 +129,32 @@ class Send(BoxLayout):
         dialog = self.prompt_password_dialog()
         dialog.open()
 
-    def unlock_send_transaction(self, password):
+    def unlock_send_transaction(self):
+        """
+        Unlocks the account with password in order to sign and publish the
+        transaction.
+        """
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
         address = normalize_address(self.send_to_address)
         amount_eth = self.send_amount
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
-        # TODO: update UI with some wait cursor
-        account.unlock(password)
+        # TODO: update UI "unlocking account"
+        account.unlock(self.password)
         sender = account.address
+        # TODO: update UI "posting transaction"
         pywalib.transact(address, value=amount_wei, data='', sender=sender)
 
+    def _start_unlock_send_transaction_thread(self):
+        """
+        Runs unlock_send_transaction() in a thread.
+        """
+        thread = Thread(target=self.unlock_send_transaction)
+        thread.start()
+
     def on_password(self, instance, password):
-        self.unlock_send_transaction(password)
+        self._start_unlock_send_transaction_thread()
 
 
 class Receive(BoxLayout):
