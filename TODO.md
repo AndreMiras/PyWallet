@@ -35,3 +35,6 @@
      * pydevp2p
        * fix broken tests:
          * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
+ * MISC
+   * kill running threads on application leave
+     so it doesn't hangs when you quite while the thread tries to connect
