@@ -22,6 +22,7 @@ from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
 from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
+from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
 from pywalib import (InsufficientFundsException, PyWalib,
@@ -339,6 +340,42 @@ class ManageKeystores(BoxLayout):
         pass
 
 
+class PWToolbar(Toolbar):
+
+    def __init__(self, **kwargs):
+        super(PWToolbar, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.navigation = self.controller.ids.navigation_id
+        self.screen_manager = self.controller.ids.screen_manager_id
+        self.load_default_navigation()
+
+    def load_default_navigation(self):
+        self.left_action_items = [
+            ['menu', lambda x: self.toggle_nav_drawer()]
+        ]
+        self.right_action_items = [
+            ['dots-vertical', lambda x: self.toggle_nav_drawer()]
+        ]
+
+    def load_back_button(self):
+        self.left_action_items = [
+            ['arrow-left', lambda x: self.on_back_button()]
+        ]
+
+    def toggle_nav_drawer(self):
+        self.navigation.toggle_nav_drawer()
+
+    def on_back_button(self):
+        # TODO: direction
+        previous_screen = self.screen_manager.previous()
+        self.screen_manager.transition.direction = "right"
+        self.screen_manager.current = previous_screen
+        self.load_default_navigation()
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty(None, allownone=True)
@@ -508,10 +545,9 @@ class Controller(FloatLayout):
         """
         Loads the manage keystores screen.
         """
+        self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
-
-    def toggle_navigation_drawer(self):
-        self.ids.navigation_id.toggle_nav_drawer()
+        self.ids.toolbar_id.load_back_button()
 
 
 class ControllerApp(App):
