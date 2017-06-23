@@ -100,17 +100,40 @@
         MDList:
             id: history_list_id
 
-<ManageKeystores@BoxLayout>:
+<ImportKeystore@BoxLayout>:
     orientation: 'vertical'
     MDLabel:
         font_style: 'Display1'
         halign: 'center'
         valign: 'middle'
-        text: 'Keystore not found'
+        text: "Import keystore"
     MDLabel:
         halign: 'center'
         valign: 'middle'
         text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
+
+<ManageExisting@BoxLayout>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "Manage existing"
+
+<ManageKeystores@BoxLayout>:
+    orientation: 'vertical'
+    MDBottomNavigation:
+        id: bottom_navigation_id
+        MDBottomNavigationItem:
+            name: "import_keystore"
+            text: "Import"
+            icon: 'format-list-bulleted'
+            ImportKeystore:
+        MDBottomNavigationItem:
+            name: "manage_existing"
+            text: "Manage"
+            icon: 'format-list-bulleted'
+            ManageExisting:
 
 <Controller>:
     Navigation:
@@ -127,7 +150,6 @@
                 right_action_items: [['dots-vertical', lambda x: root.toggle_navigation_drawer()]]
             ScreenManager:
                 id: screen_manager_id
-
                 Screen:
                     name: 'overview'
                     MDBottomNavigation:
@@ -150,7 +172,6 @@
                             icon: 'arrow-down-bold'
                             Receive:
                                 id: receive_id
-
                 Screen:
                     name: 'manage_keystores'
                     ManageKeystores:

@@ -308,6 +308,25 @@ class PWSelectList(BoxLayout):
             address_list.add_widget(item)
 
 
+class ImportKeystore(BoxLayout):
+
+    keystore_path = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ImportKeystore, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.keystore_path = self.controller.get_keystore_path()
+        accounts = self.controller.pywalib.get_account_list()
+        if len(accounts) == 0:
+            title = "No keystore found."
+            body = "Import or create one."
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+
+
 class ManageKeystores(BoxLayout):
 
     keystore_path = StringProperty()
@@ -317,8 +336,7 @@ class ManageKeystores(BoxLayout):
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
-        self.controller = App.get_running_app().controller
-        self.keystore_path = self.controller.get_keystore_path()
+        pass
 
 
 class Controller(FloatLayout):
