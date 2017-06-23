@@ -45,6 +45,8 @@
         pos_hint: {'center_x': 0.5}
         text: "Send"
         on_release: self.parent.on_send_click()
+    # hack for pushing the Send widget up
+    BoxLayout:
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
