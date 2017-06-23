@@ -308,6 +308,19 @@ class PWSelectList(BoxLayout):
             address_list.add_widget(item)
 
 
+class ManageKeystores(BoxLayout):
+
+    keystore_path = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ManageKeystores, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.keystore_path = self.controller.get_keystore_path()
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty(None, allownone=True)
@@ -455,7 +468,7 @@ class Controller(FloatLayout):
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
         except IndexError:
-            self._load_manage_keystores()
+            self.load_manage_keystores()
 
     def _load_balance(self):
         account = self.current_account
@@ -473,7 +486,7 @@ class Controller(FloatLayout):
         load_balance_thread = Thread(target=self._load_balance)
         load_balance_thread.start()
 
-    def _load_manage_keystores(self):
+    def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """

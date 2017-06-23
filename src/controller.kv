@@ -19,7 +19,7 @@
         NavigationDrawerIconButton:
             icon: "checkbox-blank-circle"
             text: "Keystores"
-            on_release: print("foo")
+            on_release: app.controller.load_manage_keystores()
         NavigationDrawerIconButton:
             icon: "checkbox-blank-circle"
             text: "About"
@@ -100,6 +100,18 @@
         MDList:
             id: history_list_id
 
+<ManageKeystores@BoxLayout>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: 'Keystore not found'
+    MDLabel:
+        halign: 'center'
+        valign: 'middle'
+        text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
+
 <Controller>:
     Navigation:
         id: navigation_id
@@ -141,14 +153,5 @@
 
                 Screen:
                     name: 'manage_keystores'
-                    BoxLayout:
-                        orientation: 'vertical'
-                        MDLabel:
-                            font_style: 'Display1'
-                            halign: 'center'
-                            valign: 'middle'
-                            text: 'Keystore not found'
-                        MDLabel:
-                            halign: 'center'
-                            valign: 'middle'
-                            text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()
+                    ManageKeystores:
+                        id: manage_keystores_id
