@@ -7,7 +7,7 @@ title = PyWallet
 package.name = pywallet
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = com.github.andremiras
 
 # (str) Source code where the main.py live
 source.dir = src/
