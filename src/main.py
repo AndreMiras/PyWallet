@@ -479,6 +479,9 @@ class Controller(FloatLayout):
         """
         self.ids.screen_manager_id.current = 'manage_keystores'
 
+    def toggle_navigation_drawer(self):
+        self.ids.navigation_id.toggle_nav_drawer()
+
 
 class ControllerApp(App):
     theme_cls = ThemeManager()

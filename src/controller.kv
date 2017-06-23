@@ -6,7 +6,24 @@
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import QRCodeWidget kivy.garden.qrcode
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
 
+
+<Navigation@NavigationLayout>:
+    MDNavigationDrawer:
+        id: navigation_drawer
+        NavigationDrawerToolbar:
+            title: "Settings"
+        NavigationDrawerIconButton:
+            icon: "checkbox-blank-circle"
+            text: "Keystores"
+            on_release: print("foo")
+        NavigationDrawerIconButton:
+            icon: "checkbox-blank-circle"
+            text: "About"
+            on_release: print("foo")
 
 <PasswordForm@BoxLayout>:
     orientation: 'vertical'
@@ -84,53 +101,54 @@
             id: history_list_id
 
 <Controller>:
+    Navigation:
+        id: navigation_id
+        BoxLayout:
+            orientation: 'vertical'
+            Toolbar:
+                id: toolbar_id
+                title: 'PyWallet'
+                md_bg_color: app.theme_cls.primary_color
+                background_palette: 'Primary'
+                background_hue: '500'
+                left_action_items: [['menu', lambda x: root.toggle_navigation_drawer()]]
+                right_action_items: [['dots-vertical', lambda x: root.toggle_navigation_drawer()]]
+            ScreenManager:
+                id: screen_manager_id
 
-    BoxLayout:
-        orientation: 'vertical'
-        Toolbar:
-            id: toolbar_id
-            title: 'PyWallet'
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            left_action_items: [['menu', lambda x: None]]
-            right_action_items: [['dots-vertical', lambda x: None]]
-        ScreenManager:
-            id: screen_manager_id
+                Screen:
+                    name: 'overview'
+                    MDBottomNavigation:
+                        id: bottom_navigation_id
+                        MDBottomNavigationItem:
+                            name: 'overview'
+                            text: "Overview"
+                            icon: 'format-list-bulleted'
+                            Overview:
+                                id: overview_id
+                        MDBottomNavigationItem:
+                            name: 'send'
+                            text: "Send"
+                            icon: 'arrow-up-bold'
+                            Send:
+                                id: send_id
+                        MDBottomNavigationItem:
+                            name: 'receive'
+                            text: "Receive"
+                            icon: 'arrow-down-bold'
+                            Receive:
+                                id: receive_id
 
-            Screen:
-                name: 'overview'
-                MDBottomNavigation:
-                    id: bottom_navigation_id
-                    MDBottomNavigationItem:
-                        name: 'overview'
-                        text: "Overview"
-                        icon: 'format-list-bulleted'
-                        Overview:
-                            id: overview_id
-                    MDBottomNavigationItem:
-                        name: 'send'
-                        text: "Send"
-                        icon: 'arrow-up-bold'
-                        Send:
-                            id: send_id
-                    MDBottomNavigationItem:
-                        name: 'receive'
-                        text: "Receive"
-                        icon: 'arrow-down-bold'
-                        Receive:
-                            id: receive_id
-
-            Screen:
-                name: 'manage_keystores'
-                BoxLayout:
-                    orientation: 'vertical'
-                    MDLabel:
-                        font_style: 'Display1'
-                        halign: 'center'
-                        valign: 'middle'
-                        text: 'Keystore not found'
-                    MDLabel:
-                        halign: 'center'
-                        valign: 'middle'
-                        text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()
+                Screen:
+                    name: 'manage_keystores'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        MDLabel:
+                            font_style: 'Display1'
+                            halign: 'center'
+                            valign: 'middle'
+                            text: 'Keystore not found'
+                        MDLabel:
+                            halign: 'center'
+                            valign: 'middle'
+                            text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()
