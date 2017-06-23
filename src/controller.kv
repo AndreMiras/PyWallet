@@ -25,7 +25,7 @@
             text: "About"
             on_release: print("foo")
 
-<PasswordForm@BoxLayout>:
+<PasswordForm>:
     orientation: 'vertical'
     MDTextField:
         id: password_id
@@ -36,14 +36,14 @@
         password: True
         on_text: root.password = args[1]
 
-<PWSelectList@BoxLayout>:
+<PWSelectList>:
     orientation: 'vertical'
     ScrollView:
         do_scroll_x: False
         MDList:
             id: address_list_id
 
-<Send@BoxLayout>:
+<Send>:
     orientation: 'vertical'
     # TODO: handle from address
     MDTextField:
@@ -75,7 +75,7 @@
     QRCodeWidget:
         id: qr_code_id
 
-<Overview@BoxLayout>:
+<Overview>:
     orientation: 'vertical'
     MDLabel:
         id: balance_label_id
@@ -94,13 +94,13 @@
 
 
 # transactions history
-<History@BoxLayout>:
+<History>:
     orientation: 'vertical'
     ScrollView:
         MDList:
             id: history_list_id
 
-<ImportKeystore@BoxLayout>:
+<ImportKeystore>:
     orientation: 'vertical'
     MDLabel:
         font_style: 'Display1'
@@ -120,7 +120,7 @@
         valign: 'middle'
         text: "Manage existing"
 
-<ManageKeystores@BoxLayout>:
+<ManageKeystores>:
     orientation: 'vertical'
     MDBottomNavigation:
         id: bottom_navigation_id
