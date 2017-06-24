@@ -376,6 +376,15 @@ class PWToolbar(Toolbar):
         self.load_default_navigation()
 
 
+class About(BoxLayout):
+
+    about_text_property = StringProperty(
+        "Project source code and info available on GitHub at: \n" +
+        "[color=00BFFF][ref=github]" +
+        "https://github.com/AndreMiras/PyWallet" +
+        "[/ref][/color]")
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty(None, allownone=True)
@@ -547,6 +556,14 @@ class Controller(FloatLayout):
         """
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
+        self.ids.toolbar_id.load_back_button()
+
+    def load_about_screen(self):
+        """
+        Loads the about screen.
+        """
+        self.ids.screen_manager_id.transition.direction = "left"
+        self.ids.screen_manager_id.current = "about"
         self.ids.toolbar_id.load_back_button()
 
 

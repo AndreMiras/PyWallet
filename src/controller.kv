@@ -1,5 +1,6 @@
 #:kivy 1.10.0
 
+#:import webbrowser webbrowser
 #:import MDList kivymd.list.MDList
 #:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
@@ -23,7 +24,7 @@
         NavigationDrawerIconButton:
             icon: "checkbox-blank-circle"
             text: "About"
-            on_release: print("foo")
+            on_release: app.controller.load_about_screen()
 
 
 <PasswordForm>:
@@ -143,6 +144,24 @@
             ManageExisting:
 
 
+<About@BoxLayout>:
+    orientation: 'vertical'
+    ScrollView:
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            MDLabel:
+                font_style: 'Display1'
+                halign: 'center'
+                valign: 'middle'
+                text: "About PyWallet"
+            MDLabel:
+                markup: True
+                text: root.about_text_property
+                theme_text_color: 'Primary'
+                on_ref_press: webbrowser.open('https://github.com/AndreMiras/PyWallet')
+
+
 <PWToolbar>:
     title: 'PyWallet'
     md_bg_color: app.theme_cls.primary_color
@@ -185,3 +204,7 @@
                     name: 'manage_keystores'
                     ManageKeystores:
                         id: manage_keystores_id
+                Screen:
+                    name: 'about'
+                    About:
+                        id: about_id
