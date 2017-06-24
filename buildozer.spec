@@ -42,7 +42,7 @@ requirements =
     kivy,
     setuptools,
     openssl,
-    pycryptodome,
+    # pycryptodome,
     pysha3,
     ethash,
     scrypt,

@@ -1,18 +1,11 @@
-language: python
+language: generic
 
-python:
-    - 2.7
-    # - 3.6
-
-# command to install dependencies
-install:
-  - pip install --install-option="--no-cython-compile" $(grep Cython requirements/requirements.txt)
-  - pip install -r requirements/test_requirements.txt
-  - pip install -r requirements.txt
-
-before_script:
-  - isort --check-only --recursive src/
-  - flake8 src/
+before_install:
+    # Required by Buildozer Android
+    # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-12-04-64bit
+    - sudo apt-get update -q
+    - sudo apt-get install build-essential ccache git lib32z1 lib32bz2-1.0 libncurses5:i386 libstdc++6:i386 python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
 
 script:
-  - python -m unittest discover --start-directory=src/tests/
+    - ./travis/script_linux.sh
+    - ./travis/script_android.sh
