@@ -378,11 +378,17 @@ class PWToolbar(Toolbar):
 
 class About(BoxLayout):
 
-    about_text_property = StringProperty(
-        "Project source code and info available on GitHub at: \n" +
-        "[color=00BFFF][ref=github]" +
-        "https://github.com/AndreMiras/PyWallet" +
-        "[/ref][/color]")
+    project_page_property = StringProperty(
+        "https://github.com/AndreMiras/PyWallet")
+    about_text_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(About, self).__init__(**kwargs)
+        self.about_text_property = "" + \
+            "Project source code and info available on GitHub at: \n" + \
+            "[color=00BFFF][ref=github]" + \
+            self.project_page_property + \
+            "[/ref][/color]"
 
 
 class Controller(FloatLayout):
