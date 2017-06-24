@@ -360,20 +360,8 @@ class PWToolbar(Toolbar):
             ['dots-vertical', lambda x: self.toggle_nav_drawer()]
         ]
 
-    def load_back_button(self):
-        self.left_action_items = [
-            ['arrow-left', lambda x: self.on_back_button()]
-        ]
-
     def toggle_nav_drawer(self):
         self.navigation.toggle_nav_drawer()
-
-    def on_back_button(self):
-        # TODO: direction
-        previous_screen = self.screen_manager.previous()
-        self.screen_manager.transition.direction = "right"
-        self.screen_manager.current = previous_screen
-        self.load_default_navigation()
 
 
 class About(BoxLayout):
@@ -399,7 +387,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        self._load_landing_page()
+        self.load_landing_page()
 
     @property
     def overview(self):
@@ -530,13 +518,15 @@ class Controller(FloatLayout):
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
 
-    def _load_landing_page(self):
+    def load_landing_page(self):
         """
         Loads the landing page.
         """
         try:
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
+            self.ids.screen_manager_id.current = "overview"
+            self.ids.screen_manager_id.transition.direction = "right"
         except IndexError:
             self.load_manage_keystores()
 
@@ -562,7 +552,6 @@ class Controller(FloatLayout):
         """
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
-        self.ids.toolbar_id.load_back_button()
 
     def load_about_screen(self):
         """
@@ -570,7 +559,6 @@ class Controller(FloatLayout):
         """
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = "about"
-        self.ids.toolbar_id.load_back_button()
 
 
 class ControllerApp(App):

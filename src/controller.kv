@@ -19,6 +19,10 @@
             title: "Settings"
         NavigationDrawerIconButton:
             icon: "checkbox-blank-circle"
+            text: "Home"
+            on_release: app.controller.load_landing_page()
+        NavigationDrawerIconButton:
+            icon: "checkbox-blank-circle"
             text: "Keystores"
             on_release: app.controller.load_manage_keystores()
         NavigationDrawerIconButton:
