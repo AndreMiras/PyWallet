@@ -4,6 +4,9 @@
 
   - Address selection widget fixes
   - Send transaction through Etherscan, refs #21
+  - Android build on Travis CI, refs #20
+  - Run unlock account & send transaction in a thread
+  - Fixes "send" page layout, refs #27
 
 ## [v20170621]
 
