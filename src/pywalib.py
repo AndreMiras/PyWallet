@@ -6,11 +6,21 @@ import os
 from os.path import expanduser
 
 import requests
+import rlp
 from devp2p.app import BaseApp
-from ethereum.utils import normalize_address
+from ethereum.transactions import Transaction
+from ethereum.utils import denoms, normalize_address
 from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
+
+
+class InsufficientFundsException(Exception):
+    pass
+
+
+class UnknownEtherscanException(Exception):
+    pass
 
 
 class PyWalib(object):
@@ -90,21 +100,88 @@ class PyWalib(object):
                 'to_address': to_address,
             }
             transaction.update({'extra_dict': extra_dict})
+        # sort by timeStamp
+        transactions.sort(key=lambda x: x['timeStamp'], reverse=True)
         return transactions
 
     @staticmethod
-    def create_and_sign_transaction(
-            account, password, receiver_address, amount_eth):
-        print("account.locked: %s" % account.locked)
-        print("unlocking...")
-        account.unlock(password)
-        print("unlocked")
-        print("sending...")
-        transaction = None
-        # TODO: convert from ETH to wei (expected) unit
-        # transaction = eth.transact(
-        #   receiver_address, sender=account, value=100)
-        return transaction
+    def get_out_transaction_history(address):
+        """
+        Retrieves the outbound transaction history from Etherscan.
+        """
+        transactions = PyWalib.get_transaction_history(address)
+        out_transactions = []
+        for transaction in transactions:
+            if transaction['extra_dict']['sent']:
+                out_transactions.append(transaction)
+        return out_transactions
+
+    @staticmethod
+    def get_nonce(address):
+        """
+        Gets the nonce by counting the list of outbound transactions from
+        Etherscan.
+        """
+        out_transactions = PyWalib.get_out_transaction_history(address)
+        nonce = len(out_transactions)
+        return nonce
+
+    @staticmethod
+    def handle_etherscan_tx_error(response_json):
+        """
+        Raises an exception on unexpected response.
+        """
+        error = response_json.get("error")
+        if error is not None:
+            code = error.get("code")
+            if code == -32010:
+                raise InsufficientFundsException()
+            else:
+                raise UnknownEtherscanException()
+
+    @staticmethod
+    def add_transaction(tx):
+        """
+        POST transaction to etherscan.io.
+        """
+        tx_hex = rlp.encode(tx).encode("hex")
+        # use https://etherscan.io/pushTx to debug
+        print("tx_hex:", tx_hex)
+        url = 'https://api.etherscan.io/api'
+        url += '?module=proxy&action=eth_sendRawTransaction'
+        if ETHERSCAN_API_KEY:
+            '&apikey=%' % ETHERSCAN_API_KEY
+        response = requests.post(url, data={'hex': tx_hex})
+        # response is like:
+        # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
+        # or on error like this:
+        # {'jsonrpc': '2.0', 'id': 1, 'error': {
+        #   'message': 'Insufficient funds...', 'code': -32010, 'data': None}}
+        response_json = response.json()
+        print("response_json:", response_json)
+        PyWalib.handle_etherscan_tx_error(response_json)
+        tx_hash = response_json['result']
+        # the response differs from the other responses
+        return tx_hash
+
+    def transact(self, to, value=0, data='', sender=None, startgas=25000,
+                 gasprice=60 * denoms.shannon):
+        """
+        Inspired from pyethapp/console_service.py except that we use
+        Etherscan for retrieving the nonce as we as for broadcasting the
+        transaction.
+        """
+        # account.unlock(password)
+        sender = normalize_address(sender or self.get_main_account().address)
+        to = normalize_address(to, allow_blank=True)
+        nonce = PyWalib.get_nonce(sender)
+        # creates the transaction
+        tx = Transaction(nonce, gasprice, startgas, to, value, data)
+        # then signs it
+        self.app.services.accounts.sign_tx(sender, tx)
+        assert tx.sender == sender
+        PyWalib.add_transaction(tx)
+        return tx
 
     @staticmethod
     def new_account(password):

@@ -1,48 +1,89 @@
 #:kivy 1.10.0
 
+#:import webbrowser webbrowser
 #:import MDList kivymd.list.MDList
-#:import Toolbar kivymd.toolbar.Toolbar
 #:import MDTextField kivymd.textfields.MDTextField
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
-#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
 #:import QRCodeWidget kivy.garden.qrcode
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
 
 
-<PWSelectList@BoxLayout>:
+<Navigation@NavigationLayout>:
+    MDNavigationDrawer:
+        id: navigation_drawer
+        NavigationDrawerToolbar:
+            title: "Menu"
+        NavigationDrawerIconButton:
+            icon: "home"
+            text: "Home"
+            on_release: app.controller.load_landing_page()
+        NavigationDrawerIconButton:
+            icon: "key"
+            text: "Keystores"
+            on_release: app.controller.load_manage_keystores()
+        NavigationDrawerIconButton:
+            icon: "help"
+            text: "About"
+            on_release: app.controller.load_about_screen()
+
+
+<PasswordForm>:
+    orientation: 'vertical'
+    MDTextField:
+        id: password_id
+        hint_text: "Password"
+        helper_text: "Enter the password to unlock your account"
+        helper_text_mode: "on_focus"
+        text: root.password
+        password: True
+        on_text: root.password = args[1]
+
+
+<PWSelectList>:
     orientation: 'vertical'
     ScrollView:
         do_scroll_x: False
         MDList:
             id: address_list_id
 
-<Send@BoxLayout>:
+
+<Send>:
     orientation: 'vertical'
     # TODO: handle from address
     MDTextField:
-        id: send_to_address_id
         hint_text: "To"
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
         required: True
+        text: root.send_to_address
+        on_text: root.send_to_address = args[1]
     FloatInput:
-        id: send_amount_id
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
+        text: str(root.send_amount)
+        on_text: root.send_amount = args[1]
     MDRaisedButton:
         pos_hint: {'center_x': 0.5}
         text: "Send"
         on_release: self.parent.on_send_click()
+    # hack for pushing the Send widget up
+    BoxLayout:
+
 
 <Receive@BoxLayout>:
     orientation: 'vertical'
-    ScrollView:
-        do_scroll_x: False
-        MDList:
-            id: address_list_id
+    MDFlatButton:
+        pos_hint: {'center_x': 0.5, 'top': 1}
+        size_hint: None, None
+        text: root.current_account_string
+        on_release: root.open_account_list()
     QRCodeWidget:
         id: qr_code_id
 
-<Overview@BoxLayout>:
+
+<Overview>:
     orientation: 'vertical'
     MDLabel:
         id: balance_label_id
@@ -52,72 +93,120 @@
         halign: 'center'
         text: '0 ETH'
     MDFlatButton:
-        id: address_button_id
         pos_hint: {'center_x': 0.5, 'top': 1}
         size_hint: None, None
-        text: "Ethereum Address"
+        text: root.current_account_string
         on_release: root.open_account_list()
     History:
         id: history_id
 
 
 # transactions history
-<History@BoxLayout>:
+<History>:
     orientation: 'vertical'
     ScrollView:
         MDList:
             id: history_list_id
 
+<ImportKeystore>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "Import keystore"
+    MDLabel:
+        halign: 'center'
+        valign: 'middle'
+        text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
+
+
+<ManageExisting@BoxLayout>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "Manage existing"
+
+
+<ManageKeystores>:
+    orientation: 'vertical'
+    MDBottomNavigation:
+        id: bottom_navigation_id
+        MDBottomNavigationItem:
+            name: "import_keystore"
+            text: "Import"
+            icon: 'format-list-bulleted'
+            ImportKeystore:
+        MDBottomNavigationItem:
+            name: "manage_existing"
+            text: "Manage"
+            icon: 'format-list-bulleted'
+            ManageExisting:
+
+
+<About@BoxLayout>:
+    orientation: 'vertical'
+    ScrollView:
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            MDLabel:
+                font_style: 'Display1'
+                halign: 'center'
+                valign: 'middle'
+                text: "About PyWallet"
+            MDLabel:
+                markup: True
+                text: root.about_text_property
+                theme_text_color: 'Primary'
+                on_ref_press: webbrowser.open(root.project_page_property)
+
+
+<PWToolbar>:
+    title: 'PyWallet'
+    md_bg_color: app.theme_cls.primary_color
+    background_palette: 'Primary'
+    background_hue: '500'
+
+
 <Controller>:
-
-    BoxLayout:
-        orientation: 'vertical'
-        Toolbar:
-            id: toolbar_id
-            title: 'PyWallet'
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            left_action_items: [['menu', lambda x: None]]
-            right_action_items: [['dots-vertical', lambda x: None]]
-        ScreenManager:
-            id: screen_manager_id
-
-            Screen:
-                name: 'overview'
-                MDBottomNavigation:
-                    id: bottom_navigation_id
-                    MDBottomNavigationItem:
-                        name: 'overview'
-                        text: "Overview"
-                        icon: 'format-list-bulleted'
-                        Overview:
-                            id: overview_id
-                    MDBottomNavigationItem:
-                        name: 'send'
-                        text: "Send"
-                        icon: 'arrow-up-bold'
-                        Send:
-                            pos_hint: {'top': 0.8}
-                            size_hint_y: None
-                            id: send_id
-                    MDBottomNavigationItem:
-                        name: 'receive'
-                        text: "Receive"
-                        icon: 'arrow-down-bold'
-                        Receive:
-                            id: send_id
-
-            Screen:
-                name: 'manage_keystores'
-                BoxLayout:
-                    orientation: 'vertical'
-                    MDLabel:
-                        font_style: 'Display1'
-                        halign: 'center'
-                        valign: 'middle'
-                        text: 'Keystore not found'
-                    MDLabel:
-                        halign: 'center'
-                        valign: 'middle'
-                        text: 'Copy it in to the keystore directory.\n%s' % root.get_keystore_path()
+    Navigation:
+        id: navigation_id
+        BoxLayout:
+            orientation: 'vertical'
+            PWToolbar:
+                id: toolbar_id
+            ScreenManager:
+                id: screen_manager_id
+                Screen:
+                    name: 'overview'
+                    MDBottomNavigation:
+                        id: bottom_navigation_id
+                        MDBottomNavigationItem:
+                            name: 'overview'
+                            text: "Overview"
+                            icon: 'format-list-bulleted'
+                            Overview:
+                                id: overview_id
+                        MDBottomNavigationItem:
+                            name: 'send'
+                            text: "Send"
+                            icon: 'arrow-up-bold'
+                            Send:
+                                id: send_id
+                        MDBottomNavigationItem:
+                            name: 'receive'
+                            text: "Receive"
+                            icon: 'arrow-down-bold'
+                            Receive:
+                                id: receive_id
+                Screen:
+                    name: 'manage_keystores'
+                    ManageKeystores:
+                        id: manage_keystores_id
+                Screen:
+                    name: 'about'
+                    About:
+                        id: about_id

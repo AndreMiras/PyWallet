@@ -11,7 +11,7 @@ from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
@@ -19,11 +19,14 @@ from kivymd.button import MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
+from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
-from pywalib import PyWalib
+from pywalib import (InsufficientFundsException, PyWalib,
+                     UnknownEtherscanException)
 
 kivy.require('1.10.0')
 
@@ -48,14 +51,28 @@ class FloatInput(MDTextField):
         return super(FloatInput, self).insert_text(s, from_undo=from_undo)
 
 
+class PasswordForm(BoxLayout):
+
+    password = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(PasswordForm, self).__init__(**kwargs)
+
+
 class Send(BoxLayout):
 
+    password = StringProperty("")
+    send_to_address = StringProperty("")
+    send_amount = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super(Send, self).__init__(**kwargs)
+
     def verify_to_address_field(self):
-        send_to_address_id = self.ids.send_to_address_id
         title = "Input error"
         body = "Invalid address field"
         try:
-            normalize_address(send_to_address_id.text)
+            normalize_address(self.send_to_address)
         except Exception:
             dialog = Controller.create_dialog(title, body)
             dialog.open()
@@ -63,10 +80,9 @@ class Send(BoxLayout):
         return True
 
     def verify_amount_field(self):
-        send_amount_id = self.ids.send_amount_id
         title = "Input error"
         body = "Invalid amount field"
-        if float(send_amount_id) == 0:
+        if self.send_amount == 0:
             dialog = Controller.create_dialog(title, body)
             dialog.open()
             return False
@@ -79,34 +95,119 @@ class Send(BoxLayout):
         return self.verify_to_address_field() \
             and self.verify_amount_field()
 
+    def on_unlock_clicked(self, dialog, password):
+        self.password = password
+        dialog.dismiss()
+
+    @staticmethod
+    def show_invalid_form_dialog():
+        title = "Invalid form"
+        body = "Please check form fields."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    def prompt_password_dialog(self):
+        """
+        Prompt the password dialog.
+        """
+        title = "Enter your password"
+        content = PasswordForm()
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(250),
+                        auto_dismiss=False)
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
+        dialog.add_action_button(
+                "Unlock",
+                action=lambda *x: self.on_unlock_clicked(
+                    dialog, content.password))
+        return dialog
+
     def on_send_click(self):
-        # TODO
-        if self.verify_fields():
-            pass
-        Controller.show_not_implemented_dialog()
+        if not self.verify_fields():
+            Send.show_invalid_form_dialog()
+            return
+        dialog = self.prompt_password_dialog()
+        dialog.open()
+
+    @mainthread
+    def snackbar_message(self, text):
+        Snackbar(text=text).show()
+
+    def unlock_send_transaction(self):
+        """
+        Unlocks the account with password in order to sign and publish the
+        transaction.
+        """
+        controller = App.get_running_app().controller
+        pywalib = controller.pywalib
+        address = normalize_address(self.send_to_address)
+        amount_eth = self.send_amount
+        amount_wei = int(amount_eth * pow(10, 18))
+        account = controller.pywalib.get_main_account()
+        self.snackbar_message("Unlocking account...")
+        try:
+            account.unlock(self.password)
+        except ValueError:
+            self.snackbar_message("Could not unlock account")
+            return
+
+        self.snackbar_message("Unlocked! Sending transaction...")
+        sender = account.address
+        try:
+            pywalib.transact(address, value=amount_wei, data='', sender=sender)
+        except InsufficientFundsException:
+            self.snackbar_message("Insufficient funds")
+            return
+        except UnknownEtherscanException:
+            self.snackbar_message("Unknown error")
+            return
+        self.snackbar_message("Sent!")
+
+    def _start_unlock_send_transaction_thread(self):
+        """
+        Runs unlock_send_transaction() in a thread.
+        """
+        thread = Thread(target=self.unlock_send_transaction)
+        thread.start()
+
+    def on_password(self, instance, password):
+        self._start_unlock_send_transaction_thread()
 
 
 class Receive(BoxLayout):
 
+    current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
+
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
-        Clock.schedule_once(self._load_address_list)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Default state setup.
+        """
+        self.controller = App.get_running_app().controller
+        self.current_account = self.controller.pywalib.get_main_account()
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def _load_address_list(self, dt=None):
-        pywalib = App.get_running_app().controller.pywalib
-        account_list = pywalib.get_account_list()
-        address_list_id = self.ids.address_list_id
-        for account in account_list:
-            address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(
-                text=address, on_release=lambda x: self.show_address(x.text))
-            address_list_id.add_widget(item)
-        # by default select the first address
-        address = '0x' + account_list[0].address.encode("hex")
+    def on_current_account_string(self, instance, address):
         self.show_address(address)
+
+    def on_current_account(self, instance, account):
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
+
+    def open_account_list(self):
+        def on_selected_item(instance, value):
+            self.current_account = value.account
+        self.controller.open_account_list_helper(on_selected_item)
 
 
 class History(BoxLayout):
@@ -156,7 +257,6 @@ class History(BoxLayout):
     def _load_history(self):
         account = self.current_account
         address = '0x' + account.address.encode("hex")
-        print("History._load_history address:", address)
         try:
             transactions = PyWalib.get_transaction_history(address)
         except ConnectionError:
@@ -179,14 +279,15 @@ class History(BoxLayout):
 class Overview(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
-        self.ids.address_button_id.text = address
+        self.current_account_string = address
 
     def open_account_list(self):
         controller = App.get_running_app().controller
-        controller.open_account_list()
+        controller.open_account_list_overview()
 
 
 class PWSelectList(BoxLayout):
@@ -208,6 +309,76 @@ class PWSelectList(BoxLayout):
             address_list.add_widget(item)
 
 
+class ImportKeystore(BoxLayout):
+
+    keystore_path = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ImportKeystore, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.keystore_path = self.controller.get_keystore_path()
+        accounts = self.controller.pywalib.get_account_list()
+        if len(accounts) == 0:
+            title = "No keystore found."
+            body = "Import or create one."
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+
+
+class ManageKeystores(BoxLayout):
+
+    keystore_path = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ManageKeystores, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        pass
+
+
+class PWToolbar(Toolbar):
+
+    def __init__(self, **kwargs):
+        super(PWToolbar, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.navigation = self.controller.ids.navigation_id
+        self.screen_manager = self.controller.ids.screen_manager_id
+        self.load_default_navigation()
+
+    def load_default_navigation(self):
+        self.left_action_items = [
+            ['menu', lambda x: self.toggle_nav_drawer()]
+        ]
+        self.right_action_items = [
+            ['dots-vertical', lambda x: self.toggle_nav_drawer()]
+        ]
+
+    def toggle_nav_drawer(self):
+        self.navigation.toggle_nav_drawer()
+
+
+class About(BoxLayout):
+
+    project_page_property = StringProperty(
+        "https://github.com/AndreMiras/PyWallet")
+    about_text_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(About, self).__init__(**kwargs)
+        self.about_text_property = "" + \
+            "Project source code and info available on GitHub at: \n" + \
+            "[color=00BFFF][ref=github]" + \
+            self.project_page_property + \
+            "[/ref][/color]"
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty(None, allownone=True)
@@ -216,8 +387,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        # will trigger account data fetching
-        self.current_account = self.pywalib.get_main_account()
+        self.load_landing_page()
 
     @property
     def overview(self):
@@ -227,7 +397,7 @@ class Controller(FloatLayout):
     def history(self):
         return self.overview.ids.history_id
 
-    def open_account_list(self):
+    def open_account_list_helper(self, on_selected_item):
         title = "Select account"
         items = []
         pywalib = self.pywalib
@@ -237,12 +407,14 @@ class Controller(FloatLayout):
             item = OneLineListItem(text=address)
             item.account = account
             items.append(item)
-
-        def on_selected_item(instance, value):
-            self.set_current_account(value.account)
         dialog = Controller.create_list_dialog(
             title, items, on_selected_item)
         dialog.open()
+
+    def open_account_list_overview(self):
+        def on_selected_item(instance, value):
+            self.set_current_account(value.account)
+        self.open_account_list_helper(on_selected_item)
 
     def set_current_account(self, account):
         self.current_account = account
@@ -346,14 +518,17 @@ class Controller(FloatLayout):
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
 
-    def _load_landing_page(self, dt=None):
+    def load_landing_page(self):
         """
         Loads the landing page.
         """
         try:
-            self._load_balance()
+            # will trigger account data fetching
+            self.current_account = self.pywalib.get_main_account()
+            self.ids.screen_manager_id.current = "overview"
+            self.ids.screen_manager_id.transition.direction = "right"
         except IndexError:
-            self._load_manage_keystores()
+            self.load_manage_keystores()
 
     def _load_balance(self):
         account = self.current_account
@@ -371,11 +546,19 @@ class Controller(FloatLayout):
         load_balance_thread = Thread(target=self._load_balance)
         load_balance_thread.start()
 
-    def _load_manage_keystores(self):
+    def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """
+        self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
+
+    def load_about_screen(self):
+        """
+        Loads the about screen.
+        """
+        self.ids.screen_manager_id.transition.direction = "left"
+        self.ids.screen_manager_id.current = "about"
 
 
 class ControllerApp(App):

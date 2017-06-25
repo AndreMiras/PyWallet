@@ -11,9 +11,9 @@ Cross platform Ethereum Wallet built with Python and Kivy.
   * Show balance
   * Show transaction history
   * Receive Ethers via QR code
-  * Send Ethers (TODO)
+  * Send Ethers
   * Handle multiple keystores
-  * Manage wallets (TODO)
+  * Manage keystores (TODO)
 
 ## Run
 
@@ -37,4 +37,4 @@ sudo apt install zlib1g-dev default-jdk
 ## Documentation
 
 * Miscellaneous documentation in the [docs](docs/) directory
-* Recipes documentation in the [python-for-android](python-for-android/) directory
+* Recipes documentation in the [python-for-android](src/python-for-android/) directory
