@@ -21,7 +21,7 @@
             on_release: app.controller.load_landing_page()
         NavigationDrawerIconButton:
             icon: "key"
-            text: "Keystores"
+            text: "Keystore"
             on_release: app.controller.load_manage_keystores()
         NavigationDrawerIconButton:
             icon: "help"
@@ -121,6 +121,28 @@
         text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
 
 
+<CreateNewAccount@BoxLayout>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "Create new account"
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the for encrypting your new account"
+        helper_text_mode: "on_focus"
+        # text: root.password
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        # text: root.password
+    # push widgets up
+    BoxLayout:
+
+
+
 <ManageExisting@BoxLayout>:
     orientation: 'vertical'
     MDLabel:
@@ -130,20 +152,26 @@
         text: "Manage existing"
 
 
-<ManageKeystores>:
+<ManageKeystore>:
     orientation: 'vertical'
     MDBottomNavigation:
         id: bottom_navigation_id
         MDBottomNavigationItem:
             name: "import_keystore"
             text: "Import"
-            icon: 'format-list-bulleted'
+            icon: "download"
             ImportKeystore:
         MDBottomNavigationItem:
             name: "manage_existing"
             text: "Manage"
             icon: 'format-list-bulleted'
             ManageExisting:
+        MDBottomNavigationItem:
+            name: "create_new"
+            text: "Create new"
+            icon: "plus"
+            CreateNewAccount:
+
 
 
 <About@BoxLayout>:
@@ -204,7 +232,7 @@
                                 id: receive_id
                 Screen:
                     name: 'manage_keystores'
-                    ManageKeystores:
+                    ManageKeystore:
                         id: manage_keystores_id
                 Screen:
                     name: 'about'

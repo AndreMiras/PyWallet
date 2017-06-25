@@ -328,12 +328,12 @@ class ImportKeystore(BoxLayout):
             dialog.open()
 
 
-class ManageKeystores(BoxLayout):
+class ManageKeystore(BoxLayout):
 
     keystore_path = StringProperty()
 
     def __init__(self, **kwargs):
-        super(ManageKeystores, self).__init__(**kwargs)
+        super(ManageKeystore, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
