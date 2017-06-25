@@ -3,8 +3,10 @@
  * other way to broadcast transaction:
    * https://etherscan.io/pushTx
    * https://github.com/corpetty/py-etherscan-api
- * use the test net
+ * Test
+   * use the test net
    * pylint
+   * unit test account creation with different iterations
  * Automate / Document dev requirements
    * Automate VM or Docker
    * https://developer.android.com/studio/run/device.html
