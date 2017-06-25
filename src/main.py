@@ -340,6 +340,25 @@ class ManageKeystore(BoxLayout):
         pass
 
 
+class CreateNewAccount(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(CreateNewAccount, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Sets security vs speed default values.
+        """
+        self.security_slider = self.ids.security_slider_id
+        self.speed_slider = self.ids.speed_slider_id
+        self.security_slider.value = self.speed_slider.value = 5
+
+    @property
+    def security_slider_value(self):
+        return self.security_slider.value
+
+
 class PWToolbar(Toolbar):
 
     def __init__(self, **kwargs):
