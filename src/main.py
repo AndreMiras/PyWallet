@@ -341,6 +341,12 @@ class ManageKeystore(BoxLayout):
 
 
 class CreateNewAccount(BoxLayout):
+    """
+    PBKDF2 iterations choice is a security vs speed trade off:
+    https://security.stackexchange.com/q/3959
+    """
+
+    password = StringProperty()
 
     def __init__(self, **kwargs):
         super(CreateNewAccount, self).__init__(**kwargs)
@@ -352,11 +358,21 @@ class CreateNewAccount(BoxLayout):
         """
         self.security_slider = self.ids.security_slider_id
         self.speed_slider = self.ids.speed_slider_id
-        self.security_slider.value = self.speed_slider.value = 5
+        self.security_slider.value = self.speed_slider.value = 50
+        self.controller = App.get_running_app().controller
 
     @property
     def security_slider_value(self):
         return self.security_slider.value
+
+    def create_account(self):
+        # TODO: perform validation (password match)
+        pywalib = self.controller.pywalib
+        password = self.password
+        security_ratio = self.security_slider_value
+        account = pywalib.new_account(
+                password=password, security_ratio=security_ratio)
+        return account
 
 
 class PWToolbar(Toolbar):
