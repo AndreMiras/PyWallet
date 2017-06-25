@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170625]
 
   - Address selection widget fixes
   - Send transaction through Etherscan, refs #21
