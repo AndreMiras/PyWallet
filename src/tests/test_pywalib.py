@@ -59,7 +59,8 @@ class PywalibTestCase(unittest.TestCase):
         self.assertFalse(account.locked)
         new_password = "new_password"
         # on unlocked account the current_password is optional
-        pywalib.update_account_password(account, new_password, current_password=None)
+        pywalib.update_account_password(
+            account, new_password, current_password=None)
         # verify it worked
         account.lock()
         account.unlock(new_password)
@@ -68,9 +69,11 @@ class PywalibTestCase(unittest.TestCase):
         account.lock()
         current_password = "wrong password"
         with self.assertRaises(ValueError):
-            pywalib.update_account_password(account, new_password, current_password)
+            pywalib.update_account_password(
+                account, new_password, current_password)
         current_password = new_password
-        pywalib.update_account_password(account, new_password, current_password)
+        pywalib.update_account_password(
+            account, new_password, current_password)
         self.assertFalse(account.locked)
 
 

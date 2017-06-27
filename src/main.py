@@ -352,7 +352,6 @@ class ManageExisting(BoxLayout):
         try:
             account.unlock(password)
         except ValueError:
-            title = "Unlock error"
             return False
         return True
 
@@ -367,7 +366,7 @@ class ManageExisting(BoxLayout):
         Verifies password fields are valid.
         """
         return (self.verify_password_field()
-            and self.verify_current_password_field())
+                and self.verify_current_password_field())
 
     def try_unlock(self, account, password):
         """

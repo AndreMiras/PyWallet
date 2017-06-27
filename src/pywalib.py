@@ -226,7 +226,7 @@ class PyWalib(object):
         return account
 
     def update_account_password(
-        self, account, new_password, current_password=None):
+            self, account, new_password, current_password=None):
         """
         The current_password is optional if the account is already unlocked.
         """
