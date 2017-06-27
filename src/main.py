@@ -99,13 +99,6 @@ class Send(BoxLayout):
         self.password = password
         dialog.dismiss()
 
-    @staticmethod
-    def show_invalid_form_dialog():
-        title = "Invalid form"
-        body = "Please check form fields."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
     def prompt_password_dialog(self):
         """
         Prompt the password dialog.
@@ -128,7 +121,7 @@ class Send(BoxLayout):
 
     def on_send_click(self):
         if not self.verify_fields():
-            Send.show_invalid_form_dialog()
+            Controller.show_invalid_form_dialog()
             return
         dialog = self.prompt_password_dialog()
         dialog.open()
@@ -346,7 +339,8 @@ class CreateNewAccount(BoxLayout):
     https://security.stackexchange.com/q/3959
     """
 
-    password = StringProperty()
+    password1 = StringProperty()
+    password2 = StringProperty()
 
     def __init__(self, **kwargs):
         super(CreateNewAccount, self).__init__(**kwargs)
@@ -361,14 +355,30 @@ class CreateNewAccount(BoxLayout):
         self.security_slider.value = self.speed_slider.value = 50
         self.controller = App.get_running_app().controller
 
+    def verify_password_field(self):
+        """
+        Makes sure passwords are matching.
+        """
+        # if self.password1 != self.password2:
+        #     raise ValueError("Password not matching")
+        return self.password1 == self.password2
+
+    def verify_fields(self):
+        """
+        Verifies password fields are valid.
+        """
+        return self.verify_password_field()
+
     @property
     def security_slider_value(self):
         return self.security_slider.value
 
     def create_account(self):
-        # TODO: perform validation (password match)
+        if not self.verify_fields():
+            Controller.show_invalid_form_dialog()
+            return
         pywalib = self.controller.pywalib
-        password = self.password
+        password = self.password1
         security_ratio = self.security_slider_value
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
@@ -462,6 +472,13 @@ class Controller(FloatLayout):
         self.overview.current_account = value
         self.history.current_account = value
         self._start_load_balance_thread()
+
+    @staticmethod
+    def show_invalid_form_dialog():
+        title = "Invalid form"
+        body = "Please check form fields."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
 
     @staticmethod
     def get_keystore_path():

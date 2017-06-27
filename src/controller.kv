@@ -134,14 +134,16 @@
         helper_text: "Enter the for encrypting your new account"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password
+        text: root.password1
+        on_text: root.password1 = args[1]
     MDTextField:
         # TODO: do validation as we type
         hint_text: "Password (again)"
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
-        # text: root.password
+        text: root.password2
+        on_text: root.password2 = args[1]
     MDLabel:
         text: "Security: %s%%" % int(security_slider_id.value)
     MDSlider:
