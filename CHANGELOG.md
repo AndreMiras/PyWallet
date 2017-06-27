@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Create new account, refs #9
+
 ## [v20170625]
 
   - Address selection widget fixes
