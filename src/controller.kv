@@ -2,6 +2,7 @@
 
 #:import webbrowser webbrowser
 #:import MDList kivymd.list.MDList
+#:import MDSlider kivymd.slider.MDSlider
 #:import MDTextField kivymd.textfields.MDTextField
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import QRCodeWidget kivy.garden.qrcode
@@ -21,7 +22,7 @@
             on_release: app.controller.load_landing_page()
         NavigationDrawerIconButton:
             icon: "key"
-            text: "Keystores"
+            text: "Keystore"
             on_release: app.controller.load_manage_keystores()
         NavigationDrawerIconButton:
             icon: "help"
@@ -121,6 +122,54 @@
         text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
 
 
+<CreateNewAccount>:
+    orientation: 'vertical'
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "Create new account"
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.password1
+        on_text: root.password1 = args[1]
+    MDTextField:
+        # TODO: do validation as we type
+        hint_text: "Password (again)"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.password2
+        on_text: root.password2 = args[1]
+    MDLabel:
+        text: "Security: %s%%" % int(security_slider_id.value)
+    MDSlider:
+        id: security_slider_id
+        min: 0
+        max: 100
+        value: max(self.max - speed_slider_id.value, 1)
+        step: 1
+    MDLabel:
+        text: "Speed: %s%%" % int(speed_slider_id.value)
+    MDSlider:
+        id: speed_slider_id
+        min: security_slider_id.min
+        max: security_slider_id.max
+        step: security_slider_id.step
+        value: max(self.max - security_slider_id.value, 1)
+    MDRaisedButton:
+        # TODO: center on x
+        id: create_account_button_id
+        text: "Create account"
+        on_release: root.start_create_account_thread()
+    # push widgets up
+    BoxLayout:
+
+
+
 <ManageExisting@BoxLayout>:
     orientation: 'vertical'
     MDLabel:
@@ -130,20 +179,26 @@
         text: "Manage existing"
 
 
-<ManageKeystores>:
+<ManageKeystore>:
     orientation: 'vertical'
     MDBottomNavigation:
         id: bottom_navigation_id
         MDBottomNavigationItem:
             name: "import_keystore"
             text: "Import"
-            icon: 'format-list-bulleted'
+            icon: "download"
             ImportKeystore:
         MDBottomNavigationItem:
             name: "manage_existing"
             text: "Manage"
             icon: 'format-list-bulleted'
             ManageExisting:
+        MDBottomNavigationItem:
+            name: "create_new"
+            text: "Create new"
+            icon: "plus"
+            CreateNewAccount:
+
 
 
 <About@BoxLayout>:
@@ -204,7 +259,7 @@
                                 id: receive_id
                 Screen:
                     name: 'manage_keystores'
-                    ManageKeystores:
+                    ManageKeystore:
                         id: manage_keystores_id
                 Screen:
                     name: 'about'

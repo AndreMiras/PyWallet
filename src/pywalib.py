@@ -8,6 +8,7 @@ from os.path import expanduser
 import requests
 import rlp
 from devp2p.app import BaseApp
+from ethereum.tools.keys import PBKDF2_CONSTANTS
 from ethereum.transactions import Transaction
 from ethereum.utils import denoms, normalize_address
 from pyethapp.accounts import Account, AccountsService
@@ -15,11 +16,15 @@ from pyethapp.accounts import Account, AccountsService
 ETHERSCAN_API_KEY = None
 
 
-class InsufficientFundsException(Exception):
+class UnknownEtherscanException(Exception):
     pass
 
 
-class UnknownEtherscanException(Exception):
+class InsufficientFundsException(UnknownEtherscanException):
+    pass
+
+
+class NoTransactionFoundException(UnknownEtherscanException):
     pass
 
 
@@ -39,7 +44,11 @@ class PyWalib(object):
         """
         status = response_json["status"]
         message = response_json["message"]
-        assert status == "1"
+        if status != "1":
+            if message == "No transactions found":
+                raise NoTransactionFoundException()
+            else:
+                raise UnknownEtherscanException(response_json)
         assert message == "OK"
 
     @staticmethod
@@ -184,11 +193,37 @@ class PyWalib(object):
         return tx
 
     @staticmethod
-    def new_account(password):
+    def new_account_helper(password, security_ratio=None):
+        """
+        Helper method for creating an account in memory.
+        Returns the created account.
+        security_ratio is a ratio of the default PBKDF2 iterations.
+        Ranging from 1 to 100 means 100% of the iterations.
+        """
+        # TODO: perform validation on security_ratio (within allowed range)
+        if security_ratio:
+            previous_iterations = PBKDF2_CONSTANTS["c"]
+            new_iterations = int((previous_iterations * security_ratio) / 100)
+            PBKDF2_CONSTANTS["c"] = new_iterations
         uuid = None
-        print("pyethapp Account.new")
         account = Account.new(password, uuid=uuid)
-        print("Address: ", account.address.encode('hex'))
+        # reverts to previous iterations
+        if security_ratio:
+            PBKDF2_CONSTANTS["c"] = previous_iterations
+        return account
+
+    def new_account(self, password, security_ratio=None):
+        """
+        Creates an account on the disk and returns it.
+        security_ratio is a ratio of the default PBKDF2 iterations.
+        Ranging from 1 to 100 means 100% of the iterations.
+        """
+        account = PyWalib.new_account_helper(password, security_ratio)
+        app = self.app
+        account.path = os.path.join(
+            app.services.accounts.keystore_dir, account.address.encode('hex'))
+        self.app.services.accounts.add_account(account)
+        return account
 
     @staticmethod
     def get_default_keystore_path():

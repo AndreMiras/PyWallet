@@ -25,8 +25,8 @@ from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
-from pywalib import (InsufficientFundsException, PyWalib,
-                     UnknownEtherscanException)
+from pywalib import (InsufficientFundsException, NoTransactionFoundException,
+                     PyWalib, UnknownEtherscanException)
 
 kivy.require('1.10.0')
 
@@ -99,13 +99,6 @@ class Send(BoxLayout):
         self.password = password
         dialog.dismiss()
 
-    @staticmethod
-    def show_invalid_form_dialog():
-        title = "Invalid form"
-        body = "Please check form fields."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
     def prompt_password_dialog(self):
         """
         Prompt the password dialog.
@@ -128,14 +121,10 @@ class Send(BoxLayout):
 
     def on_send_click(self):
         if not self.verify_fields():
-            Send.show_invalid_form_dialog()
+            Controller.show_invalid_form_dialog()
             return
         dialog = self.prompt_password_dialog()
         dialog.open()
-
-    @mainthread
-    def snackbar_message(self, text):
-        Snackbar(text=text).show()
 
     def unlock_send_transaction(self):
         """
@@ -148,24 +137,24 @@ class Send(BoxLayout):
         amount_eth = self.send_amount
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
-        self.snackbar_message("Unlocking account...")
+        Controller.snackbar_message("Unlocking account...")
         try:
             account.unlock(self.password)
         except ValueError:
-            self.snackbar_message("Could not unlock account")
+            Controller.snackbar_message("Could not unlock account")
             return
 
-        self.snackbar_message("Unlocked! Sending transaction...")
+        Controller.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
         try:
             pywalib.transact(address, value=amount_wei, data='', sender=sender)
         except InsufficientFundsException:
-            self.snackbar_message("Insufficient funds")
+            Controller.snackbar_message("Insufficient funds")
             return
         except UnknownEtherscanException:
-            self.snackbar_message("Unknown error")
+            Controller.snackbar_message("Unknown error")
             return
-        self.snackbar_message("Sent!")
+        Controller.snackbar_message("Sent!")
 
     def _start_unlock_send_transaction_thread(self):
         """
@@ -262,6 +251,8 @@ class History(BoxLayout):
         except ConnectionError:
             Controller.on_history_connection_error()
             return
+        except NoTransactionFoundException:
+            transactions = []
         list_items = []
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
@@ -328,16 +319,101 @@ class ImportKeystore(BoxLayout):
             dialog.open()
 
 
-class ManageKeystores(BoxLayout):
+class ManageKeystore(BoxLayout):
 
     keystore_path = StringProperty()
 
     def __init__(self, **kwargs):
-        super(ManageKeystores, self).__init__(**kwargs)
+        super(ManageKeystore, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
         pass
+
+
+class CreateNewAccount(BoxLayout):
+    """
+    PBKDF2 iterations choice is a security vs speed trade off:
+    https://security.stackexchange.com/q/3959
+    """
+
+    password1 = StringProperty()
+    password2 = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(CreateNewAccount, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Sets security vs speed default values.
+        """
+        self.security_slider = self.ids.security_slider_id
+        self.speed_slider = self.ids.speed_slider_id
+        self.security_slider.value = self.speed_slider.value = 50
+        self.controller = App.get_running_app().controller
+
+    def verify_password_field(self):
+        """
+        Makes sure passwords are matching.
+        """
+        # if self.password1 != self.password2:
+        #     raise ValueError("Password not matching")
+        return self.password1 == self.password2
+
+    def verify_fields(self):
+        """
+        Verifies password fields are valid.
+        """
+        return self.verify_password_field()
+
+    @property
+    def security_slider_value(self):
+        return self.security_slider.value
+
+    def try_unlock(self, account, password):
+        """
+        Just as a security measure, verifies we can unlock
+        the newly created account with provided password.
+        """
+        # making sure it's locked first
+        account.lock()
+        Controller.snackbar_message("Unlocking account...")
+        try:
+            account.unlock(password)
+        except ValueError:
+            title = "Unlock error"
+            body = ""
+            body += "Couldn't unlock your account.\n"
+            body += "The issue should be reported."
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+            return
+        Controller.snackbar_message("Unlocked!")
+
+    def create_account(self):
+        """
+        Creates an account from provided form.
+        Verify we can unlock it.
+        """
+        if not self.verify_fields():
+            Controller.show_invalid_form_dialog()
+            return
+        pywalib = self.controller.pywalib
+        password = self.password1
+        security_ratio = self.security_slider_value
+        Controller.snackbar_message("Creating account...")
+        account = pywalib.new_account(
+                password=password, security_ratio=security_ratio)
+        self.try_unlock(account, password)
+        return account
+
+    def start_create_account_thread(self):
+        """
+        Runs create_account() in a thread.
+        """
+        load_balance_thread = Thread(target=self.create_account)
+        load_balance_thread.start()
 
 
 class PWToolbar(Toolbar):
@@ -429,6 +505,13 @@ class Controller(FloatLayout):
         self._start_load_balance_thread()
 
     @staticmethod
+    def show_invalid_form_dialog():
+        title = "Invalid form"
+        body = "Please check form fields."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
     def get_keystore_path():
         """
         This is the Kivy default keystore path.
@@ -517,6 +600,11 @@ class Controller(FloatLayout):
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
+
+    @staticmethod
+    @mainthread
+    def snackbar_message(text):
+        Snackbar(text=text).show()
 
     def load_landing_page(self):
         """
