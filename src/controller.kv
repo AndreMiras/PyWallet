@@ -132,19 +132,19 @@
         text: "Create new account"
     MDTextField:
         hint_text: "Password"
-        helper_text: "Enter the for encrypting your new account"
+        helper_text: "Enter the password for encrypting your new account"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password1
-        on_text: root.password1 = args[1]
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
     MDTextField:
         # TODO: do validation as we type
         hint_text: "Password (again)"
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password2
-        on_text: root.password2 = args[1]
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
     MDLabel:
         text: "Security: %s%%" % int(security_slider_id.value)
     MDSlider:
@@ -183,20 +183,27 @@
         text: root.current_account_string
         on_release: root.open_account_list()
     MDTextField:
-        hint_text: "Password"
-        helper_text: "Enter the for encrypting your new account"
+        hint_text: "Current password"
+        helper_text: "Enter your current password for unlocking your account"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password1
-        on_text: root.password1 = args[1]
+        text: root.current_password
+        on_text: root.current_password = args[1]
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the password for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
     MDTextField:
         # TODO: do validation as we type
         hint_text: "Password (again)"
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password2
-        on_text: root.password2 = args[1]
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
     BoxLayout:
         orientation: 'horizontal'
         padding: dp(4), dp(4)
