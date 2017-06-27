@@ -126,10 +126,6 @@ class Send(BoxLayout):
         dialog = self.prompt_password_dialog()
         dialog.open()
 
-    @mainthread
-    def snackbar_message(self, text):
-        Snackbar(text=text).show()
-
     def unlock_send_transaction(self):
         """
         Unlocks the account with password in order to sign and publish the
@@ -141,24 +137,24 @@ class Send(BoxLayout):
         amount_eth = self.send_amount
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
-        self.snackbar_message("Unlocking account...")
+        Controller.snackbar_message("Unlocking account...")
         try:
             account.unlock(self.password)
         except ValueError:
-            self.snackbar_message("Could not unlock account")
+            Controller.snackbar_message("Could not unlock account")
             return
 
-        self.snackbar_message("Unlocked! Sending transaction...")
+        Controller.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
         try:
             pywalib.transact(address, value=amount_wei, data='', sender=sender)
         except InsufficientFundsException:
-            self.snackbar_message("Insufficient funds")
+            Controller.snackbar_message("Insufficient funds")
             return
         except UnknownEtherscanException:
-            self.snackbar_message("Unknown error")
+            Controller.snackbar_message("Unknown error")
             return
-        self.snackbar_message("Sent!")
+        Controller.snackbar_message("Sent!")
 
     def _start_unlock_send_transaction_thread(self):
         """
@@ -375,16 +371,49 @@ class CreateNewAccount(BoxLayout):
     def security_slider_value(self):
         return self.security_slider.value
 
+    def try_unlock(self, account, password):
+        """
+        Just as a security measure, verifies we can unlock
+        the newly created account with provided password.
+        """
+        # making sure it's locked first
+        account.lock()
+        Controller.snackbar_message("Unlocking account...")
+        try:
+            account.unlock(password)
+        except ValueError:
+            title = "Unlock error"
+            body = ""
+            body += "Couldn't unlock your account.\n"
+            body += "The issue should be reported."
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+            return
+        Controller.snackbar_message("Unlocked!")
+
     def create_account(self):
+        """
+        Creates an account from provided form.
+        Verify we can unlock it.
+        """
         if not self.verify_fields():
             Controller.show_invalid_form_dialog()
             return
         pywalib = self.controller.pywalib
         password = self.password1
         security_ratio = self.security_slider_value
+        Controller.snackbar_message("Creating account...")
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
+        self.try_unlock(account, password)
         return account
+
+    def start_create_account_thread(self):
+        """
+        Runs create_account() in a thread.
+        """
+        load_balance_thread = Thread(target=self.create_account)
+        load_balance_thread.start()
 
 
 class PWToolbar(Toolbar):
@@ -571,6 +600,11 @@ class Controller(FloatLayout):
         overview_id = self.ids.overview_id
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
+
+    @staticmethod
+    @mainthread
+    def snackbar_message(text):
+        Snackbar(text=text).show()
 
     def load_landing_page(self):
         """
