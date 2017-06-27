@@ -202,14 +202,14 @@ class PyWalib(object):
         """
         # TODO: perform validation on security_ratio (within allowed range)
         if security_ratio:
-            previous_iterations = PBKDF2_CONSTANTS["c"]
-            new_iterations = int((previous_iterations * security_ratio) / 100)
+            default_iterations = PBKDF2_CONSTANTS["c"]
+            new_iterations = int((default_iterations * security_ratio) / 100)
             PBKDF2_CONSTANTS["c"] = new_iterations
         uuid = None
         account = Account.new(password, uuid=uuid)
         # reverts to previous iterations
         if security_ratio:
-            PBKDF2_CONSTANTS["c"] = previous_iterations
+            PBKDF2_CONSTANTS["c"] = default_iterations
         return account
 
     def new_account(self, password, security_ratio=None):
@@ -224,6 +224,21 @@ class PyWalib(object):
             app.services.accounts.keystore_dir, account.address.encode('hex'))
         self.app.services.accounts.add_account(account)
         return account
+
+    def new_account_password(
+        self, account, new_password, current_password=None):
+        """
+        The current_password is optional if the account is already unlocked.
+        """
+        if current_password is not None:
+            account.unlock(current_password)
+        # make sure the PBKDF2 param stays the same
+        default_iterations = PBKDF2_CONSTANTS["c"]
+        account_iterations = account.keystore["crypto"]["kdfparams"]["c"]
+        PBKDF2_CONSTANTS["c"] = account_iterations
+        self.app.services.accounts.update_account(account, new_password)
+        # reverts to previous iterations
+        PBKDF2_CONSTANTS["c"] = default_iterations
 
     @staticmethod
     def get_default_keystore_path():

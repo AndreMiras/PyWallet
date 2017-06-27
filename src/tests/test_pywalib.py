@@ -46,6 +46,33 @@ class PywalibTestCase(unittest.TestCase):
         account.unlock(password)
         self.assertFalse(account.locked)
 
+    def test_new_account_password(self):
+        """
+        Verifies updating account password works.
+        """
+        pywalib = PyWalib(PywalibTestCase.keystore_dir)
+        current_password = "password"
+        # weak account, but fast creation
+        security_ratio = 1
+        account = pywalib.new_account(current_password, security_ratio)
+        # first try when the account is already unlocked
+        self.assertFalse(account.locked)
+        new_password = "new_password"
+        # on unlocked account the current_password is optional
+        pywalib.new_account_password(account, new_password, current_password=None)
+        # verify it worked
+        account.lock()
+        account.unlock(new_password)
+        self.assertFalse(account.locked)
+        # now try when the account is first locked
+        account.lock()
+        current_password = "wrong password"
+        with self.assertRaises(ValueError):
+            pywalib.new_account_password(account, new_password, current_password)
+        current_password = new_password
+        pywalib.new_account_password(account, new_password, current_password)
+        self.assertFalse(account.locked)
+
 
 if __name__ == '__main__':
     unittest.main()
