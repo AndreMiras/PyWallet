@@ -16,11 +16,15 @@ from pyethapp.accounts import Account, AccountsService
 ETHERSCAN_API_KEY = None
 
 
-class InsufficientFundsException(Exception):
+class UnknownEtherscanException(Exception):
     pass
 
 
-class UnknownEtherscanException(Exception):
+class InsufficientFundsException(UnknownEtherscanException):
+    pass
+
+
+class NoTransactionFoundException(UnknownEtherscanException):
     pass
 
 
@@ -40,7 +44,11 @@ class PyWalib(object):
         """
         status = response_json["status"]
         message = response_json["message"]
-        assert status == "1"
+        if status != "1":
+            if message == "No transactions found":
+                raise NoTransactionFoundException()
+            else:
+                raise UnknownEtherscanException(response_json)
         assert message == "OK"
 
     @staticmethod

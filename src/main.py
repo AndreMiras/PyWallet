@@ -25,8 +25,8 @@ from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
-from pywalib import (InsufficientFundsException, PyWalib,
-                     UnknownEtherscanException)
+from pywalib import (InsufficientFundsException, NoTransactionFoundException,
+                     PyWalib, UnknownEtherscanException)
 
 kivy.require('1.10.0')
 
@@ -255,6 +255,8 @@ class History(BoxLayout):
         except ConnectionError:
             Controller.on_history_connection_error()
             return
+        except NoTransactionFoundException:
+            transactions = []
         list_items = []
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
