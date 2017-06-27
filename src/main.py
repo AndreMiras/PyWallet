@@ -319,6 +319,112 @@ class ImportKeystore(BoxLayout):
             dialog.open()
 
 
+# TODO: also make it possible to update PBKDF2
+# TODO: create a generic password form
+# TODO: create a generic account form
+class ManageExisting(BoxLayout):
+
+    current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
+    current_password = StringProperty()
+    new_password1 = StringProperty()
+    new_password2 = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ManageExisting, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Default state setup.
+        """
+        self.controller = App.get_running_app().controller
+        self.current_account = self.controller.pywalib.get_main_account()
+
+    def verify_current_password_field(self):
+        """
+        Makes sure passwords are matching.
+        """
+        account = self.current_account
+        password = self.current_password
+        # making sure it's locked first
+        account.lock()
+        try:
+            account.unlock(password)
+        except ValueError:
+            return False
+        return True
+
+    def verify_password_field(self):
+        """
+        Makes sure passwords are matching.
+        """
+        return self.new_password1 == self.new_password2
+
+    def verify_fields(self):
+        """
+        Verifies password fields are valid.
+        """
+        return (self.verify_password_field()
+                and self.verify_current_password_field())
+
+    def try_unlock(self, account, password):
+        """
+        Just as a security measure, verifies we can unlock
+        the newly created account with provided password.
+        """
+        # making sure it's locked first
+        account.lock()
+        Controller.snackbar_message("Unlocking account...")
+        try:
+            account.unlock(password)
+        except ValueError:
+            title = "Unlock error"
+            body = ""
+            body += "Couldn't unlock your account.\n"
+            body += "The issue should be reported."
+            dialog = Controller.create_dialog(title, body)
+            dialog.open()
+            return
+        Controller.snackbar_message("Unlocked!")
+
+    def delete_account(self):
+        """
+        Not yet implemented.
+        """
+        Controller.show_not_implemented_dialog()
+
+    def update_password(self):
+        """
+        Update account password with new password provided.
+        """
+        if not self.verify_fields():
+            Controller.show_invalid_form_dialog()
+            return
+        pywalib = self.controller.pywalib
+        account = self.current_account
+        new_password = self.new_password1
+        Controller.snackbar_message("Updating account...")
+        pywalib.update_account_password(account, new_password=new_password)
+        Controller.snackbar_message("Updated!")
+
+    def start_update_password_thread(self):
+        """
+        Runs update_password() in a thread.
+        """
+        thread = Thread(target=self.update_password)
+        thread.start()
+
+    def on_current_account(self, instance, account):
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
+
+    def open_account_list(self):
+        def on_selected_item(instance, value):
+            self.current_account = value.account
+        self.controller.open_account_list_helper(on_selected_item)
+
+
 class ManageKeystore(BoxLayout):
 
     keystore_path = StringProperty()
@@ -337,8 +443,8 @@ class CreateNewAccount(BoxLayout):
     https://security.stackexchange.com/q/3959
     """
 
-    password1 = StringProperty()
-    password2 = StringProperty()
+    new_password1 = StringProperty()
+    new_password2 = StringProperty()
 
     def __init__(self, **kwargs):
         super(CreateNewAccount, self).__init__(**kwargs)
@@ -357,9 +463,7 @@ class CreateNewAccount(BoxLayout):
         """
         Makes sure passwords are matching.
         """
-        # if self.password1 != self.password2:
-        #     raise ValueError("Password not matching")
-        return self.password1 == self.password2
+        return self.new_password1 == self.new_password2
 
     def verify_fields(self):
         """
@@ -400,7 +504,7 @@ class CreateNewAccount(BoxLayout):
             Controller.show_invalid_form_dialog()
             return
         pywalib = self.controller.pywalib
-        password = self.password1
+        password = self.new_password1
         security_ratio = self.security_slider_value
         Controller.snackbar_message("Creating account...")
         account = pywalib.new_account(

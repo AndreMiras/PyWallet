@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Create new account, refs #9
+  - Manage account password, refs #9
 
 ## [v20170625]
 

@@ -11,6 +11,10 @@
 #:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
 
 
+<PushUp@BoxLayout>:
+    # need this hack to push widgets up
+    id: push_up
+
 <Navigation@NavigationLayout>:
     MDNavigationDrawer:
         id: navigation_drawer
@@ -69,11 +73,10 @@
         pos_hint: {'center_x': 0.5}
         text: "Send"
         on_release: self.parent.on_send_click()
-    # hack for pushing the Send widget up
-    BoxLayout:
+    PushUp:
 
 
-<Receive@BoxLayout>:
+<Receive>:
     orientation: 'vertical'
     MDFlatButton:
         pos_hint: {'center_x': 0.5, 'top': 1}
@@ -114,12 +117,11 @@
     MDLabel:
         font_style: 'Display1'
         halign: 'center'
-        valign: 'middle'
         text: "Import keystore"
     MDLabel:
         halign: 'center'
-        valign: 'middle'
         text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
+    PushUp:
 
 
 <CreateNewAccount>:
@@ -127,23 +129,22 @@
     MDLabel:
         font_style: 'Display1'
         halign: 'center'
-        valign: 'middle'
         text: "Create new account"
     MDTextField:
         hint_text: "Password"
-        helper_text: "Enter the for encrypting your new account"
+        helper_text: "Enter the password for encrypting your new account"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password1
-        on_text: root.password1 = args[1]
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
     MDTextField:
         # TODO: do validation as we type
         hint_text: "Password (again)"
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
-        text: root.password2
-        on_text: root.password2 = args[1]
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
     MDLabel:
         text: "Security: %s%%" % int(security_slider_id.value)
     MDSlider:
@@ -165,8 +166,7 @@
         id: create_account_button_id
         text: "Create account"
         on_release: root.start_create_account_thread()
-    # push widgets up
-    BoxLayout:
+    PushUp:
 
 
 
@@ -177,17 +177,50 @@
         halign: 'center'
         valign: 'middle'
         text: "Manage existing"
+    MDFlatButton:
+        # pos_hint: {'center_x': 0.5, 'top': 1}
+        # size_hint: None, None
+        text: root.current_account_string
+        on_release: root.open_account_list()
+    MDTextField:
+        hint_text: "Current password"
+        helper_text: "Enter your current password for unlocking your account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.current_password
+        on_text: root.current_password = args[1]
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the password for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
+    MDTextField:
+        # TODO: do validation as we type
+        hint_text: "Password (again)"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: dp(4), dp(4)
+        spacing: dp(40)
+        MDRaisedButton:
+            text: "Update password"
+            on_release: root.start_update_password_thread()
+        MDRaisedButton:
+            text: "Delete account"
+            on_release: root.delete_account()
+    PushUp:
 
 
 <ManageKeystore>:
     orientation: 'vertical'
     MDBottomNavigation:
         id: bottom_navigation_id
-        MDBottomNavigationItem:
-            name: "import_keystore"
-            text: "Import"
-            icon: "download"
-            ImportKeystore:
         MDBottomNavigationItem:
             name: "manage_existing"
             text: "Manage"
@@ -198,10 +231,15 @@
             text: "Create new"
             icon: "plus"
             CreateNewAccount:
+        MDBottomNavigationItem:
+            name: "import_keystore"
+            text: "Import"
+            icon: "download"
+            ImportKeystore:
 
 
 
-<About@BoxLayout>:
+<About>:
     orientation: 'vertical'
     ScrollView:
         BoxLayout:
