@@ -409,6 +409,13 @@ class ManageExisting(BoxLayout):
         pywalib.update_account_password(account, new_password=new_password)
         Controller.snackbar_message("Updated!")
 
+    def start_update_password_thread(self):
+        """
+        Runs update_password() in a thread.
+        """
+        thread = Thread(target=self.update_password)
+        thread.start()
+
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
