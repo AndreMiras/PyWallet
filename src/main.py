@@ -319,6 +319,32 @@ class ImportKeystore(BoxLayout):
             dialog.open()
 
 
+class ManageExisting(BoxLayout):
+
+    current_account = ObjectProperty(None, allownone=True)
+    current_account_string = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(ManageExisting, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Default state setup.
+        """
+        self.controller = App.get_running_app().controller
+        self.current_account = self.controller.pywalib.get_main_account()
+
+    def on_current_account(self, instance, account):
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
+
+    def open_account_list(self):
+        def on_selected_item(instance, value):
+            self.current_account = value.account
+        self.controller.open_account_list_helper(on_selected_item)
+
+
 class ManageKeystore(BoxLayout):
 
     keystore_path = StringProperty()
