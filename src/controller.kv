@@ -182,6 +182,31 @@
         # size_hint: None, None
         text: root.current_account_string
         on_release: root.open_account_list()
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.password1
+        on_text: root.password1 = args[1]
+    MDTextField:
+        # TODO: do validation as we type
+        hint_text: "Password (again)"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.password2
+        on_text: root.password2 = args[1]
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: dp(4), dp(4)
+        spacing: dp(40)
+        MDRaisedButton:
+            text: "Update password"
+            on_release: root.update_password()
+        MDRaisedButton:
+            text: "Delete account"
+            on_release: root.delete_account()
     PushUp:
 
 

@@ -323,6 +323,8 @@ class ManageExisting(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
     current_account_string = StringProperty()
+    password1 = StringProperty()
+    password2 = StringProperty()
 
     def __init__(self, **kwargs):
         super(ManageExisting, self).__init__(**kwargs)
@@ -334,6 +336,18 @@ class ManageExisting(BoxLayout):
         """
         self.controller = App.get_running_app().controller
         self.current_account = self.controller.pywalib.get_main_account()
+
+    def delete_account(self):
+        """
+        Not yet implemented.
+        """
+        Controller.show_not_implemented_dialog()
+
+    def update_password(self):
+        """
+        Not yet implemented.
+        """
+        Controller.show_not_implemented_dialog()
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
