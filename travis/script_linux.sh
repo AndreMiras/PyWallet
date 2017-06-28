@@ -17,3 +17,4 @@ pip install -r requirements.txt
 isort --check-only --recursive src/
 flake8 src/
 python -m unittest discover --start-directory=src/
+deactivate
