@@ -18,4 +18,5 @@ before_install:
 
 script:
     # minimal case
+    - ./travis/script_linux.sh
     - ./travis/script_android.sh
