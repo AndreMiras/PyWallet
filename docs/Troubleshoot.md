@@ -40,3 +40,15 @@ Install `libssl-dev` before rebuilding from scratch:
 ```
 sudo apt install libssl-dev
 ```
+
+Buildozer fails when building libffi:
+```
+configure.ac:41: error: possibly undefined macro: AC_PROG_LIBTOOL
+      If this token and others are legitimate, please use m4_pattern_allow.
+      See the Autoconf documentation.
+autoreconf: /usr/bin/autoconf failed with exit status: 1
+```
+Fix it by installing autogen autoconf and libtool:
+```
+sudo apt install autogen autoconf libtool
+```
