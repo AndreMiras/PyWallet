@@ -43,24 +43,11 @@ requirements =
     setuptools,
     openssl,
     pycryptodome,
-    pysha3,
-    ethash,
-    scrypt,
     bitcoin,
-    rlp,
-    repoze.lru,
-    PyYAML,
-    https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip,
-    https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip,
-    gevent,
     pbkdf2,
-    https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip,
-    https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,
-    requests,
     pyelliptic==1.5.7,
     cffi,
-    secp256k1,
-    qrcode
+    secp256k1
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
