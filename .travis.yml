@@ -6,7 +6,9 @@ language: generic
 before_install:
     # Required by Buildozer Android
     # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-12-04-64bit
+    - sudo dpkg --add-architecture i386
     - sudo apt-get update -q
+    - sudo apt-get install build-essential ccache git lib32stdc++6 lib32z1 lib32z1-dev python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
     - sudo apt-get install build-essential ccache git lib32z1 lib32bz2-1.0 libncurses5:i386 libstdc++6:i386 python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
     # Required by Kivy
     # https://kivy.org/docs/installation/installation-linux.html#dependencies-with-sdl2
