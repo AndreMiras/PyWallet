@@ -21,4 +21,5 @@ before_install:
 script:
     # # runs in parallel
     # - (eval "$SCRIPT_COMMAND")
+    - ./travis/script_linux.sh
     - ./travis/script_android.sh
