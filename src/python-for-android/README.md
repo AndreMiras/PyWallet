@@ -7,7 +7,7 @@ To debug custom recipes, it's possible to link them to the buildozer recipes dir
 For example for `ethash` recipe:
 ```
 ln -sfn \
-$PWD/python-for-android/recipes/ethash \
+$PWD/src/python-for-android/recipes/ethash \
 $PWD/.buildozer/android/platform/python-for-android-master/pythonforandroid/recipes/
 ```
 That way commands likes `clean_recipe_build` will also be available for the custom recipe.
