@@ -8,11 +8,11 @@ before_install:
     # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-12-04-64bit
     - sudo dpkg --add-architecture i386
     - sudo apt-get update -q
-    - sudo apt-get install build-essential ccache git lib32stdc++6 lib32z1 lib32z1-dev python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
-    - sudo apt-get install build-essential ccache git lib32z1 lib32bz2-1.0 libncurses5:i386 libstdc++6:i386 python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
+    - sudo apt-get install -y build-essential ccache git lib32stdc++6 lib32z1 lib32z1-dev python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
+    - sudo apt-get install -y build-essential ccache git lib32z1 lib32bz2-1.0 libncurses5:i386 libstdc++6:i386 python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
     # Required by Kivy
     # https://kivy.org/docs/installation/installation-linux.html#dependencies-with-sdl2
-    - sudo apt-get install python-pip build-essential git python-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+    - sudo apt-get install -y python-pip build-essential git python-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
 
 # env:
 #     - SCRIPT_COMMAND="./travis/script_linux.sh"
@@ -21,5 +21,5 @@ before_install:
 script:
     # # runs in parallel
     # - (eval "$SCRIPT_COMMAND")
-    - ./travis/script_linux.sh
+    # - ./travis/script_linux.sh
     - ./travis/script_android.sh
