@@ -58,3 +58,15 @@ Fix it by installing autogen autoconf and libtool:
 ```
 sudo apt install autogen autoconf libtool
 ```
+
+Building fail with the error:
+```
+No package 'libffi' found
+c/_cffi_backend.c:15:17: fatal error: ffi.h: No such file or directory
+ #include <ffi.h>
+```
+Install `libffi-dev`:
+```
+sudo apt install libffi-dev
+```
+Then clean and try to build again.
