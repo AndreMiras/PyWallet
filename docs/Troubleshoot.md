@@ -36,10 +36,16 @@ Buildozer fails with the error below when installing dependencies:
 ```
 urllib.error.URLError: <urlopen error unknown url type: https>
 ```
-Install `libssl-dev` before rebuilding from scratch:
+First install `libssl-dev`:
 ```
 sudo apt install libssl-dev
 ```
+Then clean openssl recipe build and retry:
+```
+buildozer android p4a -- clean_recipe_build openssl
+buildozer android debug
+```
+
 
 Buildozer fails when building libffi:
 ```
