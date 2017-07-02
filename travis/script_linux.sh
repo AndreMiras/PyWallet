@@ -11,7 +11,7 @@ source venv/bin/activate
 # installs requirements
 pip install --install-option="--no-cython-compile" $(grep Cython requirements/requirements.txt)
 # pip install -r requirements/test_requirements.txt
-# pip install -r requirements.txt
+pip install -r requirements.txt
 
 # runs tests
 # isort --check-only --recursive src/
