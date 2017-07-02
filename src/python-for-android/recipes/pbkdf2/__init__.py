@@ -1,4 +1,3 @@
-from os.path import join
 from pythonforandroid.recipe import PythonRecipe
 
 
