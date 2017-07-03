@@ -1,0 +1,24 @@
+diff --git a/_cffi_build/build.py b/_cffi_build/build.py
+index c6e3c87..01f2032 100644
+--- a/_cffi_build/build.py
++++ b/_cffi_build/build.py
+@@ -84,6 +84,7 @@ if has_system_lib():
+ if ffi is None:
+     # Library is not installed - use bundled one
+     print("Using bundled libsecp256k1")
++    assert False # ffi is None
+ 
+     # By default we only build with recovery enabled since the other modules
+     # are experimental
+diff --git a/setup.py b/setup.py
+index bba4bce..71ef5ef 100644
+--- a/setup.py
++++ b/setup.py
+@@ -55,6 +55,7 @@ except OSError:
+ 
+ 
+ def download_library(command):
++    return # download_library
+     if command.dry_run:
+         return
+     libdir = absolute("libsecp256k1")
