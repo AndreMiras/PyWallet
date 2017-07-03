@@ -6,7 +6,6 @@ import os
 from os.path import expanduser
 
 import requests
-
 import rlp
 from devp2p.app import BaseApp
 from ethereum.tools.keys import PBKDF2_CONSTANTS
