@@ -23,7 +23,7 @@ source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 #source.exclude_dirs = tests, bin
-source.exclude_dirs = tests, bin, venv, python-for-android
+source.exclude_dirs = bin, venv, src/python-for-android
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
@@ -147,6 +147,8 @@ android.permissions = INTERNET
 
 # (list) Pattern to whitelist for the whole project
 #android.whitelist =
+android.whitelist =
+    unittest/*
 
 # (str) Path to a custom whitelist file
 #android.whitelist_src =

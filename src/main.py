@@ -558,6 +558,14 @@ class About(BoxLayout):
             self.project_page_property + \
             "[/ref][/color]"
 
+    @staticmethod
+    def run_tests():
+        import unittest as unittest2
+        loader = unittest2.TestLoader()
+        tests = loader.discover('src/')
+        testRunner = unittest2.runner.TextTestRunner()
+        testRunner.run(tests)
+
 
 class Controller(FloatLayout):
 
