@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import re
+import unittest
 from threading import Thread
 
 import kivy
@@ -25,6 +26,7 @@ from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
+import tests
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
@@ -557,6 +559,12 @@ class About(BoxLayout):
             "[color=00BFFF][ref=github]" + \
             self.project_page_property + \
             "[/ref][/color]"
+
+    @staticmethod
+    def run_tests():
+        suite = tests.suite()
+        print("suite:", suite)
+        unittest.TextTestRunner().run(suite)
 
 
 class Controller(FloatLayout):
