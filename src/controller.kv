@@ -241,20 +241,16 @@
 
 <About>:
     orientation: 'vertical'
-    ScrollView:
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            MDLabel:
-                font_style: 'Display1'
-                halign: 'center'
-                valign: 'middle'
-                text: "About PyWallet"
-            MDLabel:
-                markup: True
-                text: root.about_text_property
-                theme_text_color: 'Primary'
-                on_ref_press: webbrowser.open(root.project_page_property)
+    MDLabel:
+        font_style: 'Display1'
+        halign: 'center'
+        valign: 'middle'
+        text: "About PyWallet"
+    MDLabel:
+        markup: True
+        text: root.about_text_property
+        theme_text_color: 'Primary'
+        on_ref_press: webbrowser.open(root.project_page_property)
 
 
 <PWToolbar>:
