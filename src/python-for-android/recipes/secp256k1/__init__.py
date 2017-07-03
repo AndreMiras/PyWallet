@@ -14,7 +14,7 @@ class Secp256k1Recipe(PythonRecipe):
 
     patches = [
         "cross_compile.patch", "drop_setup_requires.patch",
-        "pkg-config.patch", "find_lib.patch", "debug.patch"]
+        "pkg-config.patch", "find_lib.patch", "no-download.patch"]
 
     def get_recipe_env(self, arch=None):
         env = super(Secp256k1Recipe, self).get_recipe_env(arch)
