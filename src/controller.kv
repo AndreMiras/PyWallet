@@ -1,6 +1,7 @@
 #:kivy 1.10.0
 
 #:import webbrowser webbrowser
+#:import Window kivy.core.window.Window
 #:import MDList kivymd.list.MDList
 #:import MDSlider kivymd.slider.MDSlider
 #:import MDTextField kivymd.textfields.MDTextField
@@ -298,6 +299,10 @@
                         id: overview_bnavigation_id
                 Screen:
                     name: 'manage_keystores'
+                    on_enter:
+                        # workaround for broken MDBottomNavigation, refs
+                        # https://github.com/AndreMiras/PyWallet/issues/38
+                        Window.dispatch('on_resize', *Window.size)
                     ManageKeystore:
                         id: manage_keystores_id
                 Screen:
