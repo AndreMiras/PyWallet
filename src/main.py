@@ -530,6 +530,8 @@ class PWToolbar(Toolbar):
         overview = self.controller.overview
         overview.bind(
             balance_property=lambda *x: self.on_overview_balance_property())
+        # let's add the default title while waiting for the update
+        self.title_property = self.controller.get_overview_title()
         self.load_default_navigation()
 
     def on_overview_balance_property(self):
