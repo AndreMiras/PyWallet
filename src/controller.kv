@@ -116,10 +116,6 @@
 <ImportKeystore>:
     orientation: 'vertical'
     MDLabel:
-        font_style: 'Display1'
-        halign: 'center'
-        text: "Import keystore"
-    MDLabel:
         halign: 'center'
         text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
     PushUp:
@@ -127,10 +123,6 @@
 
 <CreateNewAccount>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        halign: 'center'
-        text: "Create new account"
     MDTextField:
         hint_text: "Password"
         helper_text: "Enter the password for encrypting your new account"
@@ -173,11 +165,6 @@
 
 <ManageExisting@BoxLayout>:
     orientation: 'vertical'
-    MDLabel:
-        font_style: 'Display1'
-        halign: 'center'
-        valign: 'middle'
-        text: "Manage existing"
     MDFlatButton:
         # pos_hint: {'center_x': 0.5, 'top': 1}
         # size_hint: None, None
@@ -223,28 +210,28 @@
         name: "manage_existing"
         text: "Manage"
         icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Manage existing")
         ManageExisting:
     MDBottomNavigationItem:
         name: "create_new"
         text: "Create new"
         icon: "plus"
+        on_tab_press:
+            app.controller.set_toolbar_title("Create new account")
         CreateNewAccount:
     MDBottomNavigationItem:
         name: "import_keystore"
         text: "Import"
         icon: "download"
+        on_tab_press:
+            app.controller.set_toolbar_title("Import keystore")
         ImportKeystore:
 
 
 
 <About>:
     orientation: 'vertical'
-    MDLabel:
-        size_hint_y: None
-        height: dp(40)
-        font_style: 'Display1'
-        halign: 'center'
-        text: "About PyWallet"
     MDLabel:
         markup: True
         text: root.about_text_property
@@ -278,7 +265,7 @@
 
 
 <PWToolbar>:
-    title: 'PyWallet'
+    title: root.title_property
     md_bg_color: app.theme_cls.primary_color
     background_palette: 'Primary'
     background_hue: '500'
@@ -295,11 +282,14 @@
                 id: screen_manager_id
                 Screen:
                     name: 'overview'
+                    on_enter:
+                        app.controller.set_toolbar_title("PyWallet")
                     OverviewBottomNavigation:
                         id: overview_bnavigation_id
                 Screen:
                     name: 'manage_keystores'
                     on_enter:
+                        app.controller.set_toolbar_title("Manage existing")
                         # workaround for broken MDBottomNavigation, refs
                         # https://github.com/AndreMiras/PyWallet/issues/38
                         Window.dispatch('on_resize', *Window.size)
@@ -307,5 +297,7 @@
                         id: manage_keystores_id
                 Screen:
                     name: 'about'
+                    on_enter:
+                        app.controller.set_toolbar_title("About PyWallet")
                     About:
                         id: about_id

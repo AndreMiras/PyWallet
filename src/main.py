@@ -512,6 +512,8 @@ class CreateNewAccount(BoxLayout):
 
 class PWToolbar(Toolbar):
 
+    title_property = StringProperty("PyWallet")
+
     def __init__(self, **kwargs):
         super(PWToolbar, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
@@ -573,6 +575,13 @@ class Controller(FloatLayout):
     @property
     def history(self):
         return self.overview.ids.history_id
+
+    @property
+    def toolbar(self):
+        return self.ids.toolbar_id
+
+    def set_toolbar_title(self, title):
+        self.toolbar.title_property = title
 
     def open_account_list_helper(self, on_selected_item):
         title = "Select account"
