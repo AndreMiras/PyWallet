@@ -528,7 +528,8 @@ class PWToolbar(Toolbar):
         self.screen_manager = self.controller.ids.screen_manager_id
         # bind balance update to title
         overview = self.controller.overview
-        overview.bind(balance_property=lambda instance, value: self.on_overview_balance_property())
+        overview.bind(
+            balance_property=lambda *x: self.on_overview_balance_property())
         self.load_default_navigation()
 
     def on_overview_balance_property(self):
