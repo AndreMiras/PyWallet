@@ -5,6 +5,7 @@
   - Create new account, refs #9
   - Manage account password, refs #9
   - Run builds in parallel, refs #34
+  - Run unit tests on Android, refs #40
 
 ## [v20170625]
 
