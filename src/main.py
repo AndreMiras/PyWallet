@@ -567,7 +567,8 @@ class Controller(FloatLayout):
 
     @property
     def overview(self):
-        return self.ids.overview_id
+        overview_bnavigation_id = self.ids.overview_bnavigation_id
+        return overview_bnavigation_id.ids.overview_id
 
     @property
     def history(self):
@@ -697,7 +698,7 @@ class Controller(FloatLayout):
 
     @mainthread
     def update_balance_label(self, balance):
-        overview_id = self.ids.overview_id
+        overview_id = self.overview
         balance_label_id = overview_id.ids.balance_label_id
         balance_label_id.text = '%s ETH' % balance
 

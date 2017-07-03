@@ -255,6 +255,27 @@
         on_release: root.run_tests()
 
 
+<OverviewBottomNavigation@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: 'overview'
+        text: "Overview"
+        icon: 'format-list-bulleted'
+        Overview:
+            id: overview_id
+    MDBottomNavigationItem:
+        name: 'send'
+        text: "Send"
+        icon: 'arrow-up-bold'
+        Send:
+            id: send_id
+    MDBottomNavigationItem:
+        name: 'receive'
+        text: "Receive"
+        icon: 'arrow-down-bold'
+        Receive:
+            id: receive_id
+
+
 <PWToolbar>:
     title: 'PyWallet'
     md_bg_color: app.theme_cls.primary_color
@@ -273,26 +294,8 @@
                 id: screen_manager_id
                 Screen:
                     name: 'overview'
-                    MDBottomNavigation:
-                        id: bottom_navigation_id
-                        MDBottomNavigationItem:
-                            name: 'overview'
-                            text: "Overview"
-                            icon: 'format-list-bulleted'
-                            Overview:
-                                id: overview_id
-                        MDBottomNavigationItem:
-                            name: 'send'
-                            text: "Send"
-                            icon: 'arrow-up-bold'
-                            Send:
-                                id: send_id
-                        MDBottomNavigationItem:
-                            name: 'receive'
-                            text: "Receive"
-                            icon: 'arrow-down-bold'
-                            Receive:
-                                id: receive_id
+                    OverviewBottomNavigation:
+                        id: overview_bnavigation_id
                 Screen:
                     name: 'manage_keystores'
                     ManageKeystore:
