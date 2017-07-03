@@ -283,6 +283,9 @@ class Overview(BoxLayout):
         controller = App.get_running_app().controller
         controller.open_account_list_overview()
 
+    def get_title(self):
+        return "%s ETH" % self.balance_property
+
 
 class PWSelectList(BoxLayout):
 
@@ -513,7 +516,7 @@ class CreateNewAccount(BoxLayout):
 
 class PWToolbar(Toolbar):
 
-    title_property = StringProperty("PyWallet")
+    title_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(PWToolbar, self).__init__(**kwargs)
@@ -523,7 +526,13 @@ class PWToolbar(Toolbar):
         self.controller = App.get_running_app().controller
         self.navigation = self.controller.ids.navigation_id
         self.screen_manager = self.controller.ids.screen_manager_id
+        # bind balance update to title
+        overview = self.controller.overview
+        overview.bind(balance_property=lambda instance, value: self.on_overview_balance_property())
         self.load_default_navigation()
+
+    def on_overview_balance_property(self):
+        self.title_property = self.controller.get_overview_title()
 
     def load_default_navigation(self):
         self.left_action_items = [
@@ -710,6 +719,10 @@ class Controller(FloatLayout):
     def update_balance_label(self, balance):
         overview_id = self.overview
         overview_id.balance_property = balance
+
+    def get_overview_title(self):
+        overview_id = self.overview
+        return overview_id.get_title()
 
     @staticmethod
     @mainthread
