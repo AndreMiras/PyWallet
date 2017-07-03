@@ -16,7 +16,7 @@ from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
-from kivymd.button import MDIconButton
+from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
@@ -512,6 +512,20 @@ class CreateNewAccount(BoxLayout):
         """
         load_balance_thread = Thread(target=self.create_account)
         load_balance_thread.start()
+
+
+class AddressButton(MDFlatButton):
+    """
+    Overrides MDFlatButton, makes the font slightly smaller on mobile
+    by using "Body1" rather than "Button" style.
+    """
+
+    def __init__(self, **kwargs):
+        super(MDFlatButton, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.ids.content.font_style = 'Body1'
 
 
 class PWToolbar(Toolbar):
