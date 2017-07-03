@@ -8,4 +8,5 @@ class Pbkdf2Recipe(PythonRecipe):
 
     depends = ['setuptools']
 
+
 recipe = Pbkdf2Recipe()

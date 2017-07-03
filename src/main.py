@@ -6,6 +6,8 @@ import os
 import re
 from threading import Thread
 
+from requests.exceptions import ConnectionError
+
 import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
@@ -23,8 +25,6 @@ from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
-from requests.exceptions import ConnectionError
-
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
