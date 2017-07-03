@@ -273,6 +273,7 @@ class Overview(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
     current_account_string = StringProperty()
+    balance_property = NumericProperty(0)
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
@@ -708,8 +709,7 @@ class Controller(FloatLayout):
     @mainthread
     def update_balance_label(self, balance):
         overview_id = self.overview
-        balance_label_id = overview_id.ids.balance_label_id
-        balance_label_id.text = '%s ETH' % balance
+        overview_id.balance_property = balance
 
     @staticmethod
     @mainthread
