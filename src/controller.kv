@@ -217,25 +217,23 @@
     PushUp:
 
 
-<ManageKeystore>:
-    orientation: 'vertical'
-    MDBottomNavigation:
-        id: bottom_navigation_id
-        MDBottomNavigationItem:
-            name: "manage_existing"
-            text: "Manage"
-            icon: 'format-list-bulleted'
-            ManageExisting:
-        MDBottomNavigationItem:
-            name: "create_new"
-            text: "Create new"
-            icon: "plus"
-            CreateNewAccount:
-        MDBottomNavigationItem:
-            name: "import_keystore"
-            text: "Import"
-            icon: "download"
-            ImportKeystore:
+<ManageKeystore@MDBottomNavigation>:
+    id: bottom_navigation_id
+    MDBottomNavigationItem:
+        name: "manage_existing"
+        text: "Manage"
+        icon: 'format-list-bulleted'
+        ManageExisting:
+    MDBottomNavigationItem:
+        name: "create_new"
+        text: "Create new"
+        icon: "plus"
+        CreateNewAccount:
+    MDBottomNavigationItem:
+        name: "import_keystore"
+        text: "Import"
+        icon: "download"
+        ImportKeystore:
 
 
 

@@ -427,18 +427,6 @@ class ManageExisting(BoxLayout):
         self.controller.open_account_list_helper(on_selected_item)
 
 
-class ManageKeystore(BoxLayout):
-
-    keystore_path = StringProperty()
-
-    def __init__(self, **kwargs):
-        super(ManageKeystore, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        pass
-
-
 class CreateNewAccount(BoxLayout):
     """
     PBKDF2 iterations choice is a security vs speed trade off:
