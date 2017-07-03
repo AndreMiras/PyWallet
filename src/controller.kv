@@ -80,8 +80,6 @@
 <Receive>:
     orientation: 'vertical'
     MDFlatButton:
-        pos_hint: {'center_x': 0.5, 'top': 1}
-        size_hint: None, None
         text: root.current_account_string
         on_release: root.open_account_list()
     QRCodeWidget:
@@ -91,8 +89,6 @@
 <Overview>:
     orientation: 'vertical'
     MDFlatButton:
-        pos_hint: {'center_x': 0.5, 'top': 1}
-        size_hint: None, None
         text: root.current_account_string
         on_release: root.open_account_list()
     History:
