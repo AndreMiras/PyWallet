@@ -14,6 +14,7 @@ from ethereum.utils import denoms, normalize_address
 from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
+ROUND_DIGITS = 3
 
 
 class UnknownEtherscanException(Exception):
@@ -75,7 +76,7 @@ class PyWalib(object):
         PyWalib.handle_etherscan_error(response_json)
         balance_wei = int(response_json["result"])
         balance_eth = balance_wei / float(pow(10, 18))
-        balance_eth = round(balance_eth, 2)
+        balance_eth = round(balance_eth, ROUND_DIGITS)
         return balance_eth
 
     @staticmethod
@@ -97,6 +98,7 @@ class PyWalib(object):
         for transaction in transactions:
             value_wei = int(transaction['value'])
             value_eth = value_wei / float(pow(10, 18))
+            value_eth = round(value_eth, ROUND_DIGITS)
             from_address = PyWalib.address_hex(transaction['from'])
             to_address = PyWalib.address_hex(transaction['to'])
             sent = from_address == address
