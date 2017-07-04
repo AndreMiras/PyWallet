@@ -58,3 +58,10 @@ Fix it by installing autogen autoconf and libtool:
 ```
 sudo apt install autogen autoconf libtool
 ```
+
+
+## Kivy
+
+### Debugging widget sizes
+
+<https://github.com/kivy/kivy/wiki/Debugging-widget-sizes>
