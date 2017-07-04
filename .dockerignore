@@ -1,0 +1,6 @@
+bin/
+.buildozer/
+.cache/
+.git/
+.tox/
+venv/
