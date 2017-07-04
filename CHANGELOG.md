@@ -6,6 +6,12 @@
   - Manage account password, refs #9
   - Run builds in parallel, refs #34
   - Run unit tests on Android, refs #40
+  - Use a thread decorator, refs #33
+  - Round transaction history, refs #45
+  - Fit long address to screen
+  - Use toolbar space for dynamic titles
+  - Fix broken manage account layout, refs #38
+  - Skip pkg-config, refs #39
 
 ## [v20170625]
 
