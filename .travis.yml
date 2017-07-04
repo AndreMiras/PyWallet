@@ -19,3 +19,6 @@ env:
 script:
     # runs in parallel
     - (eval "$SCRIPT_COMMAND")
+
+after_success:
+    - coveralls
