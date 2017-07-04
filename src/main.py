@@ -385,8 +385,7 @@ class ManageExisting(BoxLayout):
         """
         Verifies password fields are valid.
         """
-        return (self.verify_password_field()
-                and self.verify_current_password_field())
+        return self.verify_password_field()
 
     def delete_account(self):
         """
@@ -399,9 +398,12 @@ class ManageExisting(BoxLayout):
         """
         Update account password with new password provided.
         """
-        # TODO: update UI earlier
         if not self.verify_fields():
             Controller.show_invalid_form_dialog()
+            return
+        Controller.snackbar_message("Verifying current password...")
+        if not self.verify_current_password_field():
+            Controller.snackbar_message("Wrong account password")
             return
         pywalib = self.controller.pywalib
         account = self.current_account
