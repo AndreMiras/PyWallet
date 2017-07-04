@@ -33,6 +33,9 @@ class ModulesImportTestCase(unittest.TestCase):
 
     def test_pyethapp(self):
         from pyethapp.accounts import Account
+        from ethereum.tools.keys import PBKDF2_CONSTANTS
+        # speeds up the test
+        PBKDF2_CONSTANTS['c'] = 100
         password = "foobar"
         uuid = None
         account = Account.new(password, uuid=uuid)
