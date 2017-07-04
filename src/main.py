@@ -33,6 +33,31 @@ from pywalib import (InsufficientFundsException, NoTransactionFoundException,
 kivy.require('1.10.0')
 
 
+def run_in_thread(fn):
+    """
+    Decorator to run a function in a thread.
+    >>> 1 + 1
+    2
+    >>> @run_in_thread
+    ... def threaded_sleep(seconds):
+    ...     from time import sleep
+    ...     sleep(seconds)
+    >>> thread = threaded_sleep(0.1)
+    >>> type(thread)
+    <class 'threading.Thread'>
+    >>> thread.is_alive()
+    True
+    >>> thread.join()
+    >>> thread.is_alive()
+    False
+    """
+    def run(*k, **kw):
+        t = Thread(target=fn, args=k, kwargs=kw)
+        t.start()
+        return t
+    return run
+
+
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
     pass
 
@@ -128,6 +153,7 @@ class Send(BoxLayout):
         dialog = self.prompt_password_dialog()
         dialog.open()
 
+    @run_in_thread
     def unlock_send_transaction(self):
         """
         Unlocks the account with password in order to sign and publish the
@@ -156,17 +182,11 @@ class Send(BoxLayout):
         except UnknownEtherscanException:
             Controller.snackbar_message("Unknown error")
             return
+        # TODO: handle ConnectionError
         Controller.snackbar_message("Sent!")
 
-    def _start_unlock_send_transaction_thread(self):
-        """
-        Runs unlock_send_transaction() in a thread.
-        """
-        thread = Thread(target=self.unlock_send_transaction)
-        thread.start()
-
     def on_password(self, instance, password):
-        self._start_unlock_send_transaction_thread()
+        self.unlock_send_transaction()
 
 
 class Receive(BoxLayout):
@@ -207,7 +227,7 @@ class History(BoxLayout):
 
     def on_current_account(self, instance, account):
         print("History.on_current_account:")
-        self._start_load_history_thread()
+        self._load_history()
 
     @staticmethod
     def create_item(sent, amount, from_to):
@@ -245,6 +265,7 @@ class History(BoxLayout):
         for list_item in list_items:
             history_list_id.add_widget(list_item)
 
+    @run_in_thread
     def _load_history(self):
         account = self.current_account
         address = '0x' + account.address.encode("hex")
@@ -260,13 +281,6 @@ class History(BoxLayout):
             list_item = History.create_item_from_dict(transaction)
             list_items.append(list_item)
         self.update_history_list(list_items)
-
-    def _start_load_history_thread(self):
-        """
-        Runs _load_history() in a thread.
-        """
-        load_history_thread = Thread(target=self._load_history)
-        load_history_thread.start()
 
 
 class Overview(BoxLayout):
@@ -400,10 +414,12 @@ class ManageExisting(BoxLayout):
         """
         Controller.show_not_implemented_dialog()
 
+    @run_in_thread
     def update_password(self):
         """
         Update account password with new password provided.
         """
+        # TODO: update UI earlier
         if not self.verify_fields():
             Controller.show_invalid_form_dialog()
             return
@@ -413,13 +429,6 @@ class ManageExisting(BoxLayout):
         Controller.snackbar_message("Updating account...")
         pywalib.update_account_password(account, new_password=new_password)
         Controller.snackbar_message("Updated!")
-
-    def start_update_password_thread(self):
-        """
-        Runs update_password() in a thread.
-        """
-        thread = Thread(target=self.update_password)
-        thread.start()
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
@@ -489,6 +498,7 @@ class CreateNewAccount(BoxLayout):
             return
         Controller.snackbar_message("Unlocked!")
 
+    @run_in_thread
     def create_account(self):
         """
         Creates an account from provided form.
@@ -505,13 +515,6 @@ class CreateNewAccount(BoxLayout):
                 password=password, security_ratio=security_ratio)
         self.try_unlock(account, password)
         return account
-
-    def start_create_account_thread(self):
-        """
-        Runs create_account() in a thread.
-        """
-        load_balance_thread = Thread(target=self.create_account)
-        load_balance_thread.start()
 
 
 class AddressButton(MDFlatButton):
@@ -651,7 +654,7 @@ class Controller(FloatLayout):
         """
         self.overview.current_account = value
         self.history.current_account = value
-        self._start_load_balance_thread()
+        self._load_balance()
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -770,6 +773,7 @@ class Controller(FloatLayout):
         except IndexError:
             self.load_manage_keystores()
 
+    @run_in_thread
     def _load_balance(self):
         account = self.current_account
         try:
@@ -778,13 +782,6 @@ class Controller(FloatLayout):
             Controller.on_balance_connection_error()
             return
         self.update_balance_label(balance)
-
-    def _start_load_balance_thread(self):
-        """
-        Runs _load_balance() in a thread.
-        """
-        load_balance_thread = Thread(target=self._load_balance)
-        load_balance_thread.start()
 
     def load_manage_keystores(self):
         """

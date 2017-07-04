@@ -146,7 +146,7 @@
         # TODO: center on x
         id: create_account_button_id
         text: "Create account"
-        on_release: root.start_create_account_thread()
+        on_release: root.create_account()
     PushUp:
 
 
@@ -184,7 +184,7 @@
         spacing: dp(40)
         MDRaisedButton:
             text: "Update password"
-            on_release: root.start_update_password_thread()
+            on_release: root.update_password()
         MDRaisedButton:
             text: "Delete account"
             on_release: root.delete_account()
