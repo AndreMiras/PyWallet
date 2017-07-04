@@ -388,26 +388,6 @@ class ManageExisting(BoxLayout):
         return (self.verify_password_field()
                 and self.verify_current_password_field())
 
-    def try_unlock(self, account, password):
-        """
-        Just as a security measure, verifies we can unlock
-        the newly created account with provided password.
-        """
-        # making sure it's locked first
-        account.lock()
-        Controller.snackbar_message("Unlocking account...")
-        try:
-            account.unlock(password)
-        except ValueError:
-            title = "Unlock error"
-            body = ""
-            body += "Couldn't unlock your account.\n"
-            body += "The issue should be reported."
-            dialog = Controller.create_dialog(title, body)
-            dialog.open()
-            return
-        Controller.snackbar_message("Unlocked!")
-
     def delete_account(self):
         """
         Not yet implemented.
@@ -478,7 +458,8 @@ class CreateNewAccount(BoxLayout):
     def security_slider_value(self):
         return self.security_slider.value
 
-    def try_unlock(self, account, password):
+    @staticmethod
+    def try_unlock(account, password):
         """
         Just as a security measure, verifies we can unlock
         the newly created account with provided password.
@@ -513,7 +494,7 @@ class CreateNewAccount(BoxLayout):
         Controller.snackbar_message("Creating account...")
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
-        self.try_unlock(account, password)
+        CreateNewAccount.try_unlock(account, password)
         return account
 
 
