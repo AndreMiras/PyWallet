@@ -518,14 +518,26 @@ class AddressButton(MDFlatButton):
     """
     Overrides MDFlatButton, makes the font slightly smaller on mobile
     by using "Body1" rather than "Button" style.
+    Also shorten content size using ellipsis.
     """
 
     def __init__(self, **kwargs):
-        super(MDFlatButton, self).__init__(**kwargs)
+        super(AddressButton, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
-        self.ids.content.font_style = 'Body1'
+        content = self.ids.content
+        content.font_style = 'Body1'
+        content.shorten = True
+
+        def on_parent_size(instance, size):
+            # see BaseRectangularButton.width definition
+            button_margin = dp(32)
+            parent_width = instance.width
+            # TODO: the new size should be a min() of
+            # parent_width and actual content size
+            content.width = parent_width - button_margin
+        self.parent.bind(size=on_parent_size)
 
 
 class PWToolbar(Toolbar):
