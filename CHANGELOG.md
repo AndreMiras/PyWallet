@@ -12,6 +12,7 @@
   - Use toolbar space for dynamic titles
   - Fix broken manage account layout, refs #38
   - Skip pkg-config, refs #39
+  - Add coverage testing, refs #32
 
 ## [v20170625]
 
