@@ -1,3 +1,4 @@
+import os
 import shutil
 import unittest
 from tempfile import mkdtemp
@@ -228,6 +229,20 @@ class PywalibTestCase(unittest.TestCase):
         self.assertEqual(
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
+
+    def test_get_default_keystore_path(self):
+        """
+        Checks we the default keystore directory exists or create it.
+        Verify the path is correct and that we have read/write access to it.
+        """
+        keystore_dir = PyWalib.get_default_keystore_path()
+        if not os.path.exists(keystore_dir):
+            os.makedirs(keystore_dir)
+        # checks path correctness
+        self.assertTrue(keystore_dir.endswith("config/pyethapp/keystore/"))
+        # checks read/write access
+        self.assertEqual(os.access(keystore_dir, os.R_OK), True)
+        self.assertEqual(os.access(keystore_dir, os.W_OK), True)
 
 
 if __name__ == '__main__':
