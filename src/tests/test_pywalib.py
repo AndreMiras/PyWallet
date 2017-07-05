@@ -142,10 +142,6 @@ class PywalibTestCase(unittest.TestCase):
         # ordered by timeStamp
         self.assertTrue(
             transactions[0]['timeStamp'] < transactions[1]['timeStamp'])
-        # value is stored in Wei
-        self.assertEqual(transactions[1]['value'], '200000000000000000')
-        # but converted to Ether is also accessible
-        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
         # and a bunch of other things
         self.assertEqual(
             set(transactions[0].keys()),
@@ -163,11 +159,31 @@ class PywalibTestCase(unittest.TestCase):
         address = ADDRESS
         transactions = PyWalib.get_transaction_history(address)
         self.helper_get_history(transactions)
+        # value is stored in Wei
+        self.assertEqual(transactions[1]['value'], '200000000000000000')
+        # but converted to Ether is also accessible
+        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
         # history contains all send or received transactions
         self.assertEqual(transactions[1]['extra_dict']['sent'], False)
         self.assertEqual(transactions[1]['extra_dict']['received'], True)
         self.assertEqual(transactions[2]['extra_dict']['sent'], True)
         self.assertEqual(transactions[2]['extra_dict']['received'], False)
+
+    def test_get_out_transaction_history(self):
+        """
+        Checks get_out_transaction_history() works as expected.
+        """
+        address = ADDRESS
+        transactions = PyWalib.get_out_transaction_history(address)
+        self.helper_get_history(transactions)
+        for i in range(len(transactions)):
+            transaction = transactions[i]
+            extra_dict = transaction['extra_dict']
+            # this is only sent transactions
+            self.assertEqual(extra_dict['sent'], True)
+            self.assertEqual(extra_dict['received'], False)
+            # nonce should be incremented each time
+            self.assertEqual(transaction['nonce'], str(i))
 
 
 if __name__ == '__main__':
