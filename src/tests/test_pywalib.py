@@ -5,6 +5,8 @@ from tempfile import mkdtemp
 from pywalib import (NoTransactionFoundException, PyWalib,
                      UnknownEtherscanException)
 
+ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+
 
 class PywalibTestCase(unittest.TestCase):
     """
@@ -105,13 +107,14 @@ class PywalibTestCase(unittest.TestCase):
         """
         Checks handle_etherscan_error() error handling.
         """
-        expected_addresss = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+        expected_addresss = ADDRESS
         # no 0x prefix
-        address = "ab5801a7d398351b8be11c439e05c5b3259aec9b"
+        address_no_prefix = ADDRESS.lower().strip("0x")
+        address = address_no_prefix
         normalized = PyWalib.address_hex(address)
         self.assertEqual(normalized, expected_addresss)
         # uppercase
-        address = "0xAB5801A7D398351B8BE11C439E05C5B3259AEC9B"
+        address = "0x" + address_no_prefix.upper()
         normalized = PyWalib.address_hex(address)
         self.assertEqual(normalized, expected_addresss)
 
