@@ -7,6 +7,8 @@ from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
+PASSWORD = "password"
 
 
 class PywalibTestCase(unittest.TestCase):
@@ -21,6 +23,13 @@ class PywalibTestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.keystore_dir, ignore_errors=True)
 
+    def helper_new_account(self, password=PASSWORD, security_ratio=1):
+        """
+        Helper method for fast account creation.
+        """
+        account = self.pywalib.new_account(password, security_ratio)
+        return account
+
     def test_new_account(self):
         """
         Simple account creation test case.
@@ -33,7 +42,7 @@ class PywalibTestCase(unittest.TestCase):
         account_list = pywalib.get_account_list()
         self.assertEqual(len(account_list), 0)
         # 2) creates a new account and verify we can retrieve it
-        password = "password"
+        password = PASSWORD
         # weak account, but fast creation
         security_ratio = 1
         account = pywalib.new_account(password, security_ratio)
@@ -196,6 +205,28 @@ class PywalibTestCase(unittest.TestCase):
         last_nonce = int(last_transaction['nonce'])
         self.assertEqual(nonce, last_nonce + 1)
 
+    def test_get_nonce_no_out_transaction(self):
+        """
+        Makes sure get_nonce() doesn't crash on no out transaction,
+        but just returns 0.
+        """
+        # the VOID_ADDRESS has a lot of in transactions,
+        # but no out ones, so the nonce should be 0
+        address = VOID_ADDRESS
+        nonce = PyWalib.get_nonce(address)
+        self.assertEqual(nonce, 0)
+
+    def test_get_nonce_no_transaction(self):
+        """
+        Makes sure get_nonce() doesn't crash on no transaction,
+        but just returns 0.
+        """
+        # the newly created address has no in or out transaction history
+        account = self.helper_new_account()
+        address = account.address
+        nonce = PyWalib.get_nonce(address)
+        self.assertEqual(nonce, 0)
+
     def test_handle_etherscan_tx_error(self):
         """
         Checks handle_etherscan_tx_error() error handling.
@@ -229,14 +260,17 @@ class PywalibTestCase(unittest.TestCase):
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
 
-    def test_transact(self):
-        return
-        # TODO
+    def test_transact_no_found(self):
+        """
+        Tries to send a transaction from an address with no found.
+        """
         pywalib = self.pywalib
+        account = self.helper_new_account()
         to = ADDRESS
-        sender = ADDRESS
+        sender = account.address
         value_wei = 100
-        pywalib.transact(to=to, value=value_wei, sender=sender)
+        with self.assertRaises(InsufficientFundsException):
+            pywalib.transact(to=to, value=value_wei, sender=sender)
 
     def test_get_default_keystore_path(self):
         """

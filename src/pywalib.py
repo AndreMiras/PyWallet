@@ -136,7 +136,10 @@ class PyWalib(object):
         Gets the nonce by counting the list of outbound transactions from
         Etherscan.
         """
-        out_transactions = PyWalib.get_out_transaction_history(address)
+        try:
+            out_transactions = PyWalib.get_out_transaction_history(address)
+        except NoTransactionFoundException:
+            out_transactions = []
         nonce = len(out_transactions)
         return nonce
 
