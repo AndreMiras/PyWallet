@@ -139,7 +139,29 @@ class PywalibTestCase(unittest.TestCase):
         """
         address = ADDRESS
         transactions = PyWalib.get_transaction_history(address)
-        self.assertTrue(type(transactions), list)
+        self.assertEqual(type(transactions), list)
+        self.assertTrue(len(transactions) > 1)
+        # ordered by timeStamp
+        self.assertTrue(
+            transactions[0]['timeStamp'] < transactions[1]['timeStamp'])
+        # value is stored in Wei
+        self.assertEqual(transactions[1]['value'], '200000000000000000')
+        # but converted to Ether is also accessible
+        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
+        # as well as info suchs as if it was sent or received
+        self.assertEqual(transactions[1]['extra_dict']['sent'], False)
+        self.assertEqual(transactions[1]['extra_dict']['received'], True)
+        self.assertEqual(transactions[2]['extra_dict']['sent'], True)
+        self.assertEqual(transactions[2]['extra_dict']['received'], False)
+        # and a bunch of other things
+        self.assertEqual(
+            set(transactions[0].keys()),
+            set([
+                'nonce', 'contractAddress', 'cumulativeGasUsed', 'hash',
+                'blockHash', 'extra_dict', 'timeStamp', 'gas', 'value',
+                'blockNumber', 'to', 'confirmations', 'input', 'from',
+                'transactionIndex', 'isError', 'gasPrice', 'gasUsed'
+            ]))
 
 
 if __name__ == '__main__':
