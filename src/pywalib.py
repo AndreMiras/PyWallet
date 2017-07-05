@@ -184,6 +184,7 @@ class PyWalib(object):
         Inspired from pyethapp/console_service.py except that we use
         Etherscan for retrieving the nonce as we as for broadcasting the
         transaction.
+        Arg value is in Wei.
         """
         # account.unlock(password)
         sender = normalize_address(sender or self.get_main_account().address)

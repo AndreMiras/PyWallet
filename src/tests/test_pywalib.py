@@ -229,6 +229,15 @@ class PywalibTestCase(unittest.TestCase):
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
 
+    def test_transact(self):
+        return
+        # TODO
+        pywalib = self.pywalib
+        to = ADDRESS
+        sender = ADDRESS
+        value_wei = 100
+        pywalib.transact(to=to, value=value_wei, sender=sender)
+
     def test_get_default_keystore_path(self):
         """
         Checks we the default keystore directory exists or create it.
