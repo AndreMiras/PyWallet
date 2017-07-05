@@ -16,6 +16,7 @@ class PywalibTestCase(unittest.TestCase):
 
     def setUp(self):
         self.keystore_dir = mkdtemp()
+        self.pywalib = PyWalib(self.keystore_dir)
 
     def tearDown(self):
         shutil.rmtree(self.keystore_dir, ignore_errors=True)
@@ -27,8 +28,8 @@ class PywalibTestCase(unittest.TestCase):
         2) creates a new account and verify we can retrieve it
         3) tries to unlock the account
         """
+        pywalib = self.pywalib
         # 1) verifies the current account list is empty
-        pywalib = PyWalib(self.keystore_dir)
         account_list = pywalib.get_account_list()
         self.assertEqual(len(account_list), 0)
         # 2) creates a new account and verify we can retrieve it
@@ -52,7 +53,7 @@ class PywalibTestCase(unittest.TestCase):
         """
         Verifies updating account password works.
         """
-        pywalib = PyWalib(self.keystore_dir)
+        pywalib = self.pywalib
         current_password = "password"
         # weak account, but fast creation
         security_ratio = 1
