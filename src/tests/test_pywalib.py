@@ -2,8 +2,8 @@ import shutil
 import unittest
 from tempfile import mkdtemp
 
-from pywalib import (NoTransactionFoundException, PyWalib,
-                     UnknownEtherscanException)
+from pywalib import (InsufficientFundsException, NoTransactionFoundException,
+                     PyWalib, UnknownEtherscanException)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 
@@ -195,6 +195,39 @@ class PywalibTestCase(unittest.TestCase):
         last_transaction = transactions[-1]
         last_nonce = int(last_transaction['nonce'])
         self.assertEqual(nonce, last_nonce + 1)
+
+    def test_handle_etherscan_tx_error(self):
+        """
+        Checks handle_etherscan_tx_error() error handling.
+        """
+        # no transaction found
+        response_json = {
+            'jsonrpc': '2.0', 'id': 1, 'error': {
+                'message':
+                    'Insufficient funds. '
+                    'The account you tried to send transaction from does not '
+                    'have enough funds. Required 10001500000000000000 and'
+                    'got: 53856999715015294.',
+                    'code': -32010, 'data': None
+                }
+        }
+        with self.assertRaises(InsufficientFundsException):
+            PyWalib.handle_etherscan_tx_error(response_json)
+        # unknown error
+        response_json = {
+            'jsonrpc': '2.0', 'id': 1, 'error': {
+                'message':
+                    'Unknown error',
+                    'code': 0, 'data': None
+                }
+        }
+        with self.assertRaises(UnknownEtherscanException):
+            PyWalib.handle_etherscan_tx_error(response_json)
+        # no error
+        response_json = {'jsonrpc': '2.0', 'id': 1}
+        self.assertEqual(
+            PyWalib.handle_etherscan_tx_error(response_json),
+            None)
 
 
 if __name__ == '__main__':
