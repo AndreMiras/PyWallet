@@ -2,7 +2,8 @@ import shutil
 import unittest
 from tempfile import mkdtemp
 
-from pywalib import PyWalib
+from pywalib import (NoTransactionFoundException, PyWalib,
+                     UnknownEtherscanException)
 
 
 class PywalibTestCase(unittest.TestCase):
@@ -75,6 +76,21 @@ class PywalibTestCase(unittest.TestCase):
         pywalib.update_account_password(
             account, new_password, current_password)
         self.assertFalse(account.locked)
+
+    def test_handle_etherscan_error(self):
+        """
+        Checks handle_etherscan_error() error handling.
+        """
+        response_json = {
+            'message': 'No transactions found', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(NoTransactionFoundException):
+            PyWalib.handle_etherscan_error(response_json)
+        response_json = {
+            'message': 'Unknown error', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(UnknownEtherscanException):
+            PyWalib.handle_etherscan_error(response_json)
 
 
 if __name__ == '__main__':
