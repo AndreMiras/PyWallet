@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170706]
 
   - Create new account, refs #9
   - Manage account password, refs #9
