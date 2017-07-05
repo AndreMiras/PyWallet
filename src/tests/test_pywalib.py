@@ -285,7 +285,3 @@ class PywalibTestCase(unittest.TestCase):
         # checks read/write access
         self.assertEqual(os.access(keystore_dir, os.R_OK), True)
         self.assertEqual(os.access(keystore_dir, os.W_OK), True)
-
-
-if __name__ == '__main__':
-    unittest.main()

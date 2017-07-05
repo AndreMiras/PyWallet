@@ -26,9 +26,9 @@ from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
-from testsuite import suite
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
+from testsuite import suite
 
 kivy.require('1.10.0')
 

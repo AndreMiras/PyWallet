@@ -272,14 +272,3 @@ class PyWalib(object):
         """
         account = self.get_account_list()[0]
         return account
-
-
-def main():
-    pywalib = PyWalib()
-    account = pywalib.get_main_account()
-    balance = pywalib.get_balance(account.address.encode("hex"))
-    print("balance: %s" % balance)
-
-
-if __name__ == '__main__':
-    main()

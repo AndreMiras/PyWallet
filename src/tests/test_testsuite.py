@@ -1,4 +1,5 @@
 import unittest
+
 from testsuite import suite
 
 
@@ -13,7 +14,3 @@ class TestSuitetTestCase(unittest.TestCase):
         """
         test_suite = suite()
         self.assertEqual(type(test_suite), unittest.suite.TestSuite)
-
-
-if __name__ == '__main__':
-    unittest.main()
