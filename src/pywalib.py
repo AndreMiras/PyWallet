@@ -115,7 +115,7 @@ class PyWalib(object):
             }
             transaction.update({'extra_dict': extra_dict})
         # sort by timeStamp
-        transactions.sort(key=lambda x: x['timeStamp'], reverse=True)
+        transactions.sort(key=lambda x: x['timeStamp'])
         return transactions
 
     @staticmethod

@@ -271,6 +271,8 @@ class History(BoxLayout):
         address = '0x' + account.address.encode("hex")
         try:
             transactions = PyWalib.get_transaction_history(address)
+            # new transactions first
+            transactions.reverse()
         except ConnectionError:
             Controller.on_history_connection_error()
             return
