@@ -81,16 +81,25 @@ class PywalibTestCase(unittest.TestCase):
         """
         Checks handle_etherscan_error() error handling.
         """
+        # no transaction found
         response_json = {
             'message': 'No transactions found', 'result': [], 'status': '0'
         }
         with self.assertRaises(NoTransactionFoundException):
             PyWalib.handle_etherscan_error(response_json)
+        # unknown error
         response_json = {
             'message': 'Unknown error', 'result': [], 'status': '0'
         }
         with self.assertRaises(UnknownEtherscanException):
             PyWalib.handle_etherscan_error(response_json)
+        # no error
+        response_json = {
+            'message': 'OK', 'result': [], 'status': '1'
+        }
+        self.assertEqual(
+            PyWalib.handle_etherscan_error(response_json),
+            None)
 
     def test_address_hex(self):
         """
