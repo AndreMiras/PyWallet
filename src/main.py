@@ -26,7 +26,7 @@ from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from requests.exceptions import ConnectionError
 
-import tests
+from testsuite import suite
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
@@ -579,9 +579,9 @@ class About(BoxLayout):
 
     @staticmethod
     def run_tests():
-        suite = tests.suite()
-        print("suite:", suite)
-        unittest.TextTestRunner().run(suite)
+        test_suite = suite()
+        print("test_suite:", test_suite)
+        unittest.TextTestRunner().run(test_suite)
 
 
 class Controller(FloatLayout):
