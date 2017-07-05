@@ -136,7 +136,10 @@ class PyWalib(object):
         Gets the nonce by counting the list of outbound transactions from
         Etherscan.
         """
-        out_transactions = PyWalib.get_out_transaction_history(address)
+        try:
+            out_transactions = PyWalib.get_out_transaction_history(address)
+        except NoTransactionFoundException:
+            out_transactions = []
         nonce = len(out_transactions)
         return nonce
 
@@ -184,6 +187,7 @@ class PyWalib(object):
         Inspired from pyethapp/console_service.py except that we use
         Etherscan for retrieving the nonce as we as for broadcasting the
         transaction.
+        Arg value is in Wei.
         """
         # account.unlock(password)
         sender = normalize_address(sender or self.get_main_account().address)
