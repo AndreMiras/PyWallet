@@ -92,6 +92,20 @@ class PywalibTestCase(unittest.TestCase):
         with self.assertRaises(UnknownEtherscanException):
             PyWalib.handle_etherscan_error(response_json)
 
+    def test_address_hex(self):
+        """
+        Checks handle_etherscan_error() error handling.
+        """
+        expected_addresss = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+        # no 0x prefix
+        address = "ab5801a7d398351b8be11c439e05c5b3259aec9b"
+        normalized = PyWalib.address_hex(address)
+        self.assertEqual(normalized, expected_addresss)
+        # uppercase
+        address = "0xAB5801A7D398351B8BE11C439E05C5B3259AEC9B"
+        normalized = PyWalib.address_hex(address)
+        self.assertEqual(normalized, expected_addresss)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -54,6 +54,9 @@ class PyWalib(object):
 
     @staticmethod
     def address_hex(address):
+        """
+        Normalizes address.
+        """
         prefix = "0x"
         address_hex = prefix + normalize_address(address).encode("hex")
         return address_hex
