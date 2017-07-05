@@ -125,6 +125,14 @@ class PywalibTestCase(unittest.TestCase):
             context.exception.message,
             "Invalid address format: '%s'" % (address))
 
+    def test_get_balance(self):
+        """
+        Checks get_balance() returns a float.
+        """
+        address = ADDRESS
+        balance_eth = PyWalib.get_balance(address)
+        self.assertTrue(type(balance_eth), float)
+
 
 if __name__ == '__main__':
     unittest.main()
