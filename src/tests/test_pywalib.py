@@ -133,12 +133,10 @@ class PywalibTestCase(unittest.TestCase):
         balance_eth = PyWalib.get_balance(address)
         self.assertTrue(type(balance_eth), float)
 
-    def test_get_transaction_history(self):
+    def helper_get_history(self, transactions):
         """
-        Checks get_transaction_history() works as expected.
+        Helper method to test history related methods.
         """
-        address = ADDRESS
-        transactions = PyWalib.get_transaction_history(address)
         self.assertEqual(type(transactions), list)
         self.assertTrue(len(transactions) > 1)
         # ordered by timeStamp
@@ -148,11 +146,6 @@ class PywalibTestCase(unittest.TestCase):
         self.assertEqual(transactions[1]['value'], '200000000000000000')
         # but converted to Ether is also accessible
         self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
-        # as well as info suchs as if it was sent or received
-        self.assertEqual(transactions[1]['extra_dict']['sent'], False)
-        self.assertEqual(transactions[1]['extra_dict']['received'], True)
-        self.assertEqual(transactions[2]['extra_dict']['sent'], True)
-        self.assertEqual(transactions[2]['extra_dict']['received'], False)
         # and a bunch of other things
         self.assertEqual(
             set(transactions[0].keys()),
@@ -162,6 +155,19 @@ class PywalibTestCase(unittest.TestCase):
                 'blockNumber', 'to', 'confirmations', 'input', 'from',
                 'transactionIndex', 'isError', 'gasPrice', 'gasUsed'
             ]))
+
+    def test_get_transaction_history(self):
+        """
+        Checks get_transaction_history() works as expected.
+        """
+        address = ADDRESS
+        transactions = PyWalib.get_transaction_history(address)
+        self.helper_get_history(transactions)
+        # history contains all send or received transactions
+        self.assertEqual(transactions[1]['extra_dict']['sent'], False)
+        self.assertEqual(transactions[1]['extra_dict']['received'], True)
+        self.assertEqual(transactions[2]['extra_dict']['sent'], True)
+        self.assertEqual(transactions[2]['extra_dict']['received'], False)
 
 
 if __name__ == '__main__':
