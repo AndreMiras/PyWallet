@@ -117,6 +117,13 @@ class PywalibTestCase(unittest.TestCase):
         address = "0x" + address_no_prefix.upper()
         normalized = PyWalib.address_hex(address)
         self.assertEqual(normalized, expected_addresss)
+        # prefix cannot be uppercase
+        address = "0X" + address_no_prefix.upper()
+        with self.assertRaises(Exception) as context:
+            PyWalib.address_hex(address)
+        self.assertEqual(
+            context.exception.message,
+            "Invalid address format: '%s'" % (address))
 
 
 if __name__ == '__main__':
