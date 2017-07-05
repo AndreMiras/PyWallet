@@ -133,6 +133,14 @@ class PywalibTestCase(unittest.TestCase):
         balance_eth = PyWalib.get_balance(address)
         self.assertTrue(type(balance_eth), float)
 
+    def test_get_transaction_history(self):
+        """
+        Checks get_transaction_history() works as expected.
+        """
+        address = ADDRESS
+        transactions = PyWalib.get_transaction_history(address)
+        self.assertTrue(type(transactions), list)
+
 
 if __name__ == '__main__':
     unittest.main()
