@@ -185,6 +185,17 @@ class PywalibTestCase(unittest.TestCase):
             # nonce should be incremented each time
             self.assertEqual(transaction['nonce'], str(i))
 
+    def test_get_nonce(self):
+        """
+        Checks get_nonce() returns the next nonce, i.e. transaction count.
+        """
+        address = ADDRESS
+        nonce = PyWalib.get_nonce(address)
+        transactions = PyWalib.get_out_transaction_history(address)
+        last_transaction = transactions[-1]
+        last_nonce = int(last_transaction['nonce'])
+        self.assertEqual(nonce, last_nonce + 1)
+
 
 if __name__ == '__main__':
     unittest.main()
