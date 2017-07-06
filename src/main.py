@@ -618,6 +618,9 @@ class Controller(FloatLayout):
         for account in account_list:
             address = '0x' + account.address.encode("hex")
             item = OneLineListItem(text=address)
+            # makes sure the address doesn't wrap in multiple lines,
+            # but gets shortened
+            item.ids._lbl_primary.shorten = True
             item.account = account
             items.append(item)
         dialog = Controller.create_list_dialog(
