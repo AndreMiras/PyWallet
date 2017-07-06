@@ -680,7 +680,7 @@ class Controller(FloatLayout):
         dialog = MDDialog(
                         title=title,
                         content=content,
-                        size_hint=(.8, .8))
+                        size_hint=(.9, .9))
         # workaround for MDDialog container size (too small by default)
         dialog.ids.container.size_hint_y = 1
         # close the dialog as we select the element
