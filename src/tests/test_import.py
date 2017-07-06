@@ -34,11 +34,15 @@ class ModulesImportTestCase(unittest.TestCase):
     def test_pyethapp(self):
         from pyethapp.accounts import Account
         from ethereum.tools.keys import PBKDF2_CONSTANTS
+        # backup iterations
+        iterations_backup = PBKDF2_CONSTANTS['c']
         # speeds up the test
         PBKDF2_CONSTANTS['c'] = 100
         password = "foobar"
         uuid = None
         account = Account.new(password, uuid=uuid)
+        # restore iterations
+        PBKDF2_CONSTANTS['c'] = iterations_backup
         address = account.address.encode('hex')
         self.assertIsNotNone(account)
         self.assertIsNotNone(address)
