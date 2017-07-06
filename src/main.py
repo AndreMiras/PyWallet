@@ -783,11 +783,11 @@ class Controller(FloatLayout):
         self.ids.screen_manager_id.current = "about"
 
 
-class ControllerApp(App):
+class PyWalletApp(App):
     theme_cls = ThemeManager()
 
     def __init__(self, **kwargs):
-        super(ControllerApp, self).__init__(**kwargs)
+        super(PyWalletApp, self).__init__(**kwargs)
         self._controller = None
 
     def build(self):
@@ -800,4 +800,4 @@ class ControllerApp(App):
 
 
 if __name__ == '__main__':
-    ControllerApp().run()
+    PyWalletApp().run()
