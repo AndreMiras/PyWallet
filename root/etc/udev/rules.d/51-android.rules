@@ -1,5 +1,9 @@
 # https://developer.android.com/studio/run/device.html
+# copy to:
+# /etc/udev/rules.d/
 # Huawei (12d1)
 SUBSYSTEM=="usb", ATTR{idVendor}=="12d1", MODE="0666", GROUP="plugdev"
 # Samsung (04e8)
 SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0666", GROUP="plugdev"
+# HTC (0bb4)
+SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev"
