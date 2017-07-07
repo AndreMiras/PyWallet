@@ -74,6 +74,7 @@ class PyWalib(object):
         url += '&tag=latest'
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
         response_json = response.json()
         PyWalib.handle_etherscan_error(response_json)
@@ -94,6 +95,7 @@ class PyWalib(object):
         url += '&address=%s' % address
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
         response_json = response.json()
         PyWalib.handle_etherscan_error(response_json)
@@ -168,6 +170,7 @@ class PyWalib(object):
         url += '?module=proxy&action=eth_sendRawTransaction'
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.post(url, data={'hex': tx_hex})
         # response is like:
         # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
