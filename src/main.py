@@ -618,6 +618,9 @@ class Controller(FloatLayout):
         for account in account_list:
             address = '0x' + account.address.encode("hex")
             item = OneLineListItem(text=address)
+            # makes sure the address doesn't wrap in multiple lines,
+            # but gets shortened
+            item.ids._lbl_primary.shorten = True
             item.account = account
             items.append(item)
         dialog = Controller.create_list_dialog(
@@ -677,7 +680,7 @@ class Controller(FloatLayout):
         dialog = MDDialog(
                         title=title,
                         content=content,
-                        size_hint=(.8, .8))
+                        size_hint=(.9, .9))
         # workaround for MDDialog container size (too small by default)
         dialog.ids.container.size_hint_y = 1
         # close the dialog as we select the element
@@ -783,11 +786,11 @@ class Controller(FloatLayout):
         self.ids.screen_manager_id.current = "about"
 
 
-class ControllerApp(App):
+class PyWalletApp(App):
     theme_cls = ThemeManager()
 
     def __init__(self, **kwargs):
-        super(ControllerApp, self).__init__(**kwargs)
+        super(PyWalletApp, self).__init__(**kwargs)
         self._controller = None
 
     def build(self):
@@ -800,4 +803,4 @@ class ControllerApp(App):
 
 
 if __name__ == '__main__':
-    ControllerApp().run()
+    PyWalletApp().run()
