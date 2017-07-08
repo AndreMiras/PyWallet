@@ -15,6 +15,9 @@ from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
 ROUND_DIGITS = 3
+KEYSTORE_DIR_PREFIX = expanduser("~")
+# default pyethapp keystore path
+KEYSTORE_DIR_SUFFIX = ".config/pyethapp/keystore/"
 
 
 class UnknownEtherscanException(Exception):
@@ -252,11 +255,10 @@ class PyWalib(object):
     @staticmethod
     def get_default_keystore_path():
         """
-        Returns the keystore path.
+        Returns the keystore path, which is the same as the default pyethapp
+        one.
         """
-        home = expanduser("~")
-        keystore_relative_dir = ".config/pyethapp/keystore/"
-        keystore_dir = os.path.join(home, keystore_relative_dir)
+        keystore_dir = os.path.join(KEYSTORE_DIR_PREFIX, KEYSTORE_DIR_SUFFIX)
         return keystore_dir
 
     def get_account_list(self):

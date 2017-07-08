@@ -579,6 +579,7 @@ class About(BoxLayout):
 
     @staticmethod
     def run_tests():
+        Controller.patch_keystore_path()
         test_suite = suite()
         print("test_suite:", test_suite)
         unittest.TextTestRunner().run(test_suite)
@@ -652,20 +653,24 @@ class Controller(FloatLayout):
         dialog.open()
 
     @staticmethod
+    def patch_keystore_path():
+        """
+        Changes pywalib default keystore path depending on platform.
+        Currently only updates it on Android.
+        """
+        if platform != "android":
+            return
+        import pywalib
+        # uses kivy user_data_dir (/sdcard/<app_name>)
+        pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
+
+    @staticmethod
     def get_keystore_path():
         """
         This is the Kivy default keystore path.
         """
-        default_keystore_path = PyWalib.get_default_keystore_path()
-        if platform != "android":
-            return default_keystore_path
-        # makes sure the leading slash gets removed
-        default_keystore_path = default_keystore_path.strip('/')
-        user_data_dir = App.get_running_app().user_data_dir
-        # preprends with kivy user_data_dir
-        keystore_path = os.path.join(
-            user_data_dir, default_keystore_path)
-        return keystore_path
+        Controller.patch_keystore_path()
+        return PyWalib.get_default_keystore_path()
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
