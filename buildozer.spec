@@ -149,11 +149,10 @@ android.permissions = INTERNET
 
 # (list) Pattern to whitelist for the whole project
 #android.whitelist =
-android.whitelist =
-    unittest/*
 
 # (str) Path to a custom whitelist file
 #android.whitelist_src =
+android.whitelist_src = whitelist.txt
 
 # (str) Path to a custom blacklist file
 #android.blacklist_src =
