@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import os
 import re
 import unittest
 from threading import Thread
