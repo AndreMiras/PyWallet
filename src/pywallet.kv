@@ -224,6 +224,9 @@
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
     PushUp:
+    MDTextField:
+        multiline: True
+        text: root.stream_property
     MDRaisedButton:
         text: "Run tests"
         on_release: root.run_tests()
