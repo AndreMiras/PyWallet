@@ -223,6 +223,10 @@
         text: root.about_text_property
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
+    ScrollView:
+        MDTextField:
+            multiline: True
+            text: root.stream_property
     PushUp:
     MDRaisedButton:
         text: "Run tests"
