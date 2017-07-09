@@ -620,7 +620,9 @@ class About(BoxLayout):
         print("test_suite:", test_suite)
         self.stream_property = ""
         stream = StringIOCBWrite(callback_write=self.callback_write)
-        unittest.TextTestRunner(stream=stream).run(test_suite)
+        verbosity = 2
+        unittest.TextTestRunner(
+                stream=stream, verbosity=verbosity).run(test_suite)
 
 
 class Controller(FloatLayout):
