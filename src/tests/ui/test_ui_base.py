@@ -25,9 +25,8 @@ class Test(unittest.TestCase):
         Clock.schedule_interval(self.pause, 0.000001)
 
         # Do something
-        app.my_button.dispatch('on_release')
-        self.assertEqual('Hello Test', app.my_button.text)
-        #self.assertEqual('Fail Test', app.my_button.text)
+        # app.my_button.dispatch('on_release')
+        self.assertEqual('', app.controller.toolbar.title)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
