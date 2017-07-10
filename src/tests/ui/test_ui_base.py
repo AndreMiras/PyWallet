@@ -1,10 +1,9 @@
-import unittest
-
-import os
+import os.path as op
 import sys
 import time
-import os.path as op
+import unittest
 from functools import partial
+
 from kivy.clock import Clock
 
 # TODO: hardcoded path, refs:
@@ -12,7 +11,7 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.dirname(op.abspath(__file__))))
 sys.path.append(main_path)
 
-from main import PyWalletApp
+from main import PyWalletApp    # NOQA: F402 # isort:skip
 
 
 class Test(unittest.TestCase):
@@ -38,6 +37,7 @@ class Test(unittest.TestCase):
         p = partial(self.run_test, app)
         Clock.schedule_once(p, 0.000001)
         app.run()
+
 
 if __name__ == '__main__':
     unittest.main()
