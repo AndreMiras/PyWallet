@@ -281,7 +281,7 @@ class PywalibTestCase(unittest.TestCase):
         if not os.path.exists(keystore_dir):
             os.makedirs(keystore_dir)
         # checks path correctness
-        self.assertTrue(keystore_dir.endswith("config/pyethapp/keystore/"))
+        self.assertTrue(keystore_dir.endswith(".config/pyethapp/keystore/"))
         # checks read/write access
         self.assertEqual(os.access(keystore_dir, os.R_OK), True)
         self.assertEqual(os.access(keystore_dir, os.W_OK), True)

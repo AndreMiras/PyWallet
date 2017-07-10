@@ -223,6 +223,10 @@
         text: root.about_text_property
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
+    ScrollView:
+        MDTextField:
+            multiline: True
+            text: root.stream_property
     PushUp:
     MDRaisedButton:
         text: "Run tests"
@@ -275,13 +279,13 @@
                 Screen:
                     name: 'overview'
                     on_pre_enter:
-                        app.controller.set_toolbar_title(app.controller.get_overview_title())
+                        root.set_toolbar_title(app.controller.get_overview_title())
                     OverviewBottomNavigation:
                         id: overview_bnavigation_id
                 Screen:
                     name: 'manage_keystores'
                     on_pre_enter:
-                        app.controller.set_toolbar_title("Manage existing")
+                        root.set_toolbar_title("Manage existing")
                         # workaround for broken MDBottomNavigation, refs
                         # https://github.com/AndreMiras/PyWallet/issues/38
                         Window.dispatch('on_resize', *Window.size)
@@ -290,6 +294,6 @@
                 Screen:
                     name: 'about'
                     on_pre_enter:
-                        app.controller.set_toolbar_title("About PyWallet")
+                        root.set_toolbar_title("About PyWallet")
                     About:
                         id: about_id

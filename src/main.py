@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
-import os
 import re
 import unittest
+from io import StringIO
 from threading import Thread
 
 import kivy
@@ -563,11 +563,37 @@ class PWToolbar(Toolbar):
         self.navigation.toggle_nav_drawer()
 
 
+class StringIOCBWrite(StringIO):
+    """
+    Inherits StringIO, provides callback on write.
+    """
+
+    def __init__(self, initial_value='', newline='\n', callback_write=None):
+        """
+        Overloads the StringIO.__init__() makes it possible to hook a callback
+        for write operations.
+        """
+        self.callback_write = callback_write
+        super(StringIOCBWrite, self).__init__(initial_value, newline)
+
+    def write(self, s):
+        """
+        Calls the StringIO.write() method then the callback_write with
+        given string parameter.
+        """
+        # io.StringIO expects unicode
+        s_unicode = s.decode('utf-8')
+        super(StringIOCBWrite, self).write(s_unicode)
+        if self.callback_write is not None:
+            self.callback_write(s_unicode)
+
+
 class About(BoxLayout):
 
     project_page_property = StringProperty(
         "https://github.com/AndreMiras/PyWallet")
     about_text_property = StringProperty()
+    stream_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(About, self).__init__(**kwargs)
@@ -577,11 +603,26 @@ class About(BoxLayout):
             self.project_page_property + \
             "[/ref][/color]"
 
-    @staticmethod
-    def run_tests():
+    @mainthread
+    def callback_write(self, s):
+        """
+        Updates the UI with test progress.
+        """
+        self.stream_property += s
+
+    @run_in_thread
+    def run_tests(self):
+        """
+        Loads the test suite and hook the callback for reporting progress.
+        """
+        Controller.patch_keystore_path()
         test_suite = suite()
         print("test_suite:", test_suite)
-        unittest.TextTestRunner().run(test_suite)
+        self.stream_property = ""
+        stream = StringIOCBWrite(callback_write=self.callback_write)
+        verbosity = 2
+        unittest.TextTestRunner(
+                stream=stream, verbosity=verbosity).run(test_suite)
 
 
 class Controller(FloatLayout):
@@ -652,20 +693,24 @@ class Controller(FloatLayout):
         dialog.open()
 
     @staticmethod
+    def patch_keystore_path():
+        """
+        Changes pywalib default keystore path depending on platform.
+        Currently only updates it on Android.
+        """
+        if platform != "android":
+            return
+        import pywalib
+        # uses kivy user_data_dir (/sdcard/<app_name>)
+        pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
+
+    @staticmethod
     def get_keystore_path():
         """
         This is the Kivy default keystore path.
         """
-        default_keystore_path = PyWalib.get_default_keystore_path()
-        if platform != "android":
-            return default_keystore_path
-        # makes sure the leading slash gets removed
-        default_keystore_path = default_keystore_path.strip('/')
-        user_data_dir = App.get_running_app().user_data_dir
-        # preprends with kivy user_data_dir
-        keystore_path = os.path.join(
-            user_data_dir, default_keystore_path)
-        return keystore_path
+        Controller.patch_keystore_path()
+        return PyWalib.get_default_keystore_path()
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
