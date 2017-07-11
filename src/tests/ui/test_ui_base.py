@@ -1,8 +1,11 @@
+import os
 import os.path as op
+import shutil
 import sys
 import time
 import unittest
 from functools import partial
+from tempfile import mkdtemp
 
 from kivy.clock import Clock
 
@@ -15,6 +18,18 @@ from main import PyWalletApp    # NOQA: F402 # isort:skip
 
 
 class Test(unittest.TestCase):
+
+    def setUp(self):
+        """
+        Sets a temporay KEYSTORE_PATH, so keystore directory and related
+        application files will be stored here until tearDown().
+        """
+        self.keystore_path = mkdtemp()
+        os.environ['KEYSTORE_PATH'] = self.keystore_path
+
+    def tearDown(self):
+        shutil.rmtree(self.keystore_path, ignore_errors=True)
+
     # sleep function that catches `dt` from Clock
     def pause(*args):
         time.sleep(0.000001)
@@ -25,7 +40,7 @@ class Test(unittest.TestCase):
 
         # Do something
         # app.my_button.dispatch('on_release')
-        self.assertEqual('', app.controller.toolbar.title)
+        self.assertEqual('Manage existing', app.controller.toolbar.title)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.

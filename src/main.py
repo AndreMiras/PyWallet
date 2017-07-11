@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
+import os
 import re
 import unittest
 from io import StringIO
@@ -709,8 +710,11 @@ class Controller(FloatLayout):
         """
         This is the Kivy default keystore path.
         """
-        Controller.patch_keystore_path()
-        return PyWalib.get_default_keystore_path()
+        keystore_path = os.environ.get('KEYSTORE_PATH')
+        if keystore_path is None:
+            Controller.patch_keystore_path()
+            keystore_path = PyWalib.get_default_keystore_path()
+        return keystore_path
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
