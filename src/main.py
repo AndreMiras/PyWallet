@@ -640,7 +640,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        self.load_landing_page()
+        Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
     def overview(self):
@@ -829,9 +829,15 @@ class Controller(FloatLayout):
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
+        And from within this screen load the create new account tab.
         """
+        # loads the manage keystores screen
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
+        # loads the create new account tab
+        manage_keystores = self.ids.manage_keystores_id
+        create_new_account = manage_keystores.ids.create_new_account_id
+        create_new_account.dispatch('on_tab_press')
 
     def load_about_screen(self):
         """
