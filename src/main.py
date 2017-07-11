@@ -204,7 +204,10 @@ class Receive(BoxLayout):
         Default state setup.
         """
         self.controller = App.get_running_app().controller
-        self.current_account = self.controller.pywalib.get_main_account()
+        try:
+            self.current_account = self.controller.pywalib.get_main_account()
+        except IndexError:
+            pass
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
@@ -362,7 +365,10 @@ class ManageExisting(BoxLayout):
         Default state setup.
         """
         self.controller = App.get_running_app().controller
-        self.current_account = self.controller.pywalib.get_main_account()
+        try:
+            self.current_account = self.controller.pywalib.get_main_account()
+        except IndexError:
+            pass
 
     def verify_current_password_field(self):
         """
