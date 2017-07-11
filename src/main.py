@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
+import os
 import re
 import unittest
 from io import StringIO
@@ -203,7 +204,10 @@ class Receive(BoxLayout):
         Default state setup.
         """
         self.controller = App.get_running_app().controller
-        self.current_account = self.controller.pywalib.get_main_account()
+        try:
+            self.current_account = self.controller.pywalib.get_main_account()
+        except IndexError:
+            pass
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
@@ -361,7 +365,10 @@ class ManageExisting(BoxLayout):
         Default state setup.
         """
         self.controller = App.get_running_app().controller
-        self.current_account = self.controller.pywalib.get_main_account()
+        try:
+            self.current_account = self.controller.pywalib.get_main_account()
+        except IndexError:
+            pass
 
     def verify_current_password_field(self):
         """
@@ -633,7 +640,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        self.load_landing_page()
+        Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
     def overview(self):
@@ -709,8 +716,11 @@ class Controller(FloatLayout):
         """
         This is the Kivy default keystore path.
         """
-        Controller.patch_keystore_path()
-        return PyWalib.get_default_keystore_path()
+        keystore_path = os.environ.get('KEYSTORE_PATH')
+        if keystore_path is None:
+            Controller.patch_keystore_path()
+            keystore_path = PyWalib.get_default_keystore_path()
+        return keystore_path
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
@@ -819,9 +829,15 @@ class Controller(FloatLayout):
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
+        And from within this screen load the create new account tab.
         """
+        # loads the manage keystores screen
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
+        # loads the create new account tab
+        manage_keystores = self.ids.manage_keystores_id
+        create_new_account = manage_keystores.ids.create_new_account_id
+        create_new_account.dispatch('on_tab_press')
 
     def load_about_screen(self):
         """
