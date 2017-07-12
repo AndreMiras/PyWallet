@@ -446,11 +446,13 @@ class CreateNewAccount(BoxLayout):
     def setup(self):
         """
         Sets security vs speed default values.
+        Plus hides the advanced widgets.
         """
         self.security_slider = self.ids.security_slider_id
         self.speed_slider = self.ids.speed_slider_id
         self.security_slider.value = self.speed_slider.value = 50
         self.controller = App.get_running_app().controller
+        # self.toggle_advanced(False)
 
     def verify_password_field(self):
         """
@@ -506,6 +508,20 @@ class CreateNewAccount(BoxLayout):
                 password=password, security_ratio=security_ratio)
         CreateNewAccount.try_unlock(account, password)
         return account
+
+    def toggle_advanced(self, show):
+        """
+        Shows/hides advanced account creation widgets.
+        https://stackoverflow.com/q/23211142/185510
+        """
+        advanced = self.ids.advanced_id
+        if not show:
+            # save the old y-coordinate
+            advanced.saved_y = advanced.y
+            # now move the widget offscreen
+            advanced.y = 5000
+        else:
+            advanced.y = advanced.saved_y
 
 
 class AddressButton(MDFlatButton):
