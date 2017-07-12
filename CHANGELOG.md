@@ -1,11 +1,21 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix crash on empty keystore
+  - Introduce UI unit testing, refs #41
+  - Run app unit tests in a thread, refs #42
+  - Add custon application icon, refs #24
+  - Add custon splash screen, refs #25
+  - Document release process, refs #47
+  - Fix account list overlap, refs #49
+
 ## [v20170706]
 
   - Create new account, refs #9
   - Manage account password, refs #9
   - Run builds in parallel, refs #34
-  - Run unit tests on Android, refs #40
+  - Run unit tests from the app, refs #40
   - Use a thread decorator, refs #33
   - Round transaction history, refs #45
   - Fit long address to screen
