@@ -151,7 +151,7 @@
 
 
 
-<ManageExisting@BoxLayout>:
+<ManageExisting>:
     orientation: 'vertical'
     AddressButton:
         text: root.current_account_string
@@ -191,7 +191,7 @@
     PushUp:
 
 
-<ManageKeystore@MDBottomNavigation>:
+<ManageKeystoreBottomNavigation@MDBottomNavigation>:
     MDBottomNavigationItem:
         name: "manage_existing"
         text: "Manage"
@@ -290,7 +290,7 @@
                         # workaround for broken MDBottomNavigation, refs
                         # https://github.com/AndreMiras/PyWallet/issues/38
                         Window.dispatch('on_resize', *Window.size)
-                    ManageKeystore:
+                    ManageKeystoreBottomNavigation:
                         id: manage_keystores_id
                 Screen:
                     name: 'about'

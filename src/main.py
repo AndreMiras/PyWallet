@@ -230,7 +230,6 @@ class History(BoxLayout):
     current_account = ObjectProperty(None, allownone=True)
 
     def on_current_account(self, instance, account):
-        print("History.on_current_account:")
         self._load_history()
 
     @staticmethod
