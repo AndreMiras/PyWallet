@@ -501,6 +501,9 @@ class CreateNewAccount(BoxLayout):
         pywalib = self.controller.pywalib
         password = self.new_password1
         security_ratio = self.security_slider_value
+        # dividing again by 10, because otherwise it's
+        # too slow on smart devices
+        security_ratio /= 10.0
         Controller.snackbar_message("Creating account...")
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
