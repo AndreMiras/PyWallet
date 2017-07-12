@@ -850,18 +850,13 @@ class Controller(FloatLayout):
 class PyWalletApp(App):
     theme_cls = ThemeManager()
 
-    def __init__(self, **kwargs):
-        super(PyWalletApp, self).__init__(**kwargs)
-        self._controller = None
-
     def build(self):
         self.icon = "docs/images/icon.png"
-        self._controller = Controller(info='PyWallet')
-        return self._controller
+        return Controller(info='PyWallet')
 
     @property
     def controller(self):
-        return self._controller
+        return self.root
 
 
 if __name__ == '__main__':
