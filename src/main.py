@@ -831,7 +831,7 @@ class Controller(FloatLayout):
             self.ids.screen_manager_id.current = "overview"
             self.ids.screen_manager_id.transition.direction = "right"
         except IndexError:
-            self.load_manage_keystores()
+            self.load_create_new_account()
 
     @run_in_thread
     def _load_balance(self):
@@ -846,11 +846,16 @@ class Controller(FloatLayout):
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
-        And from within this screen load the create new account tab.
         """
         # loads the manage keystores screen
         self.ids.screen_manager_id.transition.direction = "left"
         self.ids.screen_manager_id.current = 'manage_keystores'
+
+    def load_create_new_account(self):
+        """
+        Loads the create new account tab from the maage keystores screen.
+        """
+        self.load_manage_keystores()
         # loads the create new account tab
         manage_keystores = self.ids.manage_keystores_id
         create_new_account = manage_keystores.ids.create_new_account_id
