@@ -60,7 +60,9 @@ requirements =
     pyelliptic==1.5.7,
     cffi,
     secp256k1,
-    qrcode
+    qrcode,
+    contextlib2,
+    raven
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
