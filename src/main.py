@@ -25,6 +25,7 @@ from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
+from raven import Client
 from requests.exceptions import ConnectionError
 
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
@@ -881,5 +882,22 @@ class PyWalletApp(App):
         return self.root
 
 
+def configure_sentry():
+    key = 'eaee971c463b49678f6f352dfec497a9'
+    # the public DSN URL is not available on the Python client
+    # so we're exposing the secret and will be revoking it on abuse
+    # https://github.com/getsentry/raven-python/issues/569
+    secret = '4f37fdbde03a4753b78abb84d11f45ab'
+    project_id = '191660'
+    dsn = 'https://{key}:{secret}@sentry.io/{project_id}'.format(
+        key=key, secret=secret, project_id=project_id)
+    client = Client(dsn)
+    return client
+
+
 if __name__ == '__main__':
-    PyWalletApp().run()
+    client = configure_sentry()
+    try:
+        PyWalletApp().run()
+    except:
+        client.captureException()
