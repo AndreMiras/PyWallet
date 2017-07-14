@@ -9,6 +9,7 @@
   - Add custon splash screen, refs #25
   - Document release process, refs #47
   - Fix account list overlap, refs #49
+  - Sentry error reporting, fixes #54
 
 ## [v20170706]
 
