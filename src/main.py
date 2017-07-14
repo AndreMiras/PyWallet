@@ -618,15 +618,28 @@ class About(BoxLayout):
     project_page_property = StringProperty(
         "https://github.com/AndreMiras/PyWallet")
     about_text_property = StringProperty()
+    changelog_text_property = StringProperty()
     stream_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(About, self).__init__(**kwargs)
+        self.load_about()
+        self.load_changelog()
+
+    def load_about(self):
         self.about_text_property = "" + \
             "Project source code and info available on GitHub at: \n" + \
             "[color=00BFFF][ref=github]" + \
             self.project_page_property + \
             "[/ref][/color]"
+
+    def load_changelog(self):
+        changelog_path = os.path.join(
+            Controller.base_dir(),
+            'CHANGELOG.md')
+        with open(changelog_path, 'r') as f:
+            self.changelog_text_property = f.read()
+        f.close()
 
     @mainthread
     def callback_write(self, s):
@@ -739,6 +752,14 @@ class Controller(FloatLayout):
             Controller.patch_keystore_path()
             keystore_path = PyWalib.get_default_keystore_path()
         return keystore_path
+
+    @staticmethod
+    def src_dir():
+        return os.path.dirname(os.path.abspath(__file__))
+
+    @staticmethod
+    def base_dir():
+        return os.path.dirname(Controller.src_dir())
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):

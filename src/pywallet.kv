@@ -238,6 +238,12 @@
         text: root.about_text_property
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
+    MDLabel:
+        text: 'Changelog'
+    ScrollView:
+        MDTextField:
+            multiline: True
+            text: root.changelog_text_property
     ScrollView:
         MDTextField:
             multiline: True
