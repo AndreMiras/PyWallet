@@ -635,7 +635,7 @@ class About(BoxLayout):
 
     def load_changelog(self):
         changelog_path = os.path.join(
-            Controller.base_dir(),
+            Controller.src_dir(),
             'CHANGELOG.md')
         with open(changelog_path, 'r') as f:
             self.changelog_text_property = f.read()
@@ -756,10 +756,6 @@ class Controller(FloatLayout):
     @staticmethod
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
-
-    @staticmethod
-    def base_dir():
-        return os.path.dirname(Controller.src_dir())
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
