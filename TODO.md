@@ -5,6 +5,8 @@
    * https://github.com/corpetty/py-etherscan-api
  * Test
    * use the test net
+     * talking to nodes
+     * via Etherscan https://ropsten.etherscan.io/apis
    * pylint
    * unit test account creation with different iterations
  * Automate / Document dev requirements
@@ -22,3 +24,4 @@
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect
+   * https://gitter.im/
