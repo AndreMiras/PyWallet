@@ -16,6 +16,7 @@ from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.dialog import MDDialog
@@ -611,6 +612,13 @@ class StringIOCBWrite(StringIO):
         super(StringIOCBWrite, self).write(s_unicode)
         if self.callback_write is not None:
             self.callback_write(s_unicode)
+
+
+class ScrollableLabel(ScrollView):
+    """
+    https://github.com/kivy/kivy/wiki/Scrollable-Label
+    """
+    text = StringProperty('')
 
 
 class About(BoxLayout):

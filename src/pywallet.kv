@@ -230,6 +230,14 @@
         ImportKeystore:
 
 
+<ScrollableLabel>:
+    MDLabel:
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        text: root.text
+        markup: True
+
 
 <About>:
     orientation: 'vertical'
@@ -240,10 +248,8 @@
         on_ref_press: webbrowser.open(root.project_page_property)
     MDLabel:
         text: 'Changelog'
-    ScrollView:
-        MDTextField:
-            multiline: True
-            text: root.changelog_text_property
+    ScrollableLabel:
+        text: root.changelog_text_property
     ScrollView:
         MDTextField:
             multiline: True
