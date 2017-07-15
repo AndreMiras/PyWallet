@@ -351,5 +351,8 @@
                     name: 'about'
                     on_pre_enter:
                         root.set_toolbar_title("About PyWallet")
+                        # workaround for broken MDBottomNavigation, refs
+                        # https://github.com/AndreMiras/PyWallet/issues/38
+                        Window.dispatch('on_resize', *Window.size)
                     About:
                         id: about_id
