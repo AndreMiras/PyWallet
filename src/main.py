@@ -621,25 +621,12 @@ class ScrollableLabel(ScrollView):
     text = StringProperty('')
 
 
-class About(BoxLayout):
-
-    project_page_property = StringProperty(
-        "https://github.com/AndreMiras/PyWallet")
-    about_text_property = StringProperty()
+class AboutChangelog(BoxLayout):
     changelog_text_property = StringProperty()
-    stream_property = StringProperty()
 
     def __init__(self, **kwargs):
-        super(About, self).__init__(**kwargs)
-        self.load_about()
-        self.load_changelog()
-
-    def load_about(self):
-        self.about_text_property = "" + \
-            "Project source code and info available on GitHub at: \n" + \
-            "[color=00BFFF][ref=github]" + \
-            self.project_page_property + \
-            "[/ref][/color]"
+        super(AboutChangelog, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.load_changelog())
 
     def load_changelog(self):
         changelog_path = os.path.join(
@@ -648,6 +635,27 @@ class About(BoxLayout):
         with open(changelog_path, 'r') as f:
             self.changelog_text_property = f.read()
         f.close()
+
+
+class AboutOverview(BoxLayout):
+    project_page_property = StringProperty(
+        "https://github.com/AndreMiras/PyWallet")
+    about_text_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(AboutOverview, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.load_about())
+
+    def load_about(self):
+        self.about_text_property = "" + \
+            "Project source code and info available on GitHub at: \n" + \
+            "[color=00BFFF][ref=github]" + \
+            self.project_page_property + \
+            "[/ref][/color]"
+
+
+class AboutDiagnostic(BoxLayout):
+    stream_property = StringProperty()
 
     @mainthread
     def callback_write(self, s):

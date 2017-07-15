@@ -239,25 +239,53 @@
         markup: True
 
 
-<About>:
+<AboutOverview>:
     orientation: 'vertical'
     MDLabel:
         markup: True
         text: root.about_text_property
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
-    MDLabel:
-        text: 'Changelog'
+
+
+<AboutChangelog>:
+    orientation: 'vertical'
     ScrollableLabel:
         text: root.changelog_text_property
-    ScrollView:
-        MDTextField:
-            multiline: True
-            text: root.stream_property
-    PushUp:
+
+
+<AboutDiagnostic>:
+    orientation: 'vertical'
     MDRaisedButton:
         text: "Run tests"
         on_release: root.run_tests()
+
+
+<About@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: "about_overview"
+        text: "Overview"
+        # TODO
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Overview")
+        AboutOverview:
+    MDBottomNavigationItem:
+        name: "about_changelog"
+        text: "Changelog"
+        # TODO
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Changelog")
+        AboutChangelog:
+    MDBottomNavigationItem:
+        name: "about_diagnostic"
+        text: "Diagnostic"
+        # TODO
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Diagnostic")
+        AboutDiagnostic:
 
 
 <OverviewBottomNavigation@MDBottomNavigation>:
