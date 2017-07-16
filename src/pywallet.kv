@@ -230,22 +230,63 @@
         ImportKeystore:
 
 
+<ScrollableLabel>:
+    MDLabel:
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        text: root.text
+        markup: True
 
-<About>:
+
+<AboutOverview>:
     orientation: 'vertical'
     MDLabel:
         markup: True
         text: root.about_text_property
         theme_text_color: 'Primary'
         on_ref_press: webbrowser.open(root.project_page_property)
+
+
+<AboutChangelog>:
+    orientation: 'vertical'
+    ScrollableLabel:
+        text: root.changelog_text_property
+
+
+<AboutDiagnostic>:
+    orientation: 'vertical'
     ScrollView:
         MDTextField:
             multiline: True
             text: root.stream_property
-    PushUp:
     MDRaisedButton:
         text: "Run tests"
         on_release: root.run_tests()
+
+
+<About@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: "about_overview"
+        text: "Overview"
+        icon: 'github-circle'
+        on_tab_press:
+            app.controller.set_toolbar_title("Overview")
+        AboutOverview:
+    MDBottomNavigationItem:
+        name: "about_changelog"
+        text: "Changelog"
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Changelog")
+        AboutChangelog:
+    MDBottomNavigationItem:
+        name: "about_diagnostic"
+        text: "Diagnostic"
+        icon: 'bug'
+        on_tab_press:
+            app.controller.set_toolbar_title("Diagnostic")
+        AboutDiagnostic:
 
 
 <OverviewBottomNavigation@MDBottomNavigation>:
@@ -310,5 +351,8 @@
                     name: 'about'
                     on_pre_enter:
                         root.set_toolbar_title("About PyWallet")
+                        # workaround for broken MDBottomNavigation, refs
+                        # https://github.com/AndreMiras/PyWallet/issues/38
+                        Window.dispatch('on_resize', *Window.size)
                     About:
                         id: about_id

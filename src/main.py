@@ -16,6 +16,7 @@ from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.dialog import MDDialog
@@ -613,20 +614,48 @@ class StringIOCBWrite(StringIO):
             self.callback_write(s_unicode)
 
 
-class About(BoxLayout):
+class ScrollableLabel(ScrollView):
+    """
+    https://github.com/kivy/kivy/wiki/Scrollable-Label
+    """
+    text = StringProperty('')
 
+
+class AboutChangelog(BoxLayout):
+    changelog_text_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(AboutChangelog, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.load_changelog())
+
+    def load_changelog(self):
+        changelog_path = os.path.join(
+            Controller.src_dir(),
+            'CHANGELOG.md')
+        with open(changelog_path, 'r') as f:
+            self.changelog_text_property = f.read()
+        f.close()
+
+
+class AboutOverview(BoxLayout):
     project_page_property = StringProperty(
         "https://github.com/AndreMiras/PyWallet")
     about_text_property = StringProperty()
-    stream_property = StringProperty()
 
     def __init__(self, **kwargs):
-        super(About, self).__init__(**kwargs)
+        super(AboutOverview, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.load_about())
+
+    def load_about(self):
         self.about_text_property = "" + \
             "Project source code and info available on GitHub at: \n" + \
             "[color=00BFFF][ref=github]" + \
             self.project_page_property + \
             "[/ref][/color]"
+
+
+class AboutDiagnostic(BoxLayout):
+    stream_property = StringProperty()
 
     @mainthread
     def callback_write(self, s):
@@ -739,6 +768,10 @@ class Controller(FloatLayout):
             Controller.patch_keystore_path()
             keystore_path = PyWalib.get_default_keystore_path()
         return keystore_path
+
+    @staticmethod
+    def src_dir():
+        return os.path.dirname(os.path.abspath(__file__))
 
     @staticmethod
     def create_list_dialog(title, items, on_selected_item):
