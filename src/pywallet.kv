@@ -259,9 +259,11 @@
         MDTextField:
             multiline: True
             text: root.stream_property
-    MDRaisedButton:
-        text: "Run tests"
-        on_release: root.run_tests()
+    AnchorLayout:
+        size_hint_y: None
+        MDRaisedButton:
+            text: "Run diagnostic"
+            on_release: root.run_tests()
 
 
 <About@MDBottomNavigation>:
