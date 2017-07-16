@@ -71,10 +71,10 @@
         required: True
         text: str(root.send_amount)
         on_text: root.send_amount = args[1]
-    MDRaisedButton:
-        pos_hint: {'center_x': 0.5}
-        text: "Send"
-        on_release: self.parent.on_send_click()
+    AnchorLayout:
+        MDRaisedButton:
+            text: "Send"
+            on_release: self.parent.on_send_click()
     PushUp:
 
 
