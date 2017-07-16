@@ -1,0 +1,8 @@
+lib-dynload/_csv.so
+distutils/*
+xml/*
+pdb.{py,doc,pyo}
+profile.{py,doc,pyo}
+this.{py,doc,pyo}
+timeit.{py,doc,pyo}
+smtp{d,lib}.{py,doc,pyo}
