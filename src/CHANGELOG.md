@@ -9,7 +9,9 @@
   - Add custon splash screen, refs #25
   - Document release process, refs #47
   - Fix account list overlap, refs #49
-  - Sentry error reporting, fixes #54
+  - Sentry error reporting, refs #54
+  - Fix Travis isort inconsistencies, refs #57
+  - Display changelog in the app, refs #58
 
 ## [v20170706]
 
