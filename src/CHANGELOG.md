@@ -12,6 +12,7 @@
   - Sentry error reporting, refs #54
   - Fix Travis isort inconsistencies, refs #57
   - Display changelog in the app, refs #58
+  - Introduce APK size reduction, refs #60
 
 ## [v20170706]
 
