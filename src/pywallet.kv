@@ -194,14 +194,14 @@
         on_text: root.new_password2 = args[1]
     BoxLayout:
         orientation: 'horizontal'
-        padding: dp(4), dp(4)
-        spacing: dp(40)
-        MDRaisedButton:
-            text: "Update password"
-            on_release: root.update_password()
-        MDRaisedButton:
-            text: "Delete account"
-            on_release: root.delete_account()
+        AnchorLayout:
+            MDRaisedButton:
+                text: "Update password"
+                on_release: root.update_password()
+        AnchorLayout:
+            MDRaisedButton:
+                text: "Delete account"
+                on_release: root.delete_account()
     PushUp:
 
 
