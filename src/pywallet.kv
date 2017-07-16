@@ -156,11 +156,11 @@
             max: security_slider_id.max
             step: security_slider_id.step
             value: max(self.max - security_slider_id.value, 1)
-    MDRaisedButton:
-        # TODO: center on x
-        id: create_account_button_id
-        text: "Create account"
-        on_release: root.create_account()
+    AnchorLayout:
+        MDRaisedButton:
+            id: create_account_button_id
+            text: "Create account"
+            on_release: root.create_account()
     PushUp:
 
 
