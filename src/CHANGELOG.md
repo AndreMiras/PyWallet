@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170716]
 
   - Fix crash on empty keystore
   - Introduce UI unit testing, refs #41
