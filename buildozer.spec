@@ -13,7 +13,7 @@ package.domain = com.github.andremiras
 source.dir = src/
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,md
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -23,13 +23,13 @@ source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 #source.exclude_dirs = tests, bin
-source.exclude_dirs = tests, bin, venv, python-for-android
+source.exclude_dirs = bin, venv, src/python-for-android
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.1
+version = 2017.0716
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -60,7 +60,9 @@ requirements =
     pyelliptic==1.5.7,
     cffi,
     secp256k1,
-    qrcode
+    qrcode,
+    contextlib2,
+    raven
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -72,9 +74,11 @@ garden_requirements = qrcode
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = docs/images/icon.png
 
 # (str) Icon of the application
 #icon.filename = %(source.dir)s/data/icon.png
+icon.filename = docs/images/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = portrait
@@ -150,9 +154,11 @@ android.permissions = INTERNET
 
 # (str) Path to a custom whitelist file
 #android.whitelist_src =
+android.whitelist_src = whitelist.txt
 
 # (str) Path to a custom blacklist file
 #android.blacklist_src =
+android.blacklist_src = blacklist.txt
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow

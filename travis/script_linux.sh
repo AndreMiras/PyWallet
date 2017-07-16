@@ -16,4 +16,4 @@ pip install -r requirements.txt
 # runs tests
 isort --check-only --recursive src/
 flake8 src/
-python -m unittest discover --start-directory=src/tests/
+coverage run --source=src/ -m unittest discover --start-directory=src/

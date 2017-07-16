@@ -1,0 +1,7 @@
+# .coveragerc to control coverage.py
+[run]
+source = src/
+
+omit =
+    # omits the UI
+    src/main.py

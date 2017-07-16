@@ -1,0 +1,360 @@
+#:kivy 1.10.0
+
+#:import webbrowser webbrowser
+#:import Window kivy.core.window.Window
+#:import MDList kivymd.list.MDList
+#:import MDSlider kivymd.slider.MDSlider
+#:import MDTextField kivymd.textfields.MDTextField
+#:import MDSwitch kivymd.selectioncontrols.MDSwitch
+#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import QRCodeWidget kivy.garden.qrcode
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
+
+
+<PushUp@BoxLayout>:
+    # need this hack to push widgets up
+    id: push_up
+
+<Navigation@NavigationLayout>:
+    MDNavigationDrawer:
+        id: navigation_drawer
+        NavigationDrawerToolbar:
+            title: "Menu"
+        NavigationDrawerIconButton:
+            icon: "home"
+            text: "Home"
+            on_release: app.controller.load_landing_page()
+        NavigationDrawerIconButton:
+            icon: "key"
+            text: "Account"
+            on_release: app.controller.load_manage_keystores()
+        NavigationDrawerIconButton:
+            icon: "help"
+            text: "About"
+            on_release: app.controller.load_about_screen()
+
+
+<PasswordForm>:
+    orientation: 'vertical'
+    MDTextField:
+        id: password_id
+        hint_text: "Password"
+        helper_text: "Enter the password to unlock your account"
+        helper_text_mode: "on_focus"
+        text: root.password
+        password: True
+        on_text: root.password = args[1]
+
+
+<PWSelectList>:
+    orientation: 'vertical'
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: address_list_id
+
+
+<Send>:
+    orientation: 'vertical'
+    # TODO: handle from address
+    MDTextField:
+        hint_text: "To"
+        helper_text: "Receiver Ethereum address"
+        helper_text_mode: "persistent"
+        required: True
+        text: root.send_to_address
+        on_text: root.send_to_address = args[1]
+    FloatInput:
+        hint_text: "Amount ETH (e.g. 1.10)"
+        required: True
+        text: str(root.send_amount)
+        on_text: root.send_amount = args[1]
+    AnchorLayout:
+        MDRaisedButton:
+            text: "Send"
+            on_release: self.parent.on_send_click()
+    PushUp:
+
+
+<Receive>:
+    orientation: 'vertical'
+    AddressButton:
+        text: root.current_account_string
+        on_release: root.open_account_list()
+    QRCodeWidget:
+        id: qr_code_id
+
+<Overview>:
+    orientation: 'vertical'
+    AddressButton:
+        text: root.current_account_string
+        on_release: root.open_account_list()
+    History:
+        id: history_id
+
+
+# transactions history
+<History>:
+    orientation: 'vertical'
+    ScrollView:
+        MDList:
+            id: history_list_id
+
+<ImportKeystore>:
+    orientation: 'vertical'
+    MDLabel:
+        halign: 'center'
+        text: 'Copy it in to the keystore directory.\n%s' % root.keystore_path
+    PushUp:
+
+
+<CreateNewAccount>:
+    orientation: 'vertical'
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the password for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
+    MDTextField:
+        # TODO: do validation as we type
+        hint_text: "Password (again)"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
+    # BoxLayout:
+    #     orientation: 'horizontal'
+    #     MDLabel:
+    #         text: "Advanced mode"
+    #     MDSwitch:
+    #         size_hint: None, None
+    #         size: dp(36), dp(48)
+    #         active: False
+    #         on_active:
+    #             root.toggle_advanced(self.active)
+    BoxLayout:
+        orientation: 'vertical'
+        id: advanced_id
+        MDLabel:
+            text: "Security: %s%%" % int(security_slider_id.value)
+        MDSlider:
+            id: security_slider_id
+            min: 0
+            max: 100
+            value: max(self.max - speed_slider_id.value, 1)
+            step: 1
+        MDLabel:
+            text: "Speed: %s%%" % int(speed_slider_id.value)
+        MDSlider:
+            id: speed_slider_id
+            min: security_slider_id.min
+            max: security_slider_id.max
+            step: security_slider_id.step
+            value: max(self.max - security_slider_id.value, 1)
+    AnchorLayout:
+        MDRaisedButton:
+            id: create_account_button_id
+            text: "Create account"
+            on_release: root.create_account()
+    PushUp:
+
+
+
+<ManageExisting>:
+    orientation: 'vertical'
+    AddressButton:
+        text: root.current_account_string
+        on_release: root.open_account_list()
+    MDTextField:
+        hint_text: "Current password"
+        helper_text: "Enter your current password for unlocking your account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.current_password
+        on_text: root.current_password = args[1]
+    MDTextField:
+        hint_text: "Password"
+        helper_text: "Enter the password for encrypting your new account"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password1
+        on_text: root.new_password1 = args[1]
+    MDTextField:
+        # TODO: do validation as we type
+        hint_text: "Password (again)"
+        helper_text: "Retype your password"
+        helper_text_mode: "on_focus"
+        password: True
+        text: root.new_password2
+        on_text: root.new_password2 = args[1]
+    BoxLayout:
+        orientation: 'horizontal'
+        AnchorLayout:
+            MDRaisedButton:
+                text: "Update password"
+                on_release: root.update_password()
+        AnchorLayout:
+            MDRaisedButton:
+                text: "Delete account"
+                on_release: root.delete_account()
+    PushUp:
+
+
+<ManageKeystoreBottomNavigation@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: "manage_existing"
+        text: "Manage"
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Manage existing")
+        ManageExisting:
+    MDBottomNavigationItem:
+        id: create_new_account_id
+        name: "create_new"
+        text: "Create new"
+        icon: "plus"
+        on_tab_press:
+            app.controller.set_toolbar_title("Create new account")
+        CreateNewAccount:
+    MDBottomNavigationItem:
+        name: "import_keystore"
+        text: "Import"
+        icon: "download"
+        on_tab_press:
+            app.controller.set_toolbar_title("Import keystore")
+        ImportKeystore:
+
+
+<ScrollableLabel>:
+    MDLabel:
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        text: root.text
+
+
+<AboutOverview>:
+    orientation: 'vertical'
+    MDLabel:
+        markup: True
+        text: root.about_text_property
+        theme_text_color: 'Primary'
+        on_ref_press: webbrowser.open(root.project_page_property)
+
+
+<AboutChangelog>:
+    orientation: 'vertical'
+    ScrollableLabel:
+        text: root.changelog_text_property
+
+
+<AboutDiagnostic>:
+    orientation: 'vertical'
+    ScrollView:
+        MDTextField:
+            multiline: True
+            readonly: True
+            text: root.stream_property
+    AnchorLayout:
+        size_hint_y: None
+        MDRaisedButton:
+            text: "Run diagnostic"
+            on_release: root.run_tests()
+
+
+<About@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: "about_overview"
+        text: "Overview"
+        icon: 'github-circle'
+        on_tab_press:
+            app.controller.set_toolbar_title("Overview")
+        AboutOverview:
+    MDBottomNavigationItem:
+        name: "about_changelog"
+        text: "Changelog"
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Changelog")
+        AboutChangelog:
+    MDBottomNavigationItem:
+        name: "about_diagnostic"
+        text: "Diagnostic"
+        icon: 'bug'
+        on_tab_press:
+            app.controller.set_toolbar_title("Diagnostic")
+        AboutDiagnostic:
+
+
+<OverviewBottomNavigation@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: 'overview'
+        text: "Overview"
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title(app.controller.get_overview_title())
+        Overview:
+            id: overview_id
+    MDBottomNavigationItem:
+        name: 'send'
+        text: "Send"
+        icon: 'arrow-up-bold'
+        on_tab_press:
+            app.controller.set_toolbar_title("Send ETH")
+        Send:
+            id: send_id
+    MDBottomNavigationItem:
+        name: 'receive'
+        text: "Receive"
+        icon: 'arrow-down-bold'
+        on_tab_press:
+            app.controller.set_toolbar_title("Receive ETH")
+        Receive:
+            id: receive_id
+
+
+<PWToolbar>:
+    title: root.title_property
+    md_bg_color: app.theme_cls.primary_color
+    background_palette: 'Primary'
+    background_hue: '500'
+
+
+<Controller>:
+    Navigation:
+        id: navigation_id
+        BoxLayout:
+            orientation: 'vertical'
+            PWToolbar:
+                id: toolbar_id
+            ScreenManager:
+                id: screen_manager_id
+                Screen:
+                    name: 'overview'
+                    on_pre_enter:
+                        root.set_toolbar_title(app.controller.get_overview_title())
+                    OverviewBottomNavigation:
+                        id: overview_bnavigation_id
+                Screen:
+                    name: 'manage_keystores'
+                    on_pre_enter:
+                        root.set_toolbar_title("Manage existing")
+                        # workaround for broken MDBottomNavigation, refs
+                        # https://github.com/AndreMiras/PyWallet/issues/38
+                        Window.dispatch('on_resize', *Window.size)
+                    ManageKeystoreBottomNavigation:
+                        id: manage_keystores_id
+                Screen:
+                    name: 'about'
+                    on_pre_enter:
+                        root.set_toolbar_title("About PyWallet")
+                        # workaround for broken MDBottomNavigation, refs
+                        # https://github.com/AndreMiras/PyWallet/issues/38
+                        Window.dispatch('on_resize', *Window.size)
+                    About:
+                        id: about_id

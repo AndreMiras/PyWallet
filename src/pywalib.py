@@ -8,18 +8,27 @@ from os.path import expanduser
 import requests
 import rlp
 from devp2p.app import BaseApp
+from ethereum.tools.keys import PBKDF2_CONSTANTS
 from ethereum.transactions import Transaction
 from ethereum.utils import denoms, normalize_address
 from pyethapp.accounts import Account, AccountsService
 
 ETHERSCAN_API_KEY = None
-
-
-class InsufficientFundsException(Exception):
-    pass
+ROUND_DIGITS = 3
+KEYSTORE_DIR_PREFIX = expanduser("~")
+# default pyethapp keystore path
+KEYSTORE_DIR_SUFFIX = ".config/pyethapp/keystore/"
 
 
 class UnknownEtherscanException(Exception):
+    pass
+
+
+class InsufficientFundsException(UnknownEtherscanException):
+    pass
+
+
+class NoTransactionFoundException(UnknownEtherscanException):
     pass
 
 
@@ -39,11 +48,18 @@ class PyWalib(object):
         """
         status = response_json["status"]
         message = response_json["message"]
-        assert status == "1"
+        if status != "1":
+            if message == "No transactions found":
+                raise NoTransactionFoundException()
+            else:
+                raise UnknownEtherscanException(response_json)
         assert message == "OK"
 
     @staticmethod
     def address_hex(address):
+        """
+        Normalizes address.
+        """
         prefix = "0x"
         address_hex = prefix + normalize_address(address).encode("hex")
         return address_hex
@@ -61,12 +77,13 @@ class PyWalib(object):
         url += '&tag=latest'
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
         response_json = response.json()
         PyWalib.handle_etherscan_error(response_json)
         balance_wei = int(response_json["result"])
         balance_eth = balance_wei / float(pow(10, 18))
-        balance_eth = round(balance_eth, 2)
+        balance_eth = round(balance_eth, ROUND_DIGITS)
         return balance_eth
 
     @staticmethod
@@ -81,6 +98,7 @@ class PyWalib(object):
         url += '&address=%s' % address
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
         response_json = response.json()
         PyWalib.handle_etherscan_error(response_json)
@@ -88,6 +106,7 @@ class PyWalib(object):
         for transaction in transactions:
             value_wei = int(transaction['value'])
             value_eth = value_wei / float(pow(10, 18))
+            value_eth = round(value_eth, ROUND_DIGITS)
             from_address = PyWalib.address_hex(transaction['from'])
             to_address = PyWalib.address_hex(transaction['to'])
             sent = from_address == address
@@ -101,7 +120,7 @@ class PyWalib(object):
             }
             transaction.update({'extra_dict': extra_dict})
         # sort by timeStamp
-        transactions.sort(key=lambda x: x['timeStamp'], reverse=True)
+        transactions.sort(key=lambda x: x['timeStamp'])
         return transactions
 
     @staticmethod
@@ -122,7 +141,10 @@ class PyWalib(object):
         Gets the nonce by counting the list of outbound transactions from
         Etherscan.
         """
-        out_transactions = PyWalib.get_out_transaction_history(address)
+        try:
+            out_transactions = PyWalib.get_out_transaction_history(address)
+        except NoTransactionFoundException:
+            out_transactions = []
         nonce = len(out_transactions)
         return nonce
 
@@ -151,6 +173,7 @@ class PyWalib(object):
         url += '?module=proxy&action=eth_sendRawTransaction'
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
+        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.post(url, data={'hex': tx_hex})
         # response is like:
         # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
@@ -170,6 +193,7 @@ class PyWalib(object):
         Inspired from pyethapp/console_service.py except that we use
         Etherscan for retrieving the nonce as we as for broadcasting the
         transaction.
+        Arg value is in Wei.
         """
         # account.unlock(password)
         sender = normalize_address(sender or self.get_main_account().address)
@@ -184,20 +208,60 @@ class PyWalib(object):
         return tx
 
     @staticmethod
-    def new_account(password):
+    def new_account_helper(password, security_ratio=None):
+        """
+        Helper method for creating an account in memory.
+        Returns the created account.
+        security_ratio is a ratio of the default PBKDF2 iterations.
+        Ranging from 1 to 100 means 100% of the iterations.
+        """
+        # TODO: perform validation on security_ratio (within allowed range)
+        if security_ratio:
+            default_iterations = PBKDF2_CONSTANTS["c"]
+            new_iterations = int((default_iterations * security_ratio) / 100)
+            PBKDF2_CONSTANTS["c"] = new_iterations
         uuid = None
-        print("pyethapp Account.new")
         account = Account.new(password, uuid=uuid)
-        print("Address: ", account.address.encode('hex'))
+        # reverts to previous iterations
+        if security_ratio:
+            PBKDF2_CONSTANTS["c"] = default_iterations
+        return account
+
+    def new_account(self, password, security_ratio=None):
+        """
+        Creates an account on the disk and returns it.
+        security_ratio is a ratio of the default PBKDF2 iterations.
+        Ranging from 1 to 100 means 100% of the iterations.
+        """
+        account = PyWalib.new_account_helper(password, security_ratio)
+        app = self.app
+        account.path = os.path.join(
+            app.services.accounts.keystore_dir, account.address.encode('hex'))
+        self.app.services.accounts.add_account(account)
+        return account
+
+    def update_account_password(
+            self, account, new_password, current_password=None):
+        """
+        The current_password is optional if the account is already unlocked.
+        """
+        if current_password is not None:
+            account.unlock(current_password)
+        # make sure the PBKDF2 param stays the same
+        default_iterations = PBKDF2_CONSTANTS["c"]
+        account_iterations = account.keystore["crypto"]["kdfparams"]["c"]
+        PBKDF2_CONSTANTS["c"] = account_iterations
+        self.app.services.accounts.update_account(account, new_password)
+        # reverts to previous iterations
+        PBKDF2_CONSTANTS["c"] = default_iterations
 
     @staticmethod
     def get_default_keystore_path():
         """
-        Returns the keystore path.
+        Returns the keystore path, which is the same as the default pyethapp
+        one.
         """
-        home = expanduser("~")
-        keystore_relative_dir = ".config/pyethapp/keystore/"
-        keystore_dir = os.path.join(home, keystore_relative_dir)
+        keystore_dir = os.path.join(KEYSTORE_DIR_PREFIX, KEYSTORE_DIR_SUFFIX)
         return keystore_dir
 
     def get_account_list(self):
@@ -213,14 +277,3 @@ class PyWalib(object):
         """
         account = self.get_account_list()[0]
         return account
-
-
-def main():
-    pywalib = PyWalib()
-    account = pywalib.get_main_account()
-    balance = pywalib.get_balance(account.address.encode("hex"))
-    print("balance: %s" % balance)
-
-
-if __name__ == '__main__':
-    main()

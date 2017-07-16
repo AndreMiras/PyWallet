@@ -1,2 +1,6 @@
-isort==4.2.15
+https://github.com/KeyWeeUsr/KivyUnitTest/archive/0.1.3.tar.gz
+# inconsistencies between Travis and dev environment
+# https://github.com/timothycrosley/isort/issues/541
+isort==4.2.5
 flake8==3.3.0
+coverage==4.4.1

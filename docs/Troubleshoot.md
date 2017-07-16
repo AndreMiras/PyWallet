@@ -36,7 +36,32 @@ Buildozer fails with the error below when installing dependencies:
 ```
 urllib.error.URLError: <urlopen error unknown url type: https>
 ```
-Install `libssl-dev` before rebuilding from scratch:
+First install `libssl-dev`:
 ```
 sudo apt install libssl-dev
 ```
+Then clean openssl recipe build and retry:
+```
+buildozer android p4a -- clean_recipe_build openssl
+buildozer android debug
+```
+
+
+Buildozer fails when building libffi:
+```
+configure.ac:41: error: possibly undefined macro: AC_PROG_LIBTOOL
+      If this token and others are legitimate, please use m4_pattern_allow.
+      See the Autoconf documentation.
+autoreconf: /usr/bin/autoconf failed with exit status: 1
+```
+Fix it by installing autogen autoconf and libtool:
+```
+sudo apt install autogen autoconf libtool
+```
+
+
+## Kivy
+
+### Debugging widget sizes
+
+<https://github.com/kivy/kivy/wiki/Debugging-widget-sizes>

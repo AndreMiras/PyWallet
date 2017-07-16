@@ -1,6 +1,7 @@
 # PyWallet
 
 [![Build Status](https://secure.travis-ci.org/AndreMiras/PyWallet.png?branch=develop)](http://travis-ci.org/AndreMiras/PyWallet)
+[![Coverage Status](https://coveralls.io/repos/github/AndreMiras/PyWallet/badge.svg?branch=develop)](https://coveralls.io/github/AndreMiras/PyWallet?branch=develop)
 
 Cross platform Ethereum Wallet built with Python and Kivy.
 
@@ -13,7 +14,7 @@ Cross platform Ethereum Wallet built with Python and Kivy.
   * Receive Ethers via QR code
   * Send Ethers
   * Handle multiple keystores
-  * Manage keystores (TODO)
+  * Manage accounts
 
 ## Run
 

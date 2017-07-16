@@ -3,8 +3,12 @@
  * other way to broadcast transaction:
    * https://etherscan.io/pushTx
    * https://github.com/corpetty/py-etherscan-api
- * use the test net
+ * Test
+   * use the test net
+     * talking to nodes
+     * via Etherscan https://ropsten.etherscan.io/apis
    * pylint
+   * unit test account creation with different iterations
  * Automate / Document dev requirements
    * Automate VM or Docker
    * https://developer.android.com/studio/run/device.html
@@ -20,3 +24,4 @@
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect
+   * https://gitter.im/
