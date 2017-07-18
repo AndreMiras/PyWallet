@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
         app.stop()
 
     # same named function as the filename(!)
-    def test_example(self):
+    def test_ui_base(self):
         app = PyWalletApp()
         p = partial(self.run_test, app)
         # schedule_once() timeout is high here so the application has time
