@@ -40,9 +40,7 @@ class Test(unittest.TestCase):
 
         # Do something
         # app.my_button.dispatch('on_release')
-        # TODO: verify the tab was loaded and toolbar title changed, refs #52
-        # self.assertEqual('Create new account', app.controller.toolbar.title)
-        self.assertEqual('', app.controller.toolbar.title)
+        self.assertEqual('Create new account', app.controller.toolbar.title)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
@@ -52,7 +50,9 @@ class Test(unittest.TestCase):
     def test_example(self):
         app = PyWalletApp()
         p = partial(self.run_test, app)
-        Clock.schedule_once(p, 0.000001)
+        # schedule_once() timeout is high here so the application has time
+        # to initialize, refs #52
+        Clock.schedule_once(p, 1.0)
         app.run()
 
 
