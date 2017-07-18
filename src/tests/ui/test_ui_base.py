@@ -38,8 +38,10 @@ class Test(unittest.TestCase):
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
 
-        # Do something
-        # app.my_button.dispatch('on_release')
+        pywalib = app.controller.pywalib
+        # loading the app with empty account directory
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # should open the trigger the "Create new account" view to be open
         self.assertEqual('Create new account', app.controller.toolbar.title)
 
         # Comment out if you are editing the test, it'll leave the
