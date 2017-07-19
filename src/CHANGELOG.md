@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix crash on send click, refs #63
+
 ## [v20170716]
 
   - Fix crash on empty keystore
