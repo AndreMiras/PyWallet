@@ -10,7 +10,6 @@ from functools import partial
 from tempfile import mkdtemp
 
 from kivy.clock import Clock
-from mock import patch
 
 # TODO: hardcoded path, refs:
 # https://github.com/KeyWeeUsr/KivyUnitTest/issues/3
@@ -37,7 +36,7 @@ class Test(unittest.TestCase):
     def pause(*args):
         time.sleep(0.000001)
 
-    def helper_test_empty_account(self, app, mock_create_dialog):
+    def helper_test_empty_account(self, app):
         """
         Verifies the UI behaves as expected on empty account list.
         """
@@ -46,13 +45,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should open the trigger the "Create new account" view to be open
         self.assertEqual('Create new account', app.controller.toolbar.title)
-        mock_create_dialog.assert_called_with(
-            'No keystore found.', 'Import or create one.')
+        dialogs = app.controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'No keystore found.')
+        dialog.dismiss()
+        self.assertEqual(len(dialogs), 0)
 
     # main test function
-    def run_test(self, app, mock_create_dialog, *args):
+    def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
-        self.helper_test_empty_account(app, mock_create_dialog)
+        self.helper_test_empty_account(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
@@ -61,12 +64,11 @@ class Test(unittest.TestCase):
     # same named function as the filename(!)
     def test_ui_base(self):
         app = PyWalletApp()
-        with patch.object(Controller, "create_dialog") as mock_create_dialog:
-            p = partial(self.run_test, app, mock_create_dialog)
-            # schedule_once() timeout is high here so the application has time
-            # to initialize, refs #52
-            Clock.schedule_once(p, 1.0)
-            app.run()
+        p = partial(self.run_test, app)
+        # schedule_once() timeout is high here so the application has time
+        # to initialize, refs #52
+        Clock.schedule_once(p, 1.0)
+        app.run()
 
 
 if __name__ == '__main__':
