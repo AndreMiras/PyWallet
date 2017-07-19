@@ -16,7 +16,7 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.dirname(op.abspath(__file__))))
 sys.path.append(main_path)
 
-from main import Controller, PyWalletApp    # NOQA: F402 # isort:skip
+from main import PyWalletApp    # NOQA: F402 # isort:skip
 
 
 class Test(unittest.TestCase):
@@ -52,10 +52,22 @@ class Test(unittest.TestCase):
         dialog.dismiss()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_test_on_send_click(self, app):
+        """
+        This is a regression test for #63, verify clicking "Send" Ethers works
+        as expected.
+        https://github.com/AndreMiras/PyWallet/issues/63
+        """
+        controller = app.controller
+        send = controller.send
+        send_button_id = send.ids.send_button_id
+        send_button_id.dispatch('on_release')
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
         self.helper_test_empty_account(app)
+        self.helper_test_on_send_click(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.

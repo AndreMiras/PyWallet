@@ -682,6 +682,8 @@ class AboutDiagnostic(BoxLayout):
 class Controller(FloatLayout):
 
     current_account = ObjectProperty(None, allownone=True)
+    # keeps track of all dialogs alive
+    dialogs = []
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
@@ -697,6 +699,11 @@ class Controller(FloatLayout):
     @property
     def history(self):
         return self.overview.ids.history_id
+
+    @property
+    def send(self):
+        overview_bnavigation_id = self.ids.overview_bnavigation_id
+        return overview_bnavigation_id.ids.send_id
 
     @property
     def toolbar(self):
@@ -798,9 +805,17 @@ class Controller(FloatLayout):
         return dialog
 
     @staticmethod
+    def on_dialog_dismiss(dialog):
+        """
+        Removes it from the dialogs track list.
+        """
+        Controller.dialogs.remove(dialog)
+
+    @staticmethod
     def create_dialog(title, body):
         """
         Creates a dialog from given title and body.
+        Adds it to the dialogs track list.
         """
         content = MDLabel(
                     font_style='Body1',
@@ -818,6 +833,8 @@ class Controller(FloatLayout):
         dialog.add_action_button(
                 "Dismiss",
                 action=lambda *x: dialog.dismiss())
+        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
+        Controller.dialogs.append(dialog)
         return dialog
 
     @staticmethod

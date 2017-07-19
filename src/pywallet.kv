@@ -73,6 +73,7 @@
         on_text: root.send_amount = args[1]
     AnchorLayout:
         MDRaisedButton:
+            id: send_button_id
             text: "Send"
             on_release: self.parent.on_send_click()
     PushUp:
