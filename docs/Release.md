@@ -48,6 +48,10 @@ keytool -genkey -v -keystore ~/.android/<my-new-key>.keystore -alias <my-alias> 
 buildozer android release
 ```
 
+### Play Store
+
+<https://play.google.com/apps/publish/>
+
 ## GitHub
 
 Got to GitHub [Release/Tags](https://github.com/AndreMiras/PyWallet/tags), click "Add release notes" for the tag just created.
