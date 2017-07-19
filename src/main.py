@@ -812,6 +812,15 @@ class Controller(FloatLayout):
         Controller.dialogs.remove(dialog)
 
     @staticmethod
+    def dismiss_all_dialogs():
+        """
+        Dispatches dismiss event for all dialogs.
+        """
+        dialogs = Controller.dialogs[:]
+        for dialog in dialogs:
+            dialog.dispatch('on_dismiss')
+
+    @staticmethod
     def create_dialog(title, body):
         """
         Creates a dialog from given title and body.
