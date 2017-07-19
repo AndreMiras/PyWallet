@@ -37,10 +37,10 @@ class Test(unittest.TestCase):
     def pause(*args):
         time.sleep(0.000001)
 
-    # main test function
-    def run_test(self, app, mock_create_dialog, *args):
-        Clock.schedule_interval(self.pause, 0.000001)
-
+    def helper_test_empty_account(self, app, mock_create_dialog):
+        """
+        Verifies the UI behaves as expected on empty account list.
+        """
         pywalib = app.controller.pywalib
         # loading the app with empty account directory
         self.assertEqual(len(pywalib.get_account_list()), 0)
@@ -48,6 +48,11 @@ class Test(unittest.TestCase):
         self.assertEqual('Create new account', app.controller.toolbar.title)
         mock_create_dialog.assert_called_with(
             'No keystore found.', 'Import or create one.')
+
+    # main test function
+    def run_test(self, app, mock_create_dialog, *args):
+        Clock.schedule_interval(self.pause, 0.000001)
+        self.helper_test_empty_account(app, mock_create_dialog)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
