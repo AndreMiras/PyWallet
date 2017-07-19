@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import os.path as op
 import shutil
@@ -34,25 +36,59 @@ class Test(unittest.TestCase):
     def pause(*args):
         time.sleep(0.000001)
 
+    def helper_test_empty_account(self, app):
+        """
+        Verifies the UI behaves as expected on empty account list.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # loading the app with empty account directory
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # should open the trigger the "Create new account" view to be open
+        self.assertEqual('Create new account', app.controller.toolbar.title)
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'No keystore found.')
+        dialog.dismiss()
+        self.assertEqual(len(dialogs), 0)
+
+    def helper_test_on_send_click(self, app):
+        """
+        This is a regression test for #63, verify clicking "Send" Ethers works
+        as expected.
+        https://github.com/AndreMiras/PyWallet/issues/63
+        """
+        controller = app.controller
+        send = controller.send
+        send_button_id = send.ids.send_button_id
+        # verifies clicking send button doesn't crash the application
+        send_button_id.dispatch('on_release')
+        dialogs = controller.dialogs
+        # but it would still raise some popups since the form is invalid
+        self.assertEqual(len(dialogs), 2)
+        self.assertEqual(dialogs[0].title, 'Input error')
+        self.assertEqual(dialogs[1].title, 'Invalid form')
+        controller.dismiss_all_dialogs()
+        self.assertEqual(len(dialogs), 0)
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
-
-        # Do something
-        # app.my_button.dispatch('on_release')
-        # TODO: verify the tab was loaded and toolbar title changed, refs #52
-        # self.assertEqual('Create new account', app.controller.toolbar.title)
-        self.assertEqual('', app.controller.toolbar.title)
+        self.helper_test_empty_account(app)
+        self.helper_test_on_send_click(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()
 
     # same named function as the filename(!)
-    def test_example(self):
+    def test_ui_base(self):
         app = PyWalletApp()
         p = partial(self.run_test, app)
-        Clock.schedule_once(p, 0.000001)
+        # schedule_once() timeout is high here so the application has time
+        # to initialize, refs #52
+        Clock.schedule_once(p, 1.0)
         app.run()
 
 

@@ -3,6 +3,7 @@
  * other way to broadcast transaction:
    * https://etherscan.io/pushTx
    * https://github.com/corpetty/py-etherscan-api
+   * https://github.com/Marto32/pyetherscan
  * Test
    * use the test net
      * talking to nodes
