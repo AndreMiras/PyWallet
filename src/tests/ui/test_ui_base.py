@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import os.path as op
 import shutil
@@ -8,13 +10,14 @@ from functools import partial
 from tempfile import mkdtemp
 
 from kivy.clock import Clock
+from mock import patch
 
 # TODO: hardcoded path, refs:
 # https://github.com/KeyWeeUsr/KivyUnitTest/issues/3
 main_path = op.dirname(op.dirname(op.dirname(op.abspath(__file__))))
 sys.path.append(main_path)
 
-from main import PyWalletApp    # NOQA: F402 # isort:skip
+from main import Controller, PyWalletApp    # NOQA: F402 # isort:skip
 
 
 class Test(unittest.TestCase):
@@ -35,7 +38,7 @@ class Test(unittest.TestCase):
         time.sleep(0.000001)
 
     # main test function
-    def run_test(self, app, *args):
+    def run_test(self, app, mock_create_dialog, *args):
         Clock.schedule_interval(self.pause, 0.000001)
 
         pywalib = app.controller.pywalib
@@ -43,6 +46,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should open the trigger the "Create new account" view to be open
         self.assertEqual('Create new account', app.controller.toolbar.title)
+        mock_create_dialog.assert_called_with(
+            'No keystore found.', 'Import or create one.')
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
@@ -51,11 +56,12 @@ class Test(unittest.TestCase):
     # same named function as the filename(!)
     def test_ui_base(self):
         app = PyWalletApp()
-        p = partial(self.run_test, app)
-        # schedule_once() timeout is high here so the application has time
-        # to initialize, refs #52
-        Clock.schedule_once(p, 1.0)
-        app.run()
+        with patch.object(Controller, "create_dialog") as mock_create_dialog:
+            p = partial(self.run_test, app, mock_create_dialog)
+            # schedule_once() timeout is high here so the application has time
+            # to initialize, refs #52
+            Clock.schedule_once(p, 1.0)
+            app.run()
 
 
 if __name__ == '__main__':
