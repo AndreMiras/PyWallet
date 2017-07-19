@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170719]
 
   - Fix crash on send click, refs #63
 
