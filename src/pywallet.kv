@@ -64,11 +64,13 @@
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
         required: True
+        write_tab: False
         text: root.send_to_address
         on_text: root.send_to_address = args[1]
     FloatInput:
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
+        write_tab: False
         text: str(root.send_amount)
         on_text: root.send_amount = args[1]
     AnchorLayout:
