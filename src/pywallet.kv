@@ -64,11 +64,13 @@
         helper_text: "Receiver Ethereum address"
         helper_text_mode: "persistent"
         required: True
+        write_tab: False
         text: root.send_to_address
         on_text: root.send_to_address = args[1]
     FloatInput:
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
+        write_tab: False
         text: str(root.send_amount)
         on_text: root.send_amount = args[1]
     AnchorLayout:
@@ -118,6 +120,7 @@
         helper_text: "Enter the password for encrypting your new account"
         helper_text_mode: "on_focus"
         password: True
+        write_tab: False
         text: root.new_password1
         on_text: root.new_password1 = args[1]
     MDTextField:
@@ -126,6 +129,7 @@
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
+        write_tab: False
         text: root.new_password2
         on_text: root.new_password2 = args[1]
     # BoxLayout:
@@ -176,6 +180,7 @@
         helper_text: "Enter your current password for unlocking your account"
         helper_text_mode: "on_focus"
         password: True
+        write_tab: False
         text: root.current_password
         on_text: root.current_password = args[1]
     MDTextField:
@@ -183,6 +188,7 @@
         helper_text: "Enter the password for encrypting your new account"
         helper_text_mode: "on_focus"
         password: True
+        write_tab: False
         text: root.new_password1
         on_text: root.new_password1 = args[1]
     MDTextField:
@@ -191,6 +197,7 @@
         helper_text: "Retype your password"
         helper_text_mode: "on_focus"
         password: True
+        write_tab: False
         text: root.new_password2
         on_text: root.new_password2 = args[1]
     BoxLayout:
