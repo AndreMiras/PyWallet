@@ -1,5 +1,10 @@
 # Change Log
 
+## [Unreleased]
+
+  - Add install documentation
+  - Add tab key navigation (desktop app), refs #43
+
 ## [v20170719]
 
   - Fix crash on send click, refs #63
