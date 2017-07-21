@@ -4,12 +4,12 @@ import os
 import os.path as op
 import shutil
 import sys
+import threading
 import time
 import unittest
 from functools import partial
 from tempfile import mkdtemp
 
-import mock
 from kivy.clock import Clock
 
 # TODO: hardcoded path, refs:
@@ -62,23 +62,30 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
-        # retrieve the create_new_account widget
+        # retrieves the create_new_account widget
         controller = app.controller
         create_new_account = controller.create_new_account
-        # retrieve password fields
+        # retrieves password fields
         # self.assertEqual("create_new_account.ids", create_new_account.ids)
         new_password1_id = create_new_account.ids.new_password1_id
         new_password2_id = create_new_account.ids.new_password2_id
         # fill them up with same password
         new_password1_id.text = new_password2_id.text = "password"
-        # verifying the create_account() method is called on button click
-        with mock.patch('main.CreateNewAccount.create_account') \
-                as create_account_mock:
-            # button click
-            create_account_button_id = \
-                create_new_account.ids.create_account_button_id
-            create_account_button_id.dispatch('on_release')
-            create_account_mock.assert_called_with()
+        # before clicking the create account button,
+        # only the main thread is running
+        self.assertEqual(len(threading.enumerate()), 1)
+        main_thread = threading.enumerate()[0]
+        self.assertEqual(type(main_thread), threading._MainThread)
+        # retrieves button widget and click it
+        create_account_button_id = \
+            create_new_account.ids.create_account_button_id
+        create_account_button_id.dispatch('on_release')
+        # after submitting the account creation thread should run
+        self.assertEqual(len(threading.enumerate()), 2)
+        create_account_thread = threading.enumerate()[1]
+        self.assertEqual(type(create_account_thread), threading.Thread)
+        self.assertEqual(
+            create_account_thread._Thread__target.func_name, "create_account")
 
     def helper_test_on_send_click(self, app):
         """
