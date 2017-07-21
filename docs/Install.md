@@ -10,7 +10,9 @@ pip install -r requirements/test_requirements.txt
 pip install -r requirements.txt
 ```
 Cython needs to be installed explicitly because it's not in any sub-dependency `setup.py` `install_requires`.
+
 Installing `test_requirements.txt` is only required if you want to contribute and run tests.
+
 
 ## Ubuntu host, Android target
 ```
