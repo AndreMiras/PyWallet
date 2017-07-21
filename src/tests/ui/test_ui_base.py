@@ -65,20 +65,22 @@ class Test(unittest.TestCase):
         # retrieves the create_new_account widget
         controller = app.controller
         create_new_account = controller.create_new_account
-        # retrieves password fields
-        # self.assertEqual("create_new_account.ids", create_new_account.ids)
+        # retrieves widgets (password fields, sliders and buttons)
         new_password1_id = create_new_account.ids.new_password1_id
         new_password2_id = create_new_account.ids.new_password2_id
-        # fill them up with same password
+        speed_slider_id = create_new_account.ids.speed_slider_id
+        create_account_button_id = \
+            create_new_account.ids.create_account_button_id
+        # fills them up with same password
         new_password1_id.text = new_password2_id.text = "password"
+        # makes the account creation fast
+        speed_slider_id.value = speed_slider_id.max
         # before clicking the create account button,
         # only the main thread is running
         self.assertEqual(len(threading.enumerate()), 1)
         main_thread = threading.enumerate()[0]
         self.assertEqual(type(main_thread), threading._MainThread)
-        # retrieves button widget and click it
-        create_account_button_id = \
-            create_new_account.ids.create_account_button_id
+        # click the create account button
         create_account_button_id.dispatch('on_release')
         # after submitting the account creation thread should run
         self.assertEqual(len(threading.enumerate()), 2)
