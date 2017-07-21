@@ -28,16 +28,14 @@ Cross platform Ethereum Wallet built with Python and Kivy.
 ```
 
 ### Android
-Run on Android using buildozer:
+Build, deploy and run on Android using buildozer:
 ```
 buildozer android debug deploy run logcat
 buildozer android adb -- logcat
 ```
 
-## Ubuntu dependencies
-```
-sudo apt install zlib1g-dev default-jdk
-```
+## Install
+See [Install.md](docs/Install.md) for detailed instructions.
 
 ## Documentation
 
