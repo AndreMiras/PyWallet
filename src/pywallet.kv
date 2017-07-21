@@ -116,6 +116,7 @@
 <CreateNewAccount>:
     orientation: 'vertical'
     MDTextField:
+        id: new_password1_id
         hint_text: "Password"
         helper_text: "Enter the password for encrypting your new account"
         helper_text_mode: "on_focus"
@@ -124,6 +125,7 @@
         text: root.new_password1
         on_text: root.new_password1 = args[1]
     MDTextField:
+        id: new_password2_id
         # TODO: do validation as we type
         hint_text: "Password (again)"
         helper_text: "Retype your password"
@@ -222,13 +224,14 @@
             app.controller.set_toolbar_title("Manage existing")
         ManageExisting:
     MDBottomNavigationItem:
-        id: create_new_account_id
+        id: create_new_account_nav_item_id
         name: "create_new"
         text: "Create new"
         icon: "plus"
         on_tab_press:
             app.controller.set_toolbar_title("Create new account")
         CreateNewAccount:
+            id: create_new_account_id
     MDBottomNavigationItem:
         name: "import_keystore"
         text: "Import"
