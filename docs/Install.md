@@ -3,7 +3,9 @@
 Project and dependencies are different depending on the host and target platform.
 
 ## Ubuntu host & target
-To run the project on Ubuntu, you need to install the dependencies from using pip (in a virtualenv).
+To run the project on Ubuntu, you first need to install system dependencies. See Kivy guide: https://kivy.org/docs/installation/installation-linux.html.
+
+Then install project dependencies using pip (in a virtualenv).
 ```
 pip install --install-option="--no-cython-compile" $(grep Cython requirements/requirements.txt)
 pip install -r requirements/test_requirements.txt
@@ -17,7 +19,7 @@ You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see ho
 
 
 ## Ubuntu host, Android target
-To be able to build the project for Android from Ubuntu, follow the official guide for core dependencies.
+To be able to build the project for Android from Ubuntu, follow python-for-android official guide (for core dependencies).
 https://python-for-android.readthedocs.io/en/latest/quickstart/#installing-dependencies
 Before installing additional dependencies.
 ```
