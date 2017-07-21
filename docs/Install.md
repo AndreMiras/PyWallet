@@ -20,3 +20,4 @@ You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see ho
 ```
 sudo apt install zlib1g-dev default-jdk
 ```
+Check [script_android.sh](/travis/script_android.sh) to see how it's done in Travis. Or checkout the [Dockerfile](https://github.com/AndreMiras/PyWallet/blob/feature/ticket37_travis_docker/Dockerfile).
