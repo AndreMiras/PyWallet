@@ -4,6 +4,7 @@
 
   - Add install documentation
   - Add tab key navigation (desktop app), refs #43
+  - UI Unit test account creation, refs #41
 
 ## [v20170719]
 
