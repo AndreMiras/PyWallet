@@ -13,6 +13,8 @@ Cython needs to be installed explicitly because it's not in any sub-dependency `
 
 Installing `test_requirements.txt` is only required if you want to contribute and run tests.
 
+You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see how it's being automated for Travis.
+
 
 ## Ubuntu host, Android target
 ```
