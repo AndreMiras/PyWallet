@@ -9,6 +9,7 @@ import unittest
 from functools import partial
 from tempfile import mkdtemp
 
+import mock
 from kivy.clock import Clock
 
 # TODO: hardcoded path, refs:
@@ -53,6 +54,32 @@ class Test(unittest.TestCase):
         dialog.dismiss()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_test_create_first_account(self, app):
+        """
+        Creates the first account.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # makes sure no account are loaded
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # retrieve the create_new_account widget
+        controller = app.controller
+        create_new_account = controller.create_new_account
+        # retrieve password fields
+        # self.assertEqual("create_new_account.ids", create_new_account.ids)
+        new_password1_id = create_new_account.ids.new_password1_id
+        new_password2_id = create_new_account.ids.new_password2_id
+        # fill them up with same password
+        new_password1_id.text = new_password2_id.text = "password"
+        # verifying the create_account() method is called on button click
+        with mock.patch('main.CreateNewAccount.create_account') \
+                as create_account_mock:
+            # button click
+            create_account_button_id = \
+                create_new_account.ids.create_account_button_id
+            create_account_button_id.dispatch('on_release')
+            create_account_mock.assert_called_with()
+
     def helper_test_on_send_click(self, app):
         """
         This is a regression test for #63, verify clicking "Send" Ethers works
@@ -76,6 +103,7 @@ class Test(unittest.TestCase):
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
         self.helper_test_empty_account(app)
+        self.helper_test_create_first_account(app)
         self.helper_test_on_send_click(app)
 
         # Comment out if you are editing the test, it'll leave the
