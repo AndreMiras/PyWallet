@@ -86,6 +86,10 @@ class Test(unittest.TestCase):
         self.assertEqual(type(create_account_thread), threading.Thread)
         self.assertEqual(
             create_account_thread._Thread__target.func_name, "create_account")
+        # waits for the end of the thread
+        create_account_thread.join()
+        # and verifies the account was created
+        self.assertEqual(len(pywalib.get_account_list()), 1)
 
     def helper_test_on_send_click(self, app):
         """
