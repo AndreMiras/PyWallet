@@ -309,6 +309,10 @@ class SwitchAccount(BoxLayout):
         self.load_account_list()
 
     def on_release(self, list_item):
+        """
+        Sets current account & item and switches to previous screen.
+        """
+        # sets current account & item
         self.selected_list_item = list_item
         self.selected_account = list_item.account
 
@@ -609,7 +613,6 @@ class PWToolbar(Toolbar):
     def setup(self):
         self.controller = App.get_running_app().controller
         self.navigation = self.controller.ids.navigation_id
-        self.screen_manager = self.controller.ids.screen_manager_id
         # bind balance update to title
         overview = self.controller.overview
         overview.bind(
@@ -765,17 +768,18 @@ class Controller(FloatLayout):
     def toolbar(self):
         return self.ids.toolbar_id
 
+    @property
+    def screen_manager(self):
+        return self.ids.screen_manager_id
+
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
 
     def on_selected_account(self, account):
         """
-        Updates Controller.current_account and switches to previous screen.
+        Updates Controller.current_account.
         """
         self.current_account = account
-        previous_screen = self.ids.screen_manager_id.previous()
-        self.ids.screen_manager_id.transition.direction = "right"
-        self.ids.screen_manager_id.current = previous_screen
 
     def open_account_list_helper(self, on_selected_item):
         title = "Select account"
@@ -953,8 +957,8 @@ class Controller(FloatLayout):
         try:
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
-            self.ids.screen_manager_id.current = "overview"
-            self.ids.screen_manager_id.transition.direction = "right"
+            self.screen_manager.current = "overview"
+            self.screen_manager.transition.direction = "right"
         except IndexError:
             self.load_create_new_account()
 
@@ -973,16 +977,16 @@ class Controller(FloatLayout):
         Loads the switch account screen.
         """
         # loads the switch account screen
-        self.ids.screen_manager_id.transition.direction = 'left'
-        self.ids.screen_manager_id.current = 'switch_account'
+        self.screen_manager.transition.direction = 'left'
+        self.screen_manager.current = 'switch_account'
 
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """
         # loads the manage keystores screen
-        self.ids.screen_manager_id.transition.direction = "left"
-        self.ids.screen_manager_id.current = 'manage_keystores'
+        self.screen_manager.transition.direction = "left"
+        self.screen_manager.current = 'manage_keystores'
 
     def load_create_new_account(self):
         """
@@ -999,8 +1003,8 @@ class Controller(FloatLayout):
         """
         Loads the about screen.
         """
-        self.ids.screen_manager_id.transition.direction = "left"
-        self.ids.screen_manager_id.current = "about"
+        self.screen_manager.transition.direction = "left"
+        self.screen_manager.current = "about"
 
 
 class DebugRavenClient(object):
