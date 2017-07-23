@@ -66,7 +66,11 @@ def run_in_thread(fn):
 
 class NavigationDrawerTwoLineListItem(
         TwoLineListItem, NavigationDrawerHeaderBase):
+
     def _update_specific_text_color(self, instance, value):
+        pass
+
+    def _set_active(self, active, list):
         pass
 
 
@@ -297,6 +301,37 @@ class History(BoxLayout):
             list_item = History.create_item_from_dict(transaction)
             list_items.append(list_item)
         self.update_history_list(list_items)
+
+
+class SwitchAccount(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(SwitchAccount, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.load_account_list()
+
+    @staticmethod
+    def create_item(account):
+        """
+        Creates an account list item from given account.
+        """
+        address = "0x" + account.address.encode("hex")
+        list_item = OneLineListItem(text=address)
+        return list_item
+
+    def load_account_list(self):
+        """
+        Fills account list widget from library account list.
+        """
+        account_list_id = self.ids.account_list_id
+        account_list_id.clear_widgets()
+        accounts = self.controller.pywalib.get_account_list()
+        for account in accounts:
+            list_item = SwitchAccount.create_item(account)
+            account_list_id.add_widget(list_item)
 
 
 class Overview(BoxLayout):
@@ -916,6 +951,14 @@ class Controller(FloatLayout):
             Controller.on_balance_connection_error()
             return
         self.update_balance_label(balance)
+
+    def load_switch_account(self):
+        """
+        Loads the switch account screen.
+        """
+        # loads the switch account screen
+        self.ids.screen_manager_id.transition.direction = 'left'
+        self.ids.screen_manager_id.current = 'switch_account'
 
     def load_manage_keystores(self):
         """

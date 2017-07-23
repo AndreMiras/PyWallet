@@ -24,6 +24,7 @@
         NavigationDrawerTwoLineListItem:
             text: "Account"
             secondary_text: "secondary_text"
+            on_release: app.controller.load_switch_account()
         NavigationDrawerIconButton:
             icon: "home"
             text: "Home"
@@ -217,6 +218,13 @@
     PushUp:
 
 
+<SwitchAccount>:
+    orientation: 'vertical'
+    ScrollView:
+        MDList:
+            id: account_list_id
+
+
 <ManageKeystoreBottomNavigation@MDBottomNavigation>:
     MDBottomNavigationItem:
         name: "manage_existing"
@@ -353,6 +361,11 @@
                         root.set_toolbar_title(app.controller.get_overview_title())
                     OverviewBottomNavigation:
                         id: overview_bnavigation_id
+                Screen:
+                    name: 'switch_account'
+                    on_pre_enter:
+                        root.set_toolbar_title("Switch account")
+                    SwitchAccount:
                 Screen:
                     name: 'manage_keystores'
                     on_pre_enter:
