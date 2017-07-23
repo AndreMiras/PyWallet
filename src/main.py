@@ -231,7 +231,13 @@ class Receive(BoxLayout):
 
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
+        # for some reason setting the timeout to zero
+        # crashes with:
+        # 'super' object has no attribute '__getattr__'
+        # only on first account creation (with auto redirect)
+        # and we cannot yet reproduce in unit tests
+        timeout = 1
+        Clock.schedule_once(lambda dt: self.setup(), timeout)
 
     def setup(self):
         """
@@ -587,14 +593,34 @@ class CreateNewAccount(BoxLayout):
         """
         self.controller.current_account = account
 
+    @mainthread
+    def toggle_widgets(self, enabled):
+        """
+        Enables/disables account creation widgets.
+        """
+        self.disabled = not enabled
+
+    @mainthread
+    def show_redirect_dialog(self):
+        title = "Account created, redirecting..."
+        body = ""
+        body += "Your account was created, "
+        body += "you will be redirected to the overview."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
     @run_in_thread
     def create_account(self):
         """
         Creates an account from provided form.
         Verify we can unlock it.
+        Disables widgets during the process, so the user doesn't try
+        to create another account during the process.
         """
+        self.toggle_widgets(False)
         if not self.verify_fields():
             Controller.show_invalid_form_dialog()
+            self.toggle_widgets(True)
             return
         pywalib = self.controller.pywalib
         password = self.new_password1
@@ -606,8 +632,11 @@ class CreateNewAccount(BoxLayout):
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
         Controller.snackbar_message("Created!")
+        self.toggle_widgets(True)
         self.on_account_created(account)
         CreateNewAccount.try_unlock(account, password)
+        self.show_redirect_dialog()
+        self.controller.load_landing_page()
         return account
 
     def toggle_advanced(self, show):
@@ -864,7 +893,6 @@ class Controller(FloatLayout):
         screen_manager = self.screen_manager
         if not screen_manager.has_screen(current):
             screen = screens[current](name=current)
-            # screen_manager.switch_to(screen, direction=direction)
             screen_manager.add_widget(screen)
         if direction is not None:
             screen_manager.transition.direction = direction
@@ -877,15 +905,6 @@ class Controller(FloatLayout):
         except IndexError:
             previous_screen = 'overview'
         self.screen_manager_current(previous_screen, direction='right')
-
-    def on_selected_account(self, account):
-        """
-        Updates Controller.current_account.
-        """
-        self.current_account = account
-
-    def set_current_account(self, account):
-        self.current_account = account
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -1010,6 +1029,8 @@ class Controller(FloatLayout):
         """
         Fetches the new balance and updates the UI.
         """
+        # pre-updates balance with last known value
+        self.update_toolbar_title_balance()
         account = self.current_account
         try:
             self.current_account_balance = self.pywalib.get_balance(

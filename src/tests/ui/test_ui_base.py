@@ -47,6 +47,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should open the trigger the "Create new account" view to be open
         self.assertEqual('Create new account', app.controller.toolbar.title)
+        self.assertEqual(controller.screen_manager.current, 'manage_keystores')
         dialogs = controller.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
@@ -62,6 +63,7 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
+        self.assertEqual('Create new account', app.controller.toolbar.title)
         # retrieves the create_new_account widget
         controller = app.controller
         create_new_account = controller.create_new_account
@@ -90,8 +92,19 @@ class Test(unittest.TestCase):
             create_account_thread._Thread__target.func_name, "create_account")
         # waits for the end of the thread
         create_account_thread.join()
+        # thread has ended and the main thread is running alone again
+        self.assertEqual(len(threading.enumerate()), 1)
+        main_thread = threading.enumerate()[0]
+        self.assertEqual(type(main_thread), threading._MainThread)
         # and verifies the account was created
         self.assertEqual(len(pywalib.get_account_list()), 1)
+        # we should get redirected to the overview page
+        self.assertEqual(controller.screen_manager.current, 'overview')
+        # TODO: also verify the Toolbar title was updated correctly
+        # self.assertEqual('TODO', app.controller.toolbar.title)
+        # TODO: check the redirect dialog
+        # dialogs = controller.dialogs
+        # self.assertEqual(len(dialogs), 1)
 
     def helper_test_on_send_click(self, app):
         """

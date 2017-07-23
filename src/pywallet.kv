@@ -318,7 +318,7 @@
         text: "Overview"
         icon: 'format-list-bulleted'
         on_pre_enter:
-            root.parent.set_title("0 ETH (updating...)")
+            root.parent.set_title("0 ETH")
             # TODO: not necessarily, e.g. probably not if the account didn't change
             # TODO: but update title
             app.controller.fetch_and_update_balance()
