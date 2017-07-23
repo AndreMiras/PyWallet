@@ -67,7 +67,7 @@ def run_in_thread(fn):
 class NavigationDrawerTwoLineListItem(
         TwoLineListItem, NavigationDrawerHeaderBase):
 
-    current_account_string = StringProperty()
+    address_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(NavigationDrawerTwoLineListItem, self).__init__(**kwargs)
@@ -83,7 +83,7 @@ class NavigationDrawerTwoLineListItem(
 
     def on_current_account(self, account):
         address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.address_property = address
 
     def _update_specific_text_color(self, instance, value):
         pass
