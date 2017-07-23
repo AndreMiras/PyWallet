@@ -17,6 +17,7 @@ from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton, MDIconButton
@@ -225,6 +226,7 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
+    current_account = ObjectProperty()
     address_property = StringProperty()
 
     def __init__(self, **kwargs):
@@ -236,13 +238,14 @@ class Receive(BoxLayout):
         Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
-        self.controller.bind(
-            current_account=lambda _, value: self.on_current_account(value))
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def on_current_account(self, account):
+    def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
@@ -252,7 +255,20 @@ class Receive(BoxLayout):
 
 class History(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super(History, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def on_current_account(self, instance, account):
         self._load_history()
@@ -315,9 +331,6 @@ class History(BoxLayout):
 
 class SwitchAccount(BoxLayout):
 
-    selected_list_item = ObjectProperty()
-    selected_account = ObjectProperty()
-
     def __init__(self, **kwargs):
         super(SwitchAccount, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
@@ -328,11 +341,11 @@ class SwitchAccount(BoxLayout):
 
     def on_release(self, list_item):
         """
-        Sets current account & item and switches to previous screen.
+        Sets Controller.current_account and switches to previous screen.
         """
-        # sets current account & item
+        # sets Controller.current_account
         self.selected_list_item = list_item
-        self.selected_account = list_item.account
+        self.controller.current_account = list_item.account
         # switches to previous screen
         self.controller.screen_manager_previous()
 
@@ -360,7 +373,7 @@ class SwitchAccount(BoxLayout):
 
 class Overview(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
     current_account_string = StringProperty()
 
     def __init__(self, **kwargs):
@@ -369,6 +382,8 @@ class Overview(BoxLayout):
 
     def setup(self):
         self.controller = App.get_running_app().controller
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
@@ -419,7 +434,7 @@ class ImportKeystore(BoxLayout):
 # TODO: create a generic account form
 class ManageExisting(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
     address_property = StringProperty()
     current_password = StringProperty()
     new_password1 = StringProperty()
@@ -728,6 +743,35 @@ class AboutDiagnostic(BoxLayout):
                 stream=stream, verbosity=verbosity).run(test_suite)
 
 
+class OverviewScreen(Screen):
+
+    title_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(OverviewScreen, self).__init__(**kwargs)
+
+    def set_title(self, title):
+        self.title_property = title
+
+
+class SwitchAccountScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(SwitchAccountScreen, self).__init__(**kwargs)
+
+
+class ManageKeystoreScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(ManageKeystoreScreen, self).__init__(**kwargs)
+
+
+class AboutScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(AboutScreen, self).__init__(**kwargs)
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty()
@@ -740,14 +784,13 @@ class Controller(FloatLayout):
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
         self.screen_history = []
-        self.switch_account.bind(
-            selected_account=lambda _, value: self.on_selected_account(value))
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
     def overview(self):
-        overview_bnavigation_id = self.ids.overview_bnavigation_id
-        return overview_bnavigation_id.ids.overview_id
+        overview_screen = self.ids.overview_screen_id
+        overview_bnavigation = overview_screen.ids.overview_bnavigation_id
+        return overview_bnavigation.ids.overview_id
 
     @property
     def history(self):
@@ -780,9 +823,20 @@ class Controller(FloatLayout):
         self.toolbar.title_property = title
 
     def screen_manager_current(self, current, direction=None):
+        screens = {
+            'overview': OverviewScreen,
+            'switch_account': SwitchAccountScreen,
+            'manage_keystores': ManageKeystoreScreen,
+            'about': AboutScreen,
+        }
+        screen_manager = self.screen_manager
+        if not screen_manager.has_screen(current):
+            screen = screens[current](name=current)
+            # screen_manager.switch_to(screen, direction=direction)
+            screen_manager.add_widget(screen)
         if direction is not None:
-            self.screen_manager.transition.direction = direction
-        self.screen_manager.current = current
+            screen_manager.transition.direction = direction
+        screen_manager.current = current
         self.screen_history.append(current)
 
     def screen_manager_previous(self):
@@ -800,13 +854,6 @@ class Controller(FloatLayout):
 
     def set_current_account(self, account):
         self.current_account = account
-
-    def on_current_account(self, instance, value):
-        """
-        Updates Overview.current_account and History.current_account.
-        """
-        self.overview.current_account = value
-        self.history.current_account = value
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -933,7 +980,8 @@ class Controller(FloatLayout):
         """
         account = self.current_account
         try:
-            self.current_account_balance = self.pywalib.get_balance(account.address.encode("hex"))
+            self.current_account_balance = self.pywalib.get_balance(
+                account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
