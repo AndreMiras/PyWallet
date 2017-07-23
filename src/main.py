@@ -450,6 +450,8 @@ class ManageExisting(BoxLayout):
         """
         self.controller = App.get_running_app().controller
         self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def verify_current_password_field(self):
         """
