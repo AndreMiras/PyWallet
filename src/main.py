@@ -368,10 +368,6 @@ class Overview(BoxLayout):
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
 
-    def open_account_list(self):
-        controller = App.get_running_app().controller
-        controller.open_account_list_overview()
-
     def get_title(self):
         return "%s ETH" % self.balance_property
 
@@ -490,11 +486,6 @@ class ManageExisting(BoxLayout):
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.address_property = address
-
-    def open_account_list(self):
-        def on_selected_item(instance, value):
-            self.current_account = value.account
-        self.controller.open_account_list_helper(on_selected_item)
 
 
 class CreateNewAccount(BoxLayout):
@@ -811,28 +802,6 @@ class Controller(FloatLayout):
         """
         self.current_account = account
 
-    def open_account_list_helper(self, on_selected_item):
-        title = "Select account"
-        items = []
-        pywalib = self.pywalib
-        account_list = pywalib.get_account_list()
-        for account in account_list:
-            address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(text=address)
-            # makes sure the address doesn't wrap in multiple lines,
-            # but gets shortened
-            item.ids._lbl_primary.shorten = True
-            item.account = account
-            items.append(item)
-        dialog = Controller.create_list_dialog(
-            title, items, on_selected_item)
-        dialog.open()
-
-    def open_account_list_overview(self):
-        def on_selected_item(instance, value):
-            self.set_current_account(value.account)
-        self.open_account_list_helper(on_selected_item)
-
     def set_current_account(self, account):
         self.current_account = account
 
@@ -878,30 +847,6 @@ class Controller(FloatLayout):
     @staticmethod
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
-
-    @staticmethod
-    def create_list_dialog(title, items, on_selected_item):
-        """
-        Creates a dialog from given title and list.
-        items is a list of BaseListItem objects.
-        """
-        # select_list = PWSelectList(items=items, on_release=on_release)
-        select_list = PWSelectList(items=items)
-        select_list.bind(selected_item=on_selected_item)
-        content = select_list
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.9, .9))
-        # workaround for MDDialog container size (too small by default)
-        dialog.ids.container.size_hint_y = 1
-        # close the dialog as we select the element
-        select_list.bind(
-            selected_item=lambda instance, value: dialog.dismiss())
-        dialog.add_action_button(
-                "Dismiss",
-                action=lambda *x: dialog.dismiss())
-        return dialog
 
     @staticmethod
     def on_dialog_dismiss(dialog):
