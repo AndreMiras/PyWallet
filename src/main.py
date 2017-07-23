@@ -67,6 +67,24 @@ def run_in_thread(fn):
 class NavigationDrawerTwoLineListItem(
         TwoLineListItem, NavigationDrawerHeaderBase):
 
+    current_account_string = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(NavigationDrawerTwoLineListItem, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.controller.bind(
+            current_account=lambda _, value: self.on_current_account(value))
+
+    def on_current_account(self, account):
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
+
     def _update_specific_text_color(self, instance, value):
         pass
 
@@ -215,11 +233,11 @@ class Receive(BoxLayout):
 
     def setup(self):
         """
-        Binds Controller.current_account property
+        Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
         self.controller.bind(
-            current_account=lambda instance, value: self.on_current_account(value))
+            current_account=lambda _, value: self.on_current_account(value))
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
@@ -742,7 +760,7 @@ class Controller(FloatLayout):
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
         self.switch_account.bind(
-            selected_account=lambda instance, value: self.on_selected_account(value))
+            selected_account=lambda _, value: self.on_selected_account(value))
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
