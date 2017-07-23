@@ -315,6 +315,11 @@ class SwitchAccount(BoxLayout):
         # sets current account & item
         self.selected_list_item = list_item
         self.selected_account = list_item.account
+        # switches to previous screen
+        screen_manager = self.controller.screen_manager
+        previous_screen = screen_manager.previous()
+        screen_manager.transition.direction = "right"
+        screen_manager.current = previous_screen
 
     def create_item(self, account):
         """
