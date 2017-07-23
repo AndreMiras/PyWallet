@@ -825,7 +825,9 @@ class Controller(FloatLayout):
 
     @property
     def send(self):
-        overview_bnavigation_id = self.ids.overview_bnavigation_id
+        screen_manager = self.screen_manager
+        overview_screen = screen_manager.get_screen('overview')
+        overview_bnavigation_id = overview_screen.ids.overview_bnavigation_id
         return overview_bnavigation_id.ids.send_id
 
     @property

@@ -100,6 +100,8 @@ class Test(unittest.TestCase):
         https://github.com/AndreMiras/PyWallet/issues/63
         """
         controller = app.controller
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_landing_page()
         send = controller.send
         send_button_id = send.ids.send_button_id
         # verifies clicking send button doesn't crash the application
