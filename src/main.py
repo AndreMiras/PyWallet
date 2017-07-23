@@ -334,10 +334,7 @@ class SwitchAccount(BoxLayout):
         self.selected_list_item = list_item
         self.selected_account = list_item.account
         # switches to previous screen
-        screen_manager = self.controller.screen_manager
-        previous_screen = screen_manager.previous()
-        screen_manager.transition.direction = "right"
-        screen_manager.current = previous_screen
+        self.controller.screen_manager_previous()
 
     def create_item(self, account):
         """
@@ -741,7 +738,6 @@ class AboutDiagnostic(BoxLayout):
         """
         Controller.patch_keystore_path()
         test_suite = suite()
-        print("test_suite:", test_suite)
         self.stream_property = ""
         stream = StringIOCBWrite(callback_write=self.callback_write)
         verbosity = 2
@@ -759,6 +755,7 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
+        self.screen_history = []
         self.switch_account.bind(
             selected_account=lambda _, value: self.on_selected_account(value))
         Clock.schedule_once(lambda dt: self.load_landing_page())
@@ -797,6 +794,19 @@ class Controller(FloatLayout):
 
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
+
+    def screen_manager_current(self, current, direction=None):
+        if direction is not None:
+            self.screen_manager.transition.direction = direction
+        self.screen_manager.current = current
+        self.screen_history.append(current)
+
+    def screen_manager_previous(self):
+        try:
+            previous_screen = self.screen_history[-2]
+        except IndexError:
+            previous_screen = 'overview'
+        self.screen_manager_current(previous_screen, direction='right')
 
     def on_selected_account(self, account):
         """
@@ -980,8 +990,7 @@ class Controller(FloatLayout):
         try:
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
-            self.screen_manager.current = "overview"
-            self.screen_manager.transition.direction = "right"
+            self.screen_manager_current('overview')
         except IndexError:
             self.load_create_new_account()
 
@@ -1000,16 +1009,14 @@ class Controller(FloatLayout):
         Loads the switch account screen.
         """
         # loads the switch account screen
-        self.screen_manager.transition.direction = 'left'
-        self.screen_manager.current = 'switch_account'
+        self.screen_manager_current('switch_account', direction='left')
 
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """
         # loads the manage keystores screen
-        self.screen_manager.transition.direction = "left"
-        self.screen_manager.current = 'manage_keystores'
+        self.screen_manager_current('manage_keystores', direction='left')
 
     def load_create_new_account(self):
         """
@@ -1026,8 +1033,7 @@ class Controller(FloatLayout):
         """
         Loads the about screen.
         """
-        self.screen_manager.transition.direction = "left"
-        self.screen_manager.current = "about"
+        self.screen_manager_current('about', direction='left')
 
 
 class DebugRavenClient(object):
