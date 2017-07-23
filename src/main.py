@@ -12,6 +12,7 @@ import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
+from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -943,6 +944,16 @@ class Controller(FloatLayout):
         self.ids.screen_manager_id.current = "about"
 
 
+class DebugRavenClient(object):
+    """
+    The DebugRavenClient should be used in debug mode, it just raises
+    the exception rather than capturing it.
+    """
+
+    def captureException(self):
+        raise
+
+
 class PyWalletApp(App):
     theme_cls = ThemeManager()
 
@@ -955,7 +966,10 @@ class PyWalletApp(App):
         return self.root
 
 
-def configure_sentry():
+def configure_sentry(in_debug=False):
+    """
+    Configure the Raven client, or create a dummy one if `in_debug` is `True`.
+    """
     key = 'eaee971c463b49678f6f352dfec497a9'
     # the public DSN URL is not available on the Python client
     # so we're exposing the secret and will be revoking it on abuse
@@ -964,12 +978,18 @@ def configure_sentry():
     project_id = '191660'
     dsn = 'https://{key}:{secret}@sentry.io/{project_id}'.format(
         key=key, secret=secret, project_id=project_id)
-    client = Client(dsn)
+    if in_debug:
+        client = DebugRavenClient()
+    else:
+        client = Client(dsn)
     return client
 
 
 if __name__ == '__main__':
-    client = configure_sentry()
+    # when the -d/--debug flag is set, Kivy sets log level to debug
+    level = Logger.getEffectiveLevel()
+    in_debug = level == LOG_LEVELS.get('debug')
+    client = configure_sentry(in_debug)
     try:
         PyWalletApp().run()
     except:
