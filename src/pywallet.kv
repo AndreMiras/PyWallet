@@ -96,7 +96,7 @@
     orientation: 'vertical'
     AddressButton:
         text: root.current_account_string
-        on_release: root.open_account_list()
+        on_release: app.controller.load_switch_account()
     History:
         id: history_id
 
@@ -179,7 +179,7 @@
     orientation: 'vertical'
     AddressButton:
         text: root.current_account_string
-        on_release: root.open_account_list()
+        on_release: app.controller.load_switch_account()
     MDTextField:
         hint_text: "Current password"
         helper_text: "Enter your current password for unlocking your account"
