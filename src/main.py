@@ -580,6 +580,13 @@ class CreateNewAccount(BoxLayout):
             dialog.open()
             return
 
+    @mainthread
+    def on_account_created(self, account):
+        """
+        Switches to the newly created account.
+        """
+        self.controller.current_account = account
+
     @run_in_thread
     def create_account(self):
         """
@@ -599,6 +606,7 @@ class CreateNewAccount(BoxLayout):
         account = pywalib.new_account(
                 password=password, security_ratio=security_ratio)
         Controller.snackbar_message("Created!")
+        self.on_account_created(account)
         CreateNewAccount.try_unlock(account, password)
         return account
 
@@ -824,7 +832,8 @@ class Controller(FloatLayout):
     def manage_keystores(self):
         screen_manager = self.screen_manager
         manage_keystores_screen = screen_manager.get_screen('manage_keystores')
-        manage_keystores_bnavigation_id = manage_keystores_screen.ids.manage_keystores_id
+        manage_keystores_bnavigation_id = \
+            manage_keystores_screen.ids.manage_keystores_id
         return manage_keystores_bnavigation_id
 
     @property
