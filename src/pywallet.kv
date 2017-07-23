@@ -17,11 +17,13 @@
     # need this hack to push widgets up
     id: push_up
 
+
 <Navigation@NavigationLayout>:
     MDNavigationDrawer:
         id: navigation_drawer
-        NavigationDrawerToolbar:
-            title: "Menu"
+        NavigationDrawerTwoLineListItem:
+            text: "Account"
+            secondary_text: "secondary_text"
         NavigationDrawerIconButton:
             icon: "home"
             text: "Home"

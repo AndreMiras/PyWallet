@@ -21,7 +21,9 @@ from kivy.utils import platform
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
-from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.list import (ILeftBodyTouch, OneLineListItem, TwoLineIconListItem,
+                         TwoLineListItem)
+from kivymd.navigationdrawer import NavigationDrawerHeaderBase
 from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
@@ -59,6 +61,12 @@ def run_in_thread(fn):
         t.start()
         return t
     return run
+
+
+class NavigationDrawerTwoLineListItem(
+        TwoLineListItem, NavigationDrawerHeaderBase):
+    def _update_specific_text_color(self, instance, value):
+        pass
 
 
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
