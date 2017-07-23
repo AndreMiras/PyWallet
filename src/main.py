@@ -381,14 +381,26 @@ class Overview(BoxLayout):
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
         self.controller = App.get_running_app().controller
+        self.controller.bind(current_account=self.setter('current_account'))
         # triggers the update
         self.current_account = self.controller.current_account
+
+    def is_selected(self):
+        """
+        Returns True if the overview sub-screen is selected,
+        otherwise returns False.
+        """
+        return self.parent.manager.current == 'overview'
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
-        self.controller.fetch_and_update_balance()
+        if self.is_selected():
+            self.controller.fetch_and_update_balance()
 
 
 class PWSelectList(BoxLayout):
