@@ -17,11 +17,14 @@
     # need this hack to push widgets up
     id: push_up
 
+
 <Navigation@NavigationLayout>:
     MDNavigationDrawer:
         id: navigation_drawer
-        NavigationDrawerToolbar:
-            title: "Menu"
+        NavigationDrawerTwoLineListItem:
+            text: "Account"
+            secondary_text: self.address_property
+            on_release: app.controller.load_switch_account()
         NavigationDrawerIconButton:
             icon: "home"
             text: "Home"
@@ -84,8 +87,8 @@
 <Receive>:
     orientation: 'vertical'
     AddressButton:
-        text: root.current_account_string
-        on_release: root.open_account_list()
+        text: root.address_property
+        on_release: app.controller.load_switch_account()
     QRCodeWidget:
         id: qr_code_id
 
@@ -93,7 +96,7 @@
     orientation: 'vertical'
     AddressButton:
         text: root.current_account_string
-        on_release: root.open_account_list()
+        on_release: app.controller.load_switch_account()
     History:
         id: history_id
 
@@ -175,8 +178,8 @@
 <ManageExisting>:
     orientation: 'vertical'
     AddressButton:
-        text: root.current_account_string
-        on_release: root.open_account_list()
+        text: root.address_property
+        on_release: app.controller.load_switch_account()
     MDTextField:
         hint_text: "Current password"
         helper_text: "Enter your current password for unlocking your account"
@@ -213,6 +216,13 @@
                 text: "Delete account"
                 on_release: root.delete_account()
     PushUp:
+
+
+<SwitchAccount>:
+    orientation: 'vertical'
+    ScrollView:
+        MDList:
+            id: account_list_id
 
 
 <ManageKeystoreBottomNavigation@MDBottomNavigation>:
@@ -307,24 +317,27 @@
         name: 'overview'
         text: "Overview"
         icon: 'format-list-bulleted'
-        on_tab_press:
-            app.controller.set_toolbar_title(app.controller.get_overview_title())
+        on_pre_enter:
+            root.parent.set_title("0 ETH (updating...)")
+            # TODO: not necessarily, e.g. probably not if the account didn't change
+            # TODO: but update title
+            app.controller.fetch_and_update_balance()
         Overview:
             id: overview_id
     MDBottomNavigationItem:
         name: 'send'
         text: "Send"
         icon: 'arrow-up-bold'
-        on_tab_press:
-            app.controller.set_toolbar_title("Send ETH")
+        on_pre_enter:
+            root.parent.set_title("Send ETH")
         Send:
             id: send_id
     MDBottomNavigationItem:
         name: 'receive'
         text: "Receive"
         icon: 'arrow-down-bold'
-        on_tab_press:
-            app.controller.set_toolbar_title("Receive ETH")
+        on_pre_enter:
+            root.parent.set_title("Receive ETH")
         Receive:
             id: receive_id
 
@@ -336,6 +349,48 @@
     background_hue: '500'
 
 
+<OverviewScreen>:
+    name: 'overview'
+    on_pre_enter:
+        # restores title,
+        # e.g. when coming back from the account selection screen
+        app.controller.set_toolbar_title(root.title_property)
+    on_title_property:
+        app.controller.set_toolbar_title(root.title_property)
+    OverviewBottomNavigation:
+        id: overview_bnavigation_id
+
+
+<SwitchAccountScreen>:
+    name: 'switch_account'
+    on_pre_enter:
+        app.controller.set_toolbar_title("Switch account")
+    SwitchAccount:
+        id: switch_account_id
+
+
+<ManageKeystoreScreen>:
+    name: 'manage_keystores'
+    on_pre_enter:
+        app.controller.set_toolbar_title("Manage existing")
+        # workaround for broken MDBottomNavigation, refs
+        # https://github.com/AndreMiras/PyWallet/issues/38
+        Window.dispatch('on_resize', *Window.size)
+    ManageKeystoreBottomNavigation:
+        id: manage_keystores_id
+
+
+<AboutScreen>:
+    name: 'about'
+    on_pre_enter:
+        app.controller.set_toolbar_title("About PyWallet")
+        # workaround for broken MDBottomNavigation, refs
+        # https://github.com/AndreMiras/PyWallet/issues/38
+        Window.dispatch('on_resize', *Window.size)
+    About:
+        id: about_id
+
+
 <Controller>:
     Navigation:
         id: navigation_id
@@ -345,27 +400,3 @@
                 id: toolbar_id
             ScreenManager:
                 id: screen_manager_id
-                Screen:
-                    name: 'overview'
-                    on_pre_enter:
-                        root.set_toolbar_title(app.controller.get_overview_title())
-                    OverviewBottomNavigation:
-                        id: overview_bnavigation_id
-                Screen:
-                    name: 'manage_keystores'
-                    on_pre_enter:
-                        root.set_toolbar_title("Manage existing")
-                        # workaround for broken MDBottomNavigation, refs
-                        # https://github.com/AndreMiras/PyWallet/issues/38
-                        Window.dispatch('on_resize', *Window.size)
-                    ManageKeystoreBottomNavigation:
-                        id: manage_keystores_id
-                Screen:
-                    name: 'about'
-                    on_pre_enter:
-                        root.set_toolbar_title("About PyWallet")
-                        # workaround for broken MDBottomNavigation, refs
-                        # https://github.com/AndreMiras/PyWallet/issues/38
-                        Window.dispatch('on_resize', *Window.size)
-                    About:
-                        id: about_id

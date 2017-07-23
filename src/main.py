@@ -12,16 +12,20 @@ import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
+from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
-from kivymd.list import ILeftBodyTouch, OneLineListItem, TwoLineIconListItem
+from kivymd.list import (ILeftBodyTouch, OneLineListItem, TwoLineIconListItem,
+                         TwoLineListItem)
+from kivymd.navigationdrawer import NavigationDrawerHeaderBase
 from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
@@ -59,6 +63,34 @@ def run_in_thread(fn):
         t.start()
         return t
     return run
+
+
+class NavigationDrawerTwoLineListItem(
+        TwoLineListItem, NavigationDrawerHeaderBase):
+
+    address_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(NavigationDrawerTwoLineListItem, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.controller.bind(
+            current_account=lambda _, value: self.on_current_account(value))
+
+    def on_current_account(self, account):
+        address = "0x" + account.address.encode("hex")
+        self.address_property = address
+
+    def _update_specific_text_color(self, instance, value):
+        pass
+
+    def _set_active(self, active, list):
+        pass
 
 
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
@@ -194,8 +226,8 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
-    current_account_string = StringProperty()
+    current_account = ObjectProperty()
+    address_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
@@ -203,33 +235,40 @@ class Receive(BoxLayout):
 
     def setup(self):
         """
-        Default state setup.
+        Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
-        try:
-            self.current_account = self.controller.pywalib.get_main_account()
-        except IndexError:
-            pass
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def on_current_account_string(self, instance, address):
-        self.show_address(address)
-
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.address_property = address
 
-    def open_account_list(self):
-        def on_selected_item(instance, value):
-            self.current_account = value.account
-        self.controller.open_account_list_helper(on_selected_item)
+    def on_address_property(self, instance, value):
+        self.show_address(value)
 
 
 class History(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super(History, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def on_current_account(self, instance, account):
         self._load_history()
@@ -290,22 +329,78 @@ class History(BoxLayout):
         self.update_history_list(list_items)
 
 
+class SwitchAccount(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(SwitchAccount, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
+        self.load_account_list()
+
+    def on_release(self, list_item):
+        """
+        Sets Controller.current_account and switches to previous screen.
+        """
+        # sets Controller.current_account
+        self.selected_list_item = list_item
+        self.controller.current_account = list_item.account
+        # switches to previous screen
+        self.controller.screen_manager_previous()
+
+    def create_item(self, account):
+        """
+        Creates an account list item from given account.
+        """
+        address = "0x" + account.address.encode("hex")
+        list_item = OneLineListItem(text=address)
+        list_item.account = account
+        list_item.bind(on_release=lambda x: self.on_release(x))
+        return list_item
+
+    def load_account_list(self):
+        """
+        Fills account list widget from library account list.
+        """
+        account_list_id = self.ids.account_list_id
+        account_list_id.clear_widgets()
+        accounts = self.controller.pywalib.get_account_list()
+        for account in accounts:
+            list_item = self.create_item(account)
+            account_list_id.add_widget(list_item)
+
+
 class Overview(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
     current_account_string = StringProperty()
-    balance_property = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super(Overview, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
+
+    def is_selected(self):
+        """
+        Returns True if the overview sub-screen is selected,
+        otherwise returns False.
+        """
+        return self.parent.manager.current == 'overview'
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
-
-    def open_account_list(self):
-        controller = App.get_running_app().controller
-        controller.open_account_list_overview()
-
-    def get_title(self):
-        return "%s ETH" % self.balance_property
+        if self.is_selected():
+            self.controller.fetch_and_update_balance()
 
 
 class PWSelectList(BoxLayout):
@@ -351,8 +446,8 @@ class ImportKeystore(BoxLayout):
 # TODO: create a generic account form
 class ManageExisting(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
-    current_account_string = StringProperty()
+    current_account = ObjectProperty()
+    address_property = StringProperty()
     current_password = StringProperty()
     new_password1 = StringProperty()
     new_password2 = StringProperty()
@@ -363,13 +458,12 @@ class ManageExisting(BoxLayout):
 
     def setup(self):
         """
-        Default state setup.
+        Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
-        try:
-            self.current_account = self.controller.pywalib.get_main_account()
-        except IndexError:
-            pass
+        self.controller.bind(current_account=self.setter('current_account'))
+        # triggers the update
+        self.current_account = self.controller.current_account
 
     def verify_current_password_field(self):
         """
@@ -424,12 +518,7 @@ class ManageExisting(BoxLayout):
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
-
-    def open_account_list(self):
-        def on_selected_item(instance, value):
-            self.current_account = value.account
-        self.controller.open_account_list_helper(on_selected_item)
+        self.address_property = address
 
 
 class CreateNewAccount(BoxLayout):
@@ -565,17 +654,7 @@ class PWToolbar(Toolbar):
     def setup(self):
         self.controller = App.get_running_app().controller
         self.navigation = self.controller.ids.navigation_id
-        self.screen_manager = self.controller.ids.screen_manager_id
-        # bind balance update to title
-        overview = self.controller.overview
-        overview.bind(
-            balance_property=lambda *x: self.on_overview_balance_property())
-        # let's add the default title while waiting for the update
-        self.title_property = self.controller.get_overview_title()
         self.load_default_navigation()
-
-    def on_overview_balance_property(self):
-        self.title_property = self.controller.get_overview_title()
 
     def load_default_navigation(self):
         self.left_action_items = [
@@ -671,7 +750,6 @@ class AboutDiagnostic(BoxLayout):
         """
         Controller.patch_keystore_path()
         test_suite = suite()
-        print("test_suite:", test_suite)
         self.stream_property = ""
         stream = StringIOCBWrite(callback_write=self.callback_write)
         verbosity = 2
@@ -679,9 +757,39 @@ class AboutDiagnostic(BoxLayout):
                 stream=stream, verbosity=verbosity).run(test_suite)
 
 
+class OverviewScreen(Screen):
+
+    title_property = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(OverviewScreen, self).__init__(**kwargs)
+
+    def set_title(self, title):
+        self.title_property = title
+
+
+class SwitchAccountScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(SwitchAccountScreen, self).__init__(**kwargs)
+
+
+class ManageKeystoreScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(ManageKeystoreScreen, self).__init__(**kwargs)
+
+
+class AboutScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(AboutScreen, self).__init__(**kwargs)
+
+
 class Controller(FloatLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
+    current_account_balance = NumericProperty(0)
     # keeps track of all dialogs alive
     dialogs = []
 
@@ -689,16 +797,23 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
+        self.screen_history = []
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
     def overview(self):
-        overview_bnavigation_id = self.ids.overview_bnavigation_id
-        return overview_bnavigation_id.ids.overview_id
+        overview_screen = self.ids.overview_screen_id
+        overview_bnavigation = overview_screen.ids.overview_bnavigation_id
+        return overview_bnavigation.ids.overview_id
 
     @property
     def history(self):
         return self.overview.ids.history_id
+
+    @property
+    def switch_account(self):
+        switch_account_id = self.ids.switch_account_id
+        return switch_account_id
 
     @property
     def send(self):
@@ -714,42 +829,45 @@ class Controller(FloatLayout):
     def toolbar(self):
         return self.ids.toolbar_id
 
+    @property
+    def screen_manager(self):
+        return self.ids.screen_manager_id
+
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
 
-    def open_account_list_helper(self, on_selected_item):
-        title = "Select account"
-        items = []
-        pywalib = self.pywalib
-        account_list = pywalib.get_account_list()
-        for account in account_list:
-            address = '0x' + account.address.encode("hex")
-            item = OneLineListItem(text=address)
-            # makes sure the address doesn't wrap in multiple lines,
-            # but gets shortened
-            item.ids._lbl_primary.shorten = True
-            item.account = account
-            items.append(item)
-        dialog = Controller.create_list_dialog(
-            title, items, on_selected_item)
-        dialog.open()
+    def screen_manager_current(self, current, direction=None):
+        screens = {
+            'overview': OverviewScreen,
+            'switch_account': SwitchAccountScreen,
+            'manage_keystores': ManageKeystoreScreen,
+            'about': AboutScreen,
+        }
+        screen_manager = self.screen_manager
+        if not screen_manager.has_screen(current):
+            screen = screens[current](name=current)
+            # screen_manager.switch_to(screen, direction=direction)
+            screen_manager.add_widget(screen)
+        if direction is not None:
+            screen_manager.transition.direction = direction
+        screen_manager.current = current
+        self.screen_history.append(current)
 
-    def open_account_list_overview(self):
-        def on_selected_item(instance, value):
-            self.set_current_account(value.account)
-        self.open_account_list_helper(on_selected_item)
+    def screen_manager_previous(self):
+        try:
+            previous_screen = self.screen_history[-2]
+        except IndexError:
+            previous_screen = 'overview'
+        self.screen_manager_current(previous_screen, direction='right')
+
+    def on_selected_account(self, account):
+        """
+        Updates Controller.current_account.
+        """
+        self.current_account = account
 
     def set_current_account(self, account):
         self.current_account = account
-
-    def on_current_account(self, instance, value):
-        """
-        Updates Overview.current_account and History.current_account,
-        then fetch account data.
-        """
-        self.overview.current_account = value
-        self.history.current_account = value
-        self._load_balance()
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -784,30 +902,6 @@ class Controller(FloatLayout):
     @staticmethod
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
-
-    @staticmethod
-    def create_list_dialog(title, items, on_selected_item):
-        """
-        Creates a dialog from given title and list.
-        items is a list of BaseListItem objects.
-        """
-        # select_list = PWSelectList(items=items, on_release=on_release)
-        select_list = PWSelectList(items=items)
-        select_list.bind(selected_item=on_selected_item)
-        content = select_list
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.9, .9))
-        # workaround for MDDialog container size (too small by default)
-        dialog.ids.container.size_hint_y = 1
-        # close the dialog as we select the element
-        select_list.bind(
-            selected_item=lambda instance, value: dialog.dismiss())
-        dialog.add_action_button(
-                "Dismiss",
-                action=lambda *x: dialog.dismiss())
-        return dialog
 
     @staticmethod
     def on_dialog_dismiss(dialog):
@@ -873,13 +967,9 @@ class Controller(FloatLayout):
         dialog.open()
 
     @mainthread
-    def update_balance_label(self, balance):
-        overview_id = self.overview
-        overview_id.balance_property = balance
-
-    def get_overview_title(self):
-        overview_id = self.overview
-        return overview_id.get_title()
+    def update_toolbar_title_balance(self):
+        title = "%s ETH" % (self.current_account_balance)
+        self.set_toolbar_title(title)
 
     @staticmethod
     @mainthread
@@ -893,28 +983,37 @@ class Controller(FloatLayout):
         try:
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
-            self.ids.screen_manager_id.current = "overview"
-            self.ids.screen_manager_id.transition.direction = "right"
+            self.screen_manager_current('overview')
         except IndexError:
             self.load_create_new_account()
 
     @run_in_thread
-    def _load_balance(self):
+    def fetch_and_update_balance(self):
+        """
+        Fetches the new balance and updates the UI.
+        """
         account = self.current_account
         try:
-            balance = self.pywalib.get_balance(account.address.encode("hex"))
+            self.current_account_balance = self.pywalib.get_balance(
+                account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
-        self.update_balance_label(balance)
+        self.update_toolbar_title_balance()
+
+    def load_switch_account(self):
+        """
+        Loads the switch account screen.
+        """
+        # loads the switch account screen
+        self.screen_manager_current('switch_account', direction='left')
 
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """
         # loads the manage keystores screen
-        self.ids.screen_manager_id.transition.direction = "left"
-        self.ids.screen_manager_id.current = 'manage_keystores'
+        self.screen_manager_current('manage_keystores', direction='left')
 
     def load_create_new_account(self):
         """
@@ -931,8 +1030,17 @@ class Controller(FloatLayout):
         """
         Loads the about screen.
         """
-        self.ids.screen_manager_id.transition.direction = "left"
-        self.ids.screen_manager_id.current = "about"
+        self.screen_manager_current('about', direction='left')
+
+
+class DebugRavenClient(object):
+    """
+    The DebugRavenClient should be used in debug mode, it just raises
+    the exception rather than capturing it.
+    """
+
+    def captureException(self):
+        raise
 
 
 class PyWalletApp(App):
@@ -947,7 +1055,10 @@ class PyWalletApp(App):
         return self.root
 
 
-def configure_sentry():
+def configure_sentry(in_debug=False):
+    """
+    Configure the Raven client, or create a dummy one if `in_debug` is `True`.
+    """
     key = 'eaee971c463b49678f6f352dfec497a9'
     # the public DSN URL is not available on the Python client
     # so we're exposing the secret and will be revoking it on abuse
@@ -956,12 +1067,18 @@ def configure_sentry():
     project_id = '191660'
     dsn = 'https://{key}:{secret}@sentry.io/{project_id}'.format(
         key=key, secret=secret, project_id=project_id)
-    client = Client(dsn)
+    if in_debug:
+        client = DebugRavenClient()
+    else:
+        client = Client(dsn)
     return client
 
 
 if __name__ == '__main__':
-    client = configure_sentry()
+    # when the -d/--debug flag is set, Kivy sets log level to debug
+    level = Logger.getEffectiveLevel()
+    in_debug = level == LOG_LEVELS.get('debug')
+    client = configure_sentry(in_debug)
     try:
         PyWalletApp().run()
     except:
