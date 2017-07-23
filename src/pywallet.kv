@@ -87,8 +87,8 @@
 <Receive>:
     orientation: 'vertical'
     AddressButton:
-        text: root.current_account_string
-        on_release: root.open_account_list()
+        text: root.address_property
+        on_release: app.controller.load_switch_account()
     QRCodeWidget:
         id: qr_code_id
 

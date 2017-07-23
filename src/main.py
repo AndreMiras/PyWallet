@@ -207,8 +207,7 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
-    current_account_string = StringProperty()
+    address_property = StringProperty()
 
     def __init__(self, **kwargs):
         super(Receive, self).__init__(**kwargs)
@@ -216,28 +215,21 @@ class Receive(BoxLayout):
 
     def setup(self):
         """
-        Default state setup.
+        Binds Controller.current_account property
         """
         self.controller = App.get_running_app().controller
-        try:
-            self.current_account = self.controller.pywalib.get_main_account()
-        except IndexError:
-            pass
+        self.controller.bind(
+            current_account=lambda instance, value: self.on_current_account(value))
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def on_current_account_string(self, instance, address):
-        self.show_address(address)
-
-    def on_current_account(self, instance, account):
+    def on_current_account(self, account):
         address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.address_property = address
 
-    def open_account_list(self):
-        def on_selected_item(instance, value):
-            self.current_account = value.account
-        self.controller.open_account_list_helper(on_selected_item)
+    def on_address_property(self, instance, value):
+        self.show_address(value)
 
 
 class History(BoxLayout):
