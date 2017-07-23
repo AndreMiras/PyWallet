@@ -821,8 +821,15 @@ class Controller(FloatLayout):
         return overview_bnavigation_id.ids.send_id
 
     @property
+    def manage_keystores(self):
+        screen_manager = self.screen_manager
+        manage_keystores_screen = screen_manager.get_screen('manage_keystores')
+        manage_keystores_bnavigation_id = manage_keystores_screen.ids.manage_keystores_id
+        return manage_keystores_bnavigation_id
+
+    @property
     def create_new_account(self):
-        manage_keystores = self.ids.manage_keystores_id
+        manage_keystores = self.manage_keystores
         return manage_keystores.ids.create_new_account_id
 
     @property
@@ -1021,7 +1028,7 @@ class Controller(FloatLayout):
         """
         self.load_manage_keystores()
         # loads the create new account tab
-        manage_keystores = self.ids.manage_keystores_id
+        manage_keystores = self.manage_keystores
         create_new_account_nav_item = \
             manage_keystores.ids.create_new_account_nav_item_id
         create_new_account_nav_item.dispatch('on_tab_press')
