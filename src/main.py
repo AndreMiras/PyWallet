@@ -741,9 +741,8 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
-        # on account switch, update Controller.current_account property
         self.switch_account.bind(
-            selected_account=self.setter('current_account'))
+            selected_account=lambda instance, value: self.on_selected_account(value))
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
@@ -776,6 +775,15 @@ class Controller(FloatLayout):
 
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
+
+    def on_selected_account(self, account):
+        """
+        Updates Controller.current_account and switches to previous screen.
+        """
+        self.current_account = account
+        previous_screen = self.ids.screen_manager_id.previous()
+        self.ids.screen_manager_id.transition.direction = "right"
+        self.ids.screen_manager_id.current = previous_screen
 
     def open_account_list_helper(self, on_selected_item):
         title = "Select account"
