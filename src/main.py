@@ -362,14 +362,18 @@ class Overview(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
     current_account_string = StringProperty()
-    balance_property = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super(Overview, self).__init__(**kwargs)
+        Clock.schedule_once(lambda dt: self.setup())
+
+    def setup(self):
+        self.controller = App.get_running_app().controller
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
-
-    def get_title(self):
-        return "%s ETH" % self.balance_property
+        self.controller.fetch_and_update_balance()
 
 
 class PWSelectList(BoxLayout):
@@ -621,16 +625,7 @@ class PWToolbar(Toolbar):
     def setup(self):
         self.controller = App.get_running_app().controller
         self.navigation = self.controller.ids.navigation_id
-        # bind balance update to title
-        overview = self.controller.overview
-        overview.bind(
-            balance_property=lambda *x: self.on_overview_balance_property())
-        # let's add the default title while waiting for the update
-        self.title_property = self.controller.get_overview_title()
         self.load_default_navigation()
-
-    def on_overview_balance_property(self):
-        self.title_property = self.controller.get_overview_title()
 
     def load_default_navigation(self):
         self.left_action_items = [
@@ -736,6 +731,7 @@ class AboutDiagnostic(BoxLayout):
 class Controller(FloatLayout):
 
     current_account = ObjectProperty()
+    current_account_balance = NumericProperty(0)
     # keeps track of all dialogs alive
     dialogs = []
 
@@ -807,12 +803,10 @@ class Controller(FloatLayout):
 
     def on_current_account(self, instance, value):
         """
-        Updates Overview.current_account and History.current_account,
-        then fetch account data.
+        Updates Overview.current_account and History.current_account.
         """
         self.overview.current_account = value
         self.history.current_account = value
-        self._load_balance()
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -912,13 +906,9 @@ class Controller(FloatLayout):
         dialog.open()
 
     @mainthread
-    def update_balance_label(self, balance):
-        overview_id = self.overview
-        overview_id.balance_property = balance
-
-    def get_overview_title(self):
-        overview_id = self.overview
-        return overview_id.get_title()
+    def update_toolbar_title_balance(self):
+        title = "%s ETH" % (self.current_account_balance)
+        self.set_toolbar_title(title)
 
     @staticmethod
     @mainthread
@@ -937,14 +927,17 @@ class Controller(FloatLayout):
             self.load_create_new_account()
 
     @run_in_thread
-    def _load_balance(self):
+    def fetch_and_update_balance(self):
+        """
+        Fetches the new balance and updates the UI.
+        """
         account = self.current_account
         try:
-            balance = self.pywalib.get_balance(account.address.encode("hex"))
+            self.current_account_balance = self.pywalib.get_balance(account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
-        self.update_balance_label(balance)
+        self.update_toolbar_title_balance()
 
     def load_switch_account(self):
         """

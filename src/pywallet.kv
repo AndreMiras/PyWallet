@@ -318,7 +318,7 @@
         text: "Overview"
         icon: 'format-list-bulleted'
         on_tab_press:
-            app.controller.set_toolbar_title(app.controller.get_overview_title())
+            app.controller.fetch_and_update_balance()
         Overview:
             id: overview_id
     MDBottomNavigationItem:
@@ -358,7 +358,7 @@
                 Screen:
                     name: 'overview'
                     on_pre_enter:
-                        root.set_toolbar_title(app.controller.get_overview_title())
+                        root.update_toolbar_title_balance()
                     OverviewBottomNavigation:
                         id: overview_bnavigation_id
                 Screen:
