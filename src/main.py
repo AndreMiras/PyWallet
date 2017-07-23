@@ -305,6 +305,9 @@ class History(BoxLayout):
 
 class SwitchAccount(BoxLayout):
 
+    selected_list_item = ObjectProperty()
+    selected_account = ObjectProperty()
+
     def __init__(self, **kwargs):
         super(SwitchAccount, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
@@ -313,13 +316,18 @@ class SwitchAccount(BoxLayout):
         self.controller = App.get_running_app().controller
         self.load_account_list()
 
-    @staticmethod
-    def create_item(account):
+    def on_release(self, list_item):
+        self.selected_list_item = list_item
+        self.selected_account = list_item.account
+
+    def create_item(self, account):
         """
         Creates an account list item from given account.
         """
         address = "0x" + account.address.encode("hex")
         list_item = OneLineListItem(text=address)
+        list_item.account = account
+        list_item.bind(on_release=lambda x: self.on_release(x))
         return list_item
 
     def load_account_list(self):
@@ -330,7 +338,7 @@ class SwitchAccount(BoxLayout):
         account_list_id.clear_widgets()
         accounts = self.controller.pywalib.get_account_list()
         for account in accounts:
-            list_item = SwitchAccount.create_item(account)
+            list_item = self.create_item(account)
             account_list_id.add_widget(list_item)
 
 
@@ -725,7 +733,7 @@ class AboutDiagnostic(BoxLayout):
 
 class Controller(FloatLayout):
 
-    current_account = ObjectProperty(None, allownone=True)
+    current_account = ObjectProperty()
     # keeps track of all dialogs alive
     dialogs = []
 
@@ -733,6 +741,9 @@ class Controller(FloatLayout):
         super(Controller, self).__init__(**kwargs)
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
+        # on account switch, update Controller.current_account property
+        self.switch_account.bind(
+            selected_account=self.setter('current_account'))
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
@@ -743,6 +754,11 @@ class Controller(FloatLayout):
     @property
     def history(self):
         return self.overview.ids.history_id
+
+    @property
+    def switch_account(self):
+        switch_account_id = self.ids.switch_account_id
+        return switch_account_id
 
     @property
     def send(self):
