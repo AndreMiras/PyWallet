@@ -420,7 +420,7 @@ class ImportKeystore(BoxLayout):
 class ManageExisting(BoxLayout):
 
     current_account = ObjectProperty(None, allownone=True)
-    current_account_string = StringProperty()
+    address_property = StringProperty()
     current_password = StringProperty()
     new_password1 = StringProperty()
     new_password2 = StringProperty()
@@ -431,13 +431,10 @@ class ManageExisting(BoxLayout):
 
     def setup(self):
         """
-        Default state setup.
+        Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
-        try:
-            self.current_account = self.controller.pywalib.get_main_account()
-        except IndexError:
-            pass
+        self.controller.bind(current_account=self.setter('current_account'))
 
     def verify_current_password_field(self):
         """
@@ -492,7 +489,7 @@ class ManageExisting(BoxLayout):
 
     def on_current_account(self, instance, account):
         address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.address_property = address
 
     def open_account_list(self):
         def on_selected_item(instance, value):

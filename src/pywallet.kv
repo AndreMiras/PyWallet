@@ -23,7 +23,7 @@
         id: navigation_drawer
         NavigationDrawerTwoLineListItem:
             text: "Account"
-            secondary_text: self.current_account_string
+            secondary_text: self.address_property
             on_release: app.controller.load_switch_account()
         NavigationDrawerIconButton:
             icon: "home"
@@ -178,7 +178,7 @@
 <ManageExisting>:
     orientation: 'vertical'
     AddressButton:
-        text: root.current_account_string
+        text: root.address_property
         on_release: app.controller.load_switch_account()
     MDTextField:
         hint_text: "Current password"
