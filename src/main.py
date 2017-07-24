@@ -798,29 +798,20 @@ class OverviewScreen(Screen):
 
     title_property = StringProperty()
 
-    def __init__(self, **kwargs):
-        super(OverviewScreen, self).__init__(**kwargs)
-
     def set_title(self, title):
         self.title_property = title
 
 
 class SwitchAccountScreen(Screen):
-
-    def __init__(self, **kwargs):
-        super(SwitchAccountScreen, self).__init__(**kwargs)
+    pass
 
 
 class ManageKeystoreScreen(Screen):
-
-    def __init__(self, **kwargs):
-        super(ManageKeystoreScreen, self).__init__(**kwargs)
+    pass
 
 
 class AboutScreen(Screen):
-
-    def __init__(self, **kwargs):
-        super(AboutScreen, self).__init__(**kwargs)
+    pass
 
 
 class Controller(FloatLayout):
