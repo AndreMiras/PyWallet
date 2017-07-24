@@ -102,9 +102,13 @@ class Test(unittest.TestCase):
         self.assertEqual(controller.screen_manager.current, 'overview')
         # TODO: also verify the Toolbar title was updated correctly
         # self.assertEqual('TODO', app.controller.toolbar.title)
-        # TODO: check the redirect dialog
-        # dialogs = controller.dialogs
-        # self.assertEqual(len(dialogs), 1)
+        # check the redirect dialog
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account created, redirecting...')
+        dialog.dismiss()
+        self.assertEqual(len(dialogs), 0)
 
     def helper_test_on_send_click(self, app):
         """

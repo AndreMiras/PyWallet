@@ -602,7 +602,6 @@ class CreateNewAccount(BoxLayout):
         """
         self.disabled = not enabled
 
-    @mainthread
     def show_redirect_dialog(self):
         title = "Account created, redirecting..."
         body = ""
