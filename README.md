@@ -37,6 +37,9 @@ buildozer android adb -- logcat
 ## Install
 See [Install.md](docs/Install.md) for detailed instructions.
 
+## Testing
+See [Testing.md](docs/Testing.md).
+
 ## Documentation
 
 * Miscellaneous documentation in the [docs](docs/) directory
