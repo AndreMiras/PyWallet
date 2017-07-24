@@ -503,7 +503,23 @@ class ManageExisting(BoxLayout):
         """
         Not yet implemented.
         """
-        Controller.show_not_implemented_dialog()
+        title = "Are you sure?"
+        body = ""
+        body += "Are you sure you want to delete this account?\n"
+        body += "This action cannot be undone.\n\n"
+        body += "The following account will be deleted:\n"
+        body += "%s\n\n" % (self.address_property)
+        body += "Are you sure?"
+        dialog = Controller.create_dialog_helper(title, body)
+        # makes it a little wider to fit the text
+        dialog.height = dp(300)
+        dialog.add_action_button(
+                "No",
+                action=lambda *x: dialog.dismiss())
+        dialog.add_action_button(
+                "Yes",
+                action=lambda *x: dialog.dismiss())
+        dialog.open()
 
     @run_in_thread
     def update_password(self):
@@ -952,7 +968,7 @@ class Controller(FloatLayout):
             dialog.dispatch('on_dismiss')
 
     @staticmethod
-    def create_dialog(title, body):
+    def create_dialog_helper(title, body):
         """
         Creates a dialog from given title and body.
         Adds it to the dialogs track list.
@@ -970,11 +986,21 @@ class Controller(FloatLayout):
                         size_hint=(.8, None),
                         height=dp(200),
                         auto_dismiss=False)
+        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
+        Controller.dialogs.append(dialog)
+        return dialog
+
+    @staticmethod
+    def create_dialog(title, body):
+        """
+        Creates a dialog from given title and body.
+        Adds it to the dialogs track list.
+        Appends dismiss action.
+        """
+        dialog = Controller.create_dialog_helper(title, body)
         dialog.add_action_button(
                 "Dismiss",
                 action=lambda *x: dialog.dismiss())
-        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
-        Controller.dialogs.append(dialog)
         return dialog
 
     @staticmethod
