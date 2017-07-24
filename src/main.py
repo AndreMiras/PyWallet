@@ -361,6 +361,8 @@ class SwitchAccount(BoxLayout):
         """
         address = "0x" + account.address.encode("hex")
         list_item = OneLineListItem(text=address)
+        # makes sure the address doesn't overlap on small screen
+        list_item.ids._lbl_primary.shorten = True
         list_item.account = account
         list_item.bind(on_release=lambda x: self.on_release(x))
         return list_item
