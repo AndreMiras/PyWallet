@@ -678,6 +678,9 @@ class AddressButton(MDFlatButton):
             # parent_width and actual content size
             content.width = parent_width - button_margin
         self.parent.bind(size=on_parent_size)
+        # call it once manually, refs:
+        # https://github.com/AndreMiras/PyWallet/issues/74
+        on_parent_size(self.parent, None)
 
 
 class PWToolbar(Toolbar):
