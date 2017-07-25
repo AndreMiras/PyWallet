@@ -264,6 +264,7 @@ class PyWalib(object):
     def delete_account(self, account):
         """
         Deletes the given `account` from the `keystore_dir` directory.
+        Then deletes it from the `AccountsService` account manager instance.
         In fact, moves it to another location; another directory at the same
         level.
         """
@@ -273,7 +274,11 @@ class PyWalib(object):
         # create the deleted account dir if required
         if not os.path.exists(deleted_keystore_dir):
             os.makedirs(deleted_keystore_dir)
+        # "removes" it from the file system
         shutil.move(account.path, deleted_keystore_dir)
+        # deletes it from the `AccountsService` account manager instance
+        account_service = self.get_account_list()
+        account_service.accounts.remove(account)
 
     def update_account_password(
             self, account, new_password, current_password=None):
@@ -303,8 +308,8 @@ class PyWalib(object):
         """
         Returns the Account list.
         """
-        account = self.app.services.accounts
-        return account
+        accounts = self.app.services.accounts
+        return accounts
 
     def get_main_account(self):
         """
