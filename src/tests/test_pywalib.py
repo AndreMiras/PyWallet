@@ -114,10 +114,19 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         account = self.helper_new_account()
+        address = account.address
         self.assertEqual(len(pywalib.get_account_list()), 1)
+        # deletes the account and verifies it's not loaded anymore
         pywalib.delete_account(account)
         self.assertEqual(len(pywalib.get_account_list()), 0)
-        # TODO: verify we can load the accounts from the backup location
+        # even recreating the PyWalib object
+        pywalib = PyWalib(self.keystore_dir)
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # tries to reload it from the backup location
+        deleted_keystore_dir = PyWalib.deleted_account_dir(self.keystore_dir)
+        pywalib = PyWalib(deleted_keystore_dir)
+        self.assertEqual(len(pywalib.get_account_list()), 1)
+        self.assertEqual(pywalib.get_account_list()[0].address, address)
 
     def test_handle_etherscan_error(self):
         """
