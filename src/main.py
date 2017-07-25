@@ -469,6 +469,7 @@ class ManageExisting(BoxLayout):
         Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
+        self.pywalib = self.controller.pywalib
         self.controller.bind(current_account=self.setter('current_account'))
         # triggers the update
         self.current_account = self.controller.current_account
@@ -501,11 +502,43 @@ class ManageExisting(BoxLayout):
         """
         return self.verify_password_field()
 
-    def delete_account(self):
+    def show_redirect_dialog(self):
+        title = "Account deleted, redirecting..."
+        body = ""
+        body += "Your account was deleted, "
+        body += "you will be redirected to the overview."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    def on_delete_account_yes(self, dialog):
+        """
+        Deletes the account, discarts the warning dialog,
+        shows an info popup and redirects to the landing page.
+        """
+        account = self.current_account
+        self.pywalib.delete_account(account)
+        dialog.dismiss()
+        self.show_redirect_dialog()
+        self.controller.load_landing_page()
+
+    def prompt_delete_account_dialog(self):
         """
         Not yet implemented.
         """
-        Controller.show_not_implemented_dialog()
+        title = "Are you sure?"
+        body = ""
+        body += "This action cannot be undone.\n"
+        body += "Are you sure you want to delete this account?\n"
+        dialog = Controller.create_dialog_helper(title, body)
+        # makes it a little wider to fit the text
+        dialog.height = dp(300)
+        dialog.add_action_button(
+                "No",
+                action=lambda *x: dialog.dismiss())
+        dialog.add_action_button(
+                "Yes",
+                action=lambda *x: self.on_delete_account_yes(dialog))
+        dialog.open()
 
     @run_in_thread
     def update_password(self):
@@ -867,6 +900,11 @@ class Controller(FloatLayout):
         return manage_keystores_bnavigation_id
 
     @property
+    def manage_existing(self):
+        manage_keystores = self.manage_keystores
+        return manage_keystores.ids.manage_existing_id
+
+    @property
     def create_new_account(self):
         manage_keystores = self.manage_keystores
         return manage_keystores.ids.create_new_account_id
@@ -956,7 +994,7 @@ class Controller(FloatLayout):
             dialog.dispatch('on_dismiss')
 
     @staticmethod
-    def create_dialog(title, body):
+    def create_dialog_helper(title, body):
         """
         Creates a dialog from given title and body.
         Adds it to the dialogs track list.
@@ -974,11 +1012,21 @@ class Controller(FloatLayout):
                         size_hint=(.8, None),
                         height=dp(200),
                         auto_dismiss=False)
+        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
+        Controller.dialogs.append(dialog)
+        return dialog
+
+    @staticmethod
+    def create_dialog(title, body):
+        """
+        Creates a dialog from given title and body.
+        Adds it to the dialogs track list.
+        Appends dismiss action.
+        """
+        dialog = Controller.create_dialog_helper(title, body)
         dialog.add_action_button(
                 "Dismiss",
                 action=lambda *x: dialog.dismiss())
-        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
-        Controller.dialogs.append(dialog)
         return dialog
 
     @staticmethod

@@ -178,6 +178,7 @@
 <ManageExisting>:
     orientation: 'vertical'
     AddressButton:
+        id: account_address_id
         text: root.address_property
         on_release: app.controller.load_switch_account()
     MDTextField:
@@ -213,8 +214,9 @@
                 on_release: root.update_password()
         AnchorLayout:
             MDRaisedButton:
+                id: delete_button_id
                 text: "Delete account"
-                on_release: root.delete_account()
+                on_release: root.prompt_delete_account_dialog()
     PushUp:
 
 
@@ -233,6 +235,7 @@
         on_tab_press:
             app.controller.set_toolbar_title("Manage existing")
         ManageExisting:
+            id: manage_existing_id
     MDBottomNavigationItem:
         id: create_new_account_nav_item_id
         name: "create_new"

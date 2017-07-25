@@ -196,6 +196,47 @@ class Test(unittest.TestCase):
         controller.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
 
+    # TODO:
+    # also test we're getting invited to create a new account
+    # when all accounts were deleted
+    def helper_test_delete_account(self, app):
+        """
+        Deletes account from the UI.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # makes sure we have an account to play with
+        self.assertEqual(len(pywalib.get_account_list()), 1)
+        # go to the manage account screen
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_manage_keystores()
+        self.assertEqual('Manage existing', app.controller.toolbar.title)
+        # verifies an account is showing
+        manage_existing = controller.manage_existing
+        account_address_id = manage_existing.ids.account_address_id
+        account = pywalib.get_account_list()[0]
+        account_address = '0x' + account.address.encode("hex")
+        self.assertEqual(account_address_id.text, account_address)
+        # clicks delete
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        # TODO: click on the dialog action button itself
+        manage_existing.on_delete_account_yes(dialog)
+        # the dialog should be replaced by another one
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+        # and the account deleted
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -203,6 +244,7 @@ class Test(unittest.TestCase):
         self.helper_test_create_first_account(app)
         self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
+        self.helper_test_delete_account(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
