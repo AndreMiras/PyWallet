@@ -148,10 +148,29 @@ class Test(unittest.TestCase):
         self.assertEqual('Manage existing', app.controller.toolbar.title)
         # verifies an account is showing
         manage_existing = controller.manage_existing
-        address_id = manage_existing.ids.address_id
+        account_address_id = manage_existing.ids.account_address_id
         account = pywalib.get_account_list()[0]
-        account_address = account.address.encode("hex")
-        self.assertEqual(address_id.text, account_address)
+        account_address = '0x' + account.address.encode("hex")
+        self.assertEqual(account_address_id.text, account_address)
+        # clicks delete
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        # TODO: click on the dialog action button itself
+        manage_existing.on_delete_account_yes(dialog)
+        # the dialog should be replaced by another one
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+        # and the account deleted
+        self.assertEqual(len(pywalib.get_account_list()), 0)
 
     # main test function
     def run_test(self, app, *args):
