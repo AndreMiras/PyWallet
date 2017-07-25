@@ -131,12 +131,35 @@ class Test(unittest.TestCase):
         controller.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
 
+    # TODO:
+    # also test we're getting invited to create a new account
+    # when all accounts were deleted
+    def helper_test_delete_account(self, app):
+        """
+        Deletes account from the UI.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # makes sure we have an account to play with
+        self.assertEqual(len(pywalib.get_account_list()), 1)
+        # go to the manage account screen
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_manage_keystores()
+        self.assertEqual('Manage existing', app.controller.toolbar.title)
+        # verifies an account is showing
+        manage_existing = controller.manage_existing
+        address_id = manage_existing.ids.address_id
+        account = pywalib.get_account_list()[0]
+        account_address = account.address.encode("hex")
+        self.assertEqual(address_id.text, account_address)
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
         self.helper_test_empty_account(app)
         self.helper_test_create_first_account(app)
         self.helper_test_on_send_click(app)
+        self.helper_test_delete_account(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.

@@ -896,6 +896,11 @@ class Controller(FloatLayout):
         return manage_keystores_bnavigation_id
 
     @property
+    def manage_existing(self):
+        manage_keystores = self.manage_keystores
+        return manage_keystores.ids.manage_existing_id
+
+    @property
     def create_new_account(self):
         manage_keystores = self.manage_keystores
         return manage_keystores.ids.create_new_account_id

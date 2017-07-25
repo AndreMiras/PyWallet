@@ -178,6 +178,7 @@
 <ManageExisting>:
     orientation: 'vertical'
     AddressButton:
+        id: address_id
         text: root.address_property
         on_release: app.controller.load_switch_account()
     MDTextField:
@@ -233,6 +234,7 @@
         on_tab_press:
             app.controller.set_toolbar_title("Manage existing")
         ManageExisting:
+            id: manage_existing_id
     MDBottomNavigationItem:
         id: create_new_account_nav_item_id
         name: "create_new"
