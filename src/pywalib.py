@@ -3,6 +3,7 @@
 from __future__ import print_function, unicode_literals
 
 import os
+import shutil
 from os.path import expanduser
 
 import requests
@@ -259,6 +260,20 @@ class PyWalib(object):
             app.services.accounts.keystore_dir, account.address.encode('hex'))
         self.app.services.accounts.add_account(account)
         return account
+
+    def delete_account(self, account):
+        """
+        Deletes the given `account` from the `keystore_dir` directory.
+        In fact, moves it to another location; another directory at the same
+        level.
+        """
+        app = self.app
+        keystore_dir = app.services.accounts.keystore_dir
+        deleted_keystore_dir = PyWalib.deleted_account_dir(keystore_dir)
+        # create the deleted account dir if required
+        if not os.path.exists(deleted_keystore_dir):
+            os.makedirs(deleted_keystore_dir)
+        shutil.move(account.path, deleted_keystore_dir)
 
     def update_account_password(
             self, account, new_password, current_password=None):
