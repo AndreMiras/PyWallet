@@ -505,11 +505,8 @@ class ManageExisting(BoxLayout):
         """
         title = "Are you sure?"
         body = ""
+        body += "This action cannot be undone.\n"
         body += "Are you sure you want to delete this account?\n"
-        body += "This action cannot be undone.\n\n"
-        body += "The following account will be deleted:\n"
-        body += "%s\n\n" % (self.address_property)
-        body += "Are you sure?"
         dialog = Controller.create_dialog_helper(title, body)
         # makes it a little wider to fit the text
         dialog.height = dp(300)
