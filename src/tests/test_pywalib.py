@@ -88,6 +88,26 @@ class PywalibTestCase(unittest.TestCase):
             account, new_password, current_password)
         self.assertFalse(account.locked)
 
+
+    def test_deleted_account_dir(self):
+        """
+        The deleted_account_dir() helper method should be working
+        with and without trailing slash.
+        """
+        expected_deleted_keystore_dir = '/tmp/keystore-deleted'
+        keystore_dirs = [
+            # without trailing slash
+            '/tmp/keystore',
+            # with one trailing slash
+            '/tmp/keystore/',
+            # with two trailing slashes
+            '/tmp/keystore//',
+        ]
+        for keystore_dir in keystore_dirs:
+            self.assertEqual(
+                PyWalib.deleted_account_dir(keystore_dir),
+                expected_deleted_keystore_dir)
+
     def test_handle_etherscan_error(self):
         """
         Checks handle_etherscan_error() error handling.

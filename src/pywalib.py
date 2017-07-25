@@ -227,6 +227,26 @@ class PyWalib(object):
             PBKDF2_CONSTANTS["c"] = default_iterations
         return account
 
+    @staticmethod
+    def deleted_account_dir(keystore_dir):
+        """
+        Given a `keystore_dir`, returns the corresponding
+        `deleted_keystore_dir`.
+        >>> keystore_dir = '/tmp/keystore'
+        >>> PyWalib.deleted_account_dir(keystore_dir)
+        u'/tmp/keystore-deleted'
+        >>> keystore_dir = '/tmp/keystore/'
+        >>> PyWalib.deleted_account_dir(keystore_dir)
+        u'/tmp/keystore-deleted'
+        """
+        keystore_dir = keystore_dir.rstrip('/')
+        keystore_dir_name = os.path.basename(keystore_dir)
+        deleted_keystore_dir_name = "%s-deleted" % (keystore_dir_name)
+        deleted_keystore_dir = os.path.join(
+            os.path.dirname(keystore_dir),
+            deleted_keystore_dir_name)
+        return deleted_keystore_dir
+
     def new_account(self, password, security_ratio=None):
         """
         Creates an account on the disk and returns it.
