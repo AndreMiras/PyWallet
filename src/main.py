@@ -489,9 +489,11 @@ class ManageExisting(BoxLayout):
 
     def verify_password_field(self):
         """
-        Makes sure passwords are matching.
+        Makes sure passwords are matching and are not void.
         """
-        return self.new_password1 == self.new_password2
+        passwords_matching = self.new_password1 == self.new_password2
+        passwords_not_void = self.new_password1 != ''
+        return passwords_matching and passwords_not_void
 
     def verify_fields(self):
         """
@@ -555,9 +557,11 @@ class CreateNewAccount(BoxLayout):
 
     def verify_password_field(self):
         """
-        Makes sure passwords are matching.
+        Makes sure passwords are matching and are not void.
         """
-        return self.new_password1 == self.new_password2
+        passwords_matching = self.new_password1 == self.new_password2
+        passwords_not_void = self.new_password1 != ''
+        return passwords_matching and passwords_not_void
 
     def verify_fields(self):
         """
