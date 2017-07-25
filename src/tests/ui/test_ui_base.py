@@ -159,7 +159,8 @@ class Test(unittest.TestCase):
             create_account_thread = threading.enumerate()[1]
             self.assertEqual(type(create_account_thread), threading.Thread)
             self.assertEqual(
-                create_account_thread._Thread__target.func_name, "create_account")
+                create_account_thread._Thread__target.func_name,
+                "create_account")
             # waits for the end of the thread
             create_account_thread.join()
             # the form should popup an error dialog
