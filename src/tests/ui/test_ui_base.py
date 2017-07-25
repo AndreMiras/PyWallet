@@ -113,6 +113,7 @@ class Test(unittest.TestCase):
     def helper_test_create_account_form(self, app):
         """
         Create account form validation checks.
+        Testing both not matching and empty passwords.
         """
         controller = app.controller
         pywalib = controller.pywalib
@@ -130,36 +131,48 @@ class Test(unittest.TestCase):
         new_password2_id = create_new_account.ids.new_password2_id
         create_account_button_id = \
             create_new_account.ids.create_account_button_id
-        # fills them up with same password
-        new_password1_id.text = "not matching1"
-        new_password2_id.text = "not matching2"
-        # makes the account creation fast
-        # before clicking the create account button,
-        # only the main thread is running
-        self.assertEqual(len(threading.enumerate()), 1)
-        main_thread = threading.enumerate()[0]
-        self.assertEqual(type(main_thread), threading._MainThread)
-        # click the create account button
-        create_account_button_id.dispatch('on_release')
-        # after submitting the account verification thread should run
-        self.assertEqual(len(threading.enumerate()), 2)
-        create_account_thread = threading.enumerate()[1]
-        self.assertEqual(type(create_account_thread), threading.Thread)
-        self.assertEqual(
-            create_account_thread._Thread__target.func_name, "create_account")
-        # waits for the end of the thread
-        create_account_thread.join()
-        # the form should popup an error dialog
-        dialogs = controller.dialogs
-        self.assertEqual(len(dialogs), 1)
-        dialog = dialogs[0]
-        self.assertEqual(dialog.title, 'Invalid form')
-        dialog.dismiss()
-        self.assertEqual(len(dialogs), 0)
-        # no account were created
-        self.assertEqual(
-            account_count_before,
-            len(pywalib.get_account_list()))
+        passwords_to_try = [
+            # passwords not matching
+            {
+                'new_password1': 'not matching1',
+                'new_password2': 'not matching2'
+            },
+            # passwords empty
+            {
+                'new_password1': '',
+                'new_password2': ''
+            },
+        ]
+        for password_dict in passwords_to_try:
+            new_password1_id.text = password_dict['new_password1']
+            new_password2_id.text = password_dict['new_password2']
+            # makes the account creation fast
+            # before clicking the create account button,
+            # only the main thread is running
+            self.assertEqual(len(threading.enumerate()), 1)
+            main_thread = threading.enumerate()[0]
+            self.assertEqual(type(main_thread), threading._MainThread)
+            # click the create account button
+            create_account_button_id.dispatch('on_release')
+            # after submitting the account verification thread should run
+            self.assertEqual(len(threading.enumerate()), 2)
+            create_account_thread = threading.enumerate()[1]
+            self.assertEqual(type(create_account_thread), threading.Thread)
+            self.assertEqual(
+                create_account_thread._Thread__target.func_name, "create_account")
+            # waits for the end of the thread
+            create_account_thread.join()
+            # the form should popup an error dialog
+            dialogs = controller.dialogs
+            self.assertEqual(len(dialogs), 1)
+            dialog = dialogs[0]
+            self.assertEqual(dialog.title, 'Invalid form')
+            dialog.dismiss()
+            self.assertEqual(len(dialogs), 0)
+            # no account were created
+            self.assertEqual(
+                account_count_before,
+                len(pywalib.get_account_list()))
 
     def helper_test_on_send_click(self, app):
         """
