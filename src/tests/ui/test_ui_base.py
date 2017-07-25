@@ -110,6 +110,57 @@ class Test(unittest.TestCase):
         dialog.dismiss()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_test_create_account_form(self, app):
+        """
+        Create account form validation checks.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # number of existing accounts before the test
+        account_count_before = len(pywalib.get_account_list())
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_create_new_account()
+        self.assertEqual('Create new account', app.controller.toolbar.title)
+        self.assertEqual(controller.screen_manager.current, 'manage_keystores')
+        # retrieves the create_new_account widget
+        controller = app.controller
+        create_new_account = controller.create_new_account
+        # retrieves widgets (password fields, sliders and buttons)
+        new_password1_id = create_new_account.ids.new_password1_id
+        new_password2_id = create_new_account.ids.new_password2_id
+        create_account_button_id = \
+            create_new_account.ids.create_account_button_id
+        # fills them up with same password
+        new_password1_id.text = "not matching1"
+        new_password2_id.text = "not matching2"
+        # makes the account creation fast
+        # before clicking the create account button,
+        # only the main thread is running
+        self.assertEqual(len(threading.enumerate()), 1)
+        main_thread = threading.enumerate()[0]
+        self.assertEqual(type(main_thread), threading._MainThread)
+        # click the create account button
+        create_account_button_id.dispatch('on_release')
+        # after submitting the account verification thread should run
+        self.assertEqual(len(threading.enumerate()), 2)
+        create_account_thread = threading.enumerate()[1]
+        self.assertEqual(type(create_account_thread), threading.Thread)
+        self.assertEqual(
+            create_account_thread._Thread__target.func_name, "create_account")
+        # waits for the end of the thread
+        create_account_thread.join()
+        # the form should popup an error dialog
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Invalid form')
+        dialog.dismiss()
+        self.assertEqual(len(dialogs), 0)
+        # no account were created
+        self.assertEqual(
+            account_count_before,
+            len(pywalib.get_account_list()))
+
     def helper_test_on_send_click(self, app):
         """
         This is a regression test for #63, verify clicking "Send" Ethers works
@@ -136,6 +187,7 @@ class Test(unittest.TestCase):
         Clock.schedule_interval(self.pause, 0.000001)
         self.helper_test_empty_account(app)
         self.helper_test_create_first_account(app)
+        self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
 
         # Comment out if you are editing the test, it'll leave the
