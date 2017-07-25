@@ -469,6 +469,7 @@ class ManageExisting(BoxLayout):
         Binds Controller.current_account property.
         """
         self.controller = App.get_running_app().controller
+        self.pywalib = self.controller.pywalib
         self.controller.bind(current_account=self.setter('current_account'))
         # triggers the update
         self.current_account = self.controller.current_account
@@ -499,7 +500,26 @@ class ManageExisting(BoxLayout):
         """
         return self.verify_password_field()
 
-    def delete_account(self):
+    def show_redirect_dialog(self):
+        title = "Account deleted, redirecting..."
+        body = ""
+        body += "Your account was deleted, "
+        body += "you will be redirected to the overview."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    def on_delete_account_yes(self, dialog):
+        """
+        Deletes the account, discarts the warning dialog,
+        shows an info popup and redirects to the landing page.
+        """
+        account = self.current_account
+        self.pywalib.delete_account(account)
+        dialog.dismiss()
+        self.show_redirect_dialog()
+        self.controller.load_landing_page()
+
+    def prompt_delete_account_dialog(self):
         """
         Not yet implemented.
         """
@@ -515,7 +535,7 @@ class ManageExisting(BoxLayout):
                 action=lambda *x: dialog.dismiss())
         dialog.add_action_button(
                 "Yes",
-                action=lambda *x: dialog.dismiss())
+                action=lambda *x: self.on_delete_account_yes(dialog))
         dialog.open()
 
     @run_in_thread
