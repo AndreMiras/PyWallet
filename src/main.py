@@ -627,8 +627,11 @@ class CreateNewAccount(BoxLayout):
     def on_account_created(self, account):
         """
         Switches to the newly created account.
+        Clears the form.
         """
         self.controller.current_account = account
+        self.new_password1 = ''
+        self.new_password2 = ''
 
     @mainthread
     def toggle_widgets(self, enabled):
