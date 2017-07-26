@@ -530,8 +530,6 @@ class ManageExisting(BoxLayout):
         body += "This action cannot be undone.\n"
         body += "Are you sure you want to delete this account?\n"
         dialog = Controller.create_dialog_helper(title, body)
-        # makes it a little wider to fit the text
-        dialog.height = dp(300)
         dialog.add_action_button(
                 "No",
                 action=lambda *x: dialog.dismiss())
@@ -1010,7 +1008,7 @@ class Controller(FloatLayout):
                         title=title,
                         content=content,
                         size_hint=(.8, None),
-                        height=dp(200),
+                        height=dp(250),
                         auto_dismiss=False)
         dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
         Controller.dialogs.append(dialog)
