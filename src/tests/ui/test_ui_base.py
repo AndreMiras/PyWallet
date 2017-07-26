@@ -10,6 +10,7 @@ import unittest
 from functools import partial
 from tempfile import mkdtemp
 
+import kivymd
 from kivy.clock import Clock
 
 # TODO: hardcoded path, refs:
@@ -228,9 +229,13 @@ class Test(unittest.TestCase):
         # makes sure we have an account to play with
         self.assertEqual(len(pywalib.get_account_list()), 1)
         # makes sure the account appears in the switch account view
-        # switch_account = self.helper_load_switch_account(app)
-        # account_list_id = switch_account.ids.account_list_id
-        # TODO: check account_list_id.children has the account widget
+        switch_account = self.helper_load_switch_account(app)
+        account_list_id = switch_account.ids.account_list_id
+        children = account_list_id.children
+        self.assertEqual(len(children), 1)
+        item = children[0]
+        self.assertEqual(type(item), kivymd.list.OneLineListItem)
+        self.assertEqual(item.account, pywalib.get_account_list()[0])
         # go to the manage account screen
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_manage_keystores()
@@ -260,11 +265,10 @@ class Test(unittest.TestCase):
         controller.dismiss_all_dialogs()
         # and the account deleted
         self.assertEqual(len(pywalib.get_account_list()), 0)
-        # makes sure the account also doesn't not appear
-        # in the account selection view
-        # TODO: check account_list_id.children has the account widget
-        # switch_account = self.helper_load_switch_account(app)
-        # account_list_id = switch_account.ids.account_list_id
+        # makes sure the account was also cleared from the selection view
+        switch_account = self.helper_load_switch_account(app)
+        account_list_id = switch_account.ids.account_list_id
+        self.assertEqual(len(account_list_id.children), 0)
 
     # main test function
     def run_test(self, app, *args):

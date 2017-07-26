@@ -337,14 +337,6 @@ class History(BoxLayout):
 
 class SwitchAccount(BoxLayout):
 
-    def __init__(self, **kwargs):
-        super(SwitchAccount, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        self.controller = App.get_running_app().controller
-        self.load_account_list()
-
     def on_release(self, list_item):
         """
         Sets Controller.current_account and switches to previous screen.
@@ -371,6 +363,7 @@ class SwitchAccount(BoxLayout):
         """
         Fills account list widget from library account list.
         """
+        self.controller = App.get_running_app().controller
         account_list_id = self.ids.account_list_id
         account_list_id.clear_widgets()
         accounts = self.controller.pywalib.get_account_list()

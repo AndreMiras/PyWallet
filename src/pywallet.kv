@@ -368,6 +368,7 @@
     name: 'switch_account'
     on_pre_enter:
         app.controller.set_toolbar_title("Switch account")
+        switch_account_id.load_account_list()
     SwitchAccount:
         id: switch_account_id
 
