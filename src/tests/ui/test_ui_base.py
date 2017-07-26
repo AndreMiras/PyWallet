@@ -64,6 +64,7 @@ class Test(unittest.TestCase):
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
         self.assertEqual('Create new account', app.controller.toolbar.title)
+        self.assertEqual(controller.current_account, None)
         # retrieves the create_new_account widget
         controller = app.controller
         create_new_account = controller.create_new_account
@@ -98,8 +99,15 @@ class Test(unittest.TestCase):
         self.assertEqual(type(main_thread), threading._MainThread)
         # and verifies the account was created
         self.assertEqual(len(pywalib.get_account_list()), 1)
+        # TODO verify the form fields were voided
+        # self.assertEqual(new_password1_id.text, '')
+        # self.assertEqual(new_password2_id.text, '')
         # we should get redirected to the overview page
         self.assertEqual(controller.screen_manager.current, 'overview')
+        # the new account should be loaded in the controller
+        self.assertEqual(
+            controller.current_account,
+            pywalib.get_account_list()[0])
         # TODO: also verify the Toolbar title was updated correctly
         # self.assertEqual('TODO', app.controller.toolbar.title)
         # check the redirect dialog
