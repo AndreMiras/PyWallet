@@ -17,7 +17,7 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.dirname(op.abspath(__file__))))
 sys.path.append(main_path)
 
-from main import PyWalletApp    # NOQA: F402 # isort:skip
+import main    # NOQA: F402 # isort:skip
 
 
 class Test(unittest.TestCase):
@@ -204,6 +204,18 @@ class Test(unittest.TestCase):
         controller.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_load_switch_account(self, app):
+        """
+        Helper method for loading the switch account screen and returning
+        the class handling this view.
+        """
+        controller = app.controller
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_switch_account()
+        switch_account = controller.switch_account
+        self.assertEqual(switch_account.__class__, main.SwitchAccount)
+        return switch_account
+
     # TODO:
     # also test we're getting invited to create a new account
     # when all accounts were deleted
@@ -215,6 +227,10 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # makes sure we have an account to play with
         self.assertEqual(len(pywalib.get_account_list()), 1)
+        # makes sure the account appears in the switch account view
+        # switch_account = self.helper_load_switch_account(app)
+        # account_list_id = switch_account.ids.account_list_id
+        # TODO: check account_list_id.children has the account widget
         # go to the manage account screen
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_manage_keystores()
@@ -244,6 +260,11 @@ class Test(unittest.TestCase):
         controller.dismiss_all_dialogs()
         # and the account deleted
         self.assertEqual(len(pywalib.get_account_list()), 0)
+        # makes sure the account also doesn't not appear
+        # in the account selection view
+        # TODO: check account_list_id.children has the account widget
+        # switch_account = self.helper_load_switch_account(app)
+        # account_list_id = switch_account.ids.account_list_id
 
     # main test function
     def run_test(self, app, *args):
@@ -260,7 +281,7 @@ class Test(unittest.TestCase):
 
     # same named function as the filename(!)
     def test_ui_base(self):
-        app = PyWalletApp()
+        app = main.PyWalletApp()
         p = partial(self.run_test, app)
         # schedule_once() timeout is high here so the application has time
         # to initialize, refs #52

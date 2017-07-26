@@ -882,7 +882,9 @@ class Controller(FloatLayout):
 
     @property
     def switch_account(self):
-        switch_account_id = self.ids.switch_account_id
+        screen_manager = self.screen_manager
+        switch_account_screen = screen_manager.get_screen('switch_account')
+        switch_account_id = switch_account_screen.ids.switch_account_id
         return switch_account_id
 
     @property
