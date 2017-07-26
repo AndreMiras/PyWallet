@@ -4,8 +4,14 @@
 
   - Add install documentation
   - Add tab key navigation (desktop app), refs #43
-  - UI Unit test account creation, refs #41
   - Disable Sentry in "debug" mode #64
+  - Add account deletion feature, refs #51
+  - Do not allow empty account password, refs #69
+  - Document testing, refs #62
+  - Fix account address on small screen, refs #75
+  - Fix account address not centered, refs #74
+  - Refresh account list after creation, refs #56
+  - Add global account selection control, refs #70
 
 ## [v20170719]
 
