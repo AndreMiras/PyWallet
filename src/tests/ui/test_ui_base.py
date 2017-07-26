@@ -285,7 +285,7 @@ class Test(unittest.TestCase):
         p = partial(self.run_test, app)
         # schedule_once() timeout is high here so the application has time
         # to initialize, refs #52
-        Clock.schedule_once(p, 1.0)
+        Clock.schedule_once(p, 2.0)
         app.run()
 
 
