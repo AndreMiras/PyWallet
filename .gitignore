@@ -6,3 +6,4 @@ bin/
 .tox/
 .coverage
 htmlcov/
+.cache/
