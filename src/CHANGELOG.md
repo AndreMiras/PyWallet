@@ -12,6 +12,7 @@
   - Fix account address not centered, refs #74
   - Refresh account list after creation, refs #56
   - Add global account selection control, refs #70
+  - Use upstream recipes, refs #28
 
 ## [v20170719]
 
