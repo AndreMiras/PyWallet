@@ -24,8 +24,10 @@ Cross platform Ethereum Wallet built with Python and Kivy.
 
 ### Linux
 ```
-./src/main.py
+./src/main.py --debug
 ```
+The `--debug` flag is required if you want to see errors printed in your console.
+Otherwise the exception will be only sent to Sentry.
 
 ### Android
 Build, deploy and run on Android using buildozer:
