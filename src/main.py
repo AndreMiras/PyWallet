@@ -1164,4 +1164,8 @@ if __name__ == '__main__':
     try:
         PyWalletApp().run()
     except:
+        if type(client) == Client:
+            Logger.info(
+                'Errors will be sent to Sentry, run with "--debug" if you '
+                'are a developper and want to the error in the shell.')
         client.captureException()
