@@ -390,18 +390,13 @@ class Overview(BoxLayout):
         # triggers the update
         self.current_account = self.controller.current_account
 
-    def is_selected(self):
-        """
-        Returns True if the overview sub-screen is selected,
-        otherwise returns False.
-        """
-        return self.parent.manager.current == 'overview'
-
     def on_current_account(self, instance, account):
+        """
+        Updates current_account_string and fetches the new account balance.
+        """
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
-        if self.is_selected():
-            self.controller.fetch_and_update_balance()
+        self.controller.fetch_balance()
 
 
 class PWSelectList(BoxLayout):
@@ -916,6 +911,18 @@ class Controller(FloatLayout):
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
 
+    def bind_current_account_balance(self):
+        """
+        Binds the current_account_balance to the Toolbar title.
+        """
+        self.bind(current_account_balance=self.update_toolbar_title_balance)
+
+    def unbind_current_account_balance(self):
+        """
+        Unbinds the current_account_balance from the Toolbar title.
+        """
+        self.unbind(current_account_balance=self.update_toolbar_title_balance)
+
     def screen_manager_current(self, current, direction=None):
         screens = {
             'overview': OverviewScreen,
@@ -1047,7 +1054,7 @@ class Controller(FloatLayout):
         dialog.open()
 
     @mainthread
-    def update_toolbar_title_balance(self):
+    def update_toolbar_title_balance(self, instance=None, value=None):
         title = "%s ETH" % (self.current_account_balance)
         self.set_toolbar_title(title)
 
@@ -1067,13 +1074,10 @@ class Controller(FloatLayout):
         except IndexError:
             self.load_create_new_account()
 
-    @run_in_thread
-    def fetch_and_update_balance(self):
+    def fetch_balance(self):
         """
-        Fetches the new balance and updates the UI.
+        Fetches the new balance and current_account_balance property.
         """
-        # pre-updates balance with last known value
-        self.update_toolbar_title_balance()
         account = self.current_account
         try:
             self.current_account_balance = self.pywalib.get_balance(
@@ -1081,7 +1085,6 @@ class Controller(FloatLayout):
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
-        self.update_toolbar_title_balance()
 
     def load_switch_account(self):
         """
@@ -1164,4 +1167,8 @@ if __name__ == '__main__':
     try:
         PyWalletApp().run()
     except:
+        if type(client) == Client:
+            Logger.info(
+                'Errors will be sent to Sentry, run with "--debug" if you '
+                'are a developper and want to the error in the shell.')
         client.captureException()
