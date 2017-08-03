@@ -321,10 +321,14 @@
         text: "Overview"
         icon: 'format-list-bulleted'
         on_pre_enter:
-            root.parent.set_title("0 ETH")
-            # TODO: not necessarily, e.g. probably not if the account didn't change
-            # TODO: but update title
-            app.controller.fetch_and_update_balance()
+            # sets to the last known value
+            app.controller.update_toolbar_title_balance()
+            # and binds on update
+            app.controller.bind_current_account_balance()
+        on_pre_leave:
+            # makes ure the title doesn't get updated async
+            # if we're not in this screen
+            app.controller.unbind_current_account_balance()
         Overview:
             id: overview_id
     MDBottomNavigationItem:
@@ -358,6 +362,9 @@
         # restores title,
         # e.g. when coming back from the account selection screen
         app.controller.set_toolbar_title(root.title_property)
+        overview_bnavigation_id.ids.tab_manager.current_screen.dispatch('on_pre_enter')
+    on_pre_leave:
+        overview_bnavigation_id.ids.tab_manager.current_screen.dispatch('on_pre_leave')
     on_title_property:
         app.controller.set_toolbar_title(root.title_property)
     OverviewBottomNavigation:
