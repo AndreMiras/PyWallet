@@ -13,6 +13,7 @@
   - Refresh account list after creation, refs #56
   - Add global account selection control, refs #70
   - Use upstream recipes, refs #28
+  - Toolbar title refactoring, refs #80
 
 ## [v20170719]
 
