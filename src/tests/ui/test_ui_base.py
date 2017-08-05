@@ -11,7 +11,7 @@ from tempfile import mkdtemp
 import kivymd
 from kivy.clock import Clock
 
-import main    # NOQA: F402 # isort:skip
+import main
 
 
 class Test(unittest.TestCase):
