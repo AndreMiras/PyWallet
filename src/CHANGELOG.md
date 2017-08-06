@@ -14,6 +14,7 @@
   - Add global account selection control, refs #70
   - Use upstream recipes, refs #28
   - Toolbar title refactoring, refs #80
+  - Hide advanced account options, refs #53
 
 ## [v20170719]
 
