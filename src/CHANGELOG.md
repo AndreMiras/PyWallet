@@ -15,6 +15,7 @@
   - Use upstream recipes, refs #28
   - Toolbar title refactoring, refs #80
   - Hide advanced account options, refs #53
+  - Show version in about, refs #46
 
 ## [v20170719]
 

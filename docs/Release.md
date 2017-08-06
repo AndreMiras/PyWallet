@@ -11,7 +11,7 @@ Start the release with git flow:
 git flow release start vYYYYMMDD
 ```
 Now update the CHANGELOG.md `[Unreleased]` section to match the new release version.
-Eventually also update the `buildozer.spec` `version` section. Then commit and finish release.
+Also update the `__version__` string of the [version.py](/src/version.py) file. Then commit and finish release.
 ```
 git commit -a -m "vYYYYMMDD"
 git flow release finish

@@ -38,6 +38,7 @@ from requests.exceptions import ConnectionError
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 from testsuite import suite
+from version import __version__
 
 kivy.require('1.10.0')
 
@@ -809,6 +810,7 @@ class AboutOverview(BoxLayout):
 
     def load_about(self):
         self.about_text_property = "" + \
+            "PyWallet version: %s\n" % (__version__) + \
             "Project source code and info available on GitHub at: \n" + \
             "[color=00BFFF][ref=github]" + \
             self.project_page_property + \
