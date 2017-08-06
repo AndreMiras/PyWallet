@@ -5,7 +5,6 @@
 #:import MDList kivymd.list.MDList
 #:import MDSlider kivymd.slider.MDSlider
 #:import MDTextField kivymd.textfields.MDTextField
-#:import MDSwitch kivymd.selectioncontrols.MDSwitch
 #:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
 #:import QRCodeWidget kivy.garden.qrcode
 #:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
@@ -141,7 +140,7 @@
         orientation: 'horizontal'
         MDLabel:
             text: "Advanced mode"
-        MDSwitch:
+        CustomMDSwitch:
             size_hint: None, None
             size: dp(36), dp(48)
             active: False

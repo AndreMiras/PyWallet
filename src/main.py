@@ -19,13 +19,15 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
-from kivy.utils import platform
+from kivy.utils import get_color_from_hex, platform
 from kivymd.button import MDFlatButton, MDIconButton
+from kivymd.color_definitions import colors
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import (ILeftBodyTouch, OneLineListItem, TwoLineIconListItem,
                          TwoLineListItem)
 from kivymd.navigationdrawer import NavigationDrawerHeaderBase
+from kivymd.selectioncontrols import MDSwitch
 from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
@@ -91,6 +93,22 @@ class NavigationDrawerTwoLineListItem(
 
     def _set_active(self, active, list):
         pass
+
+
+class CustomMDSwitch(MDSwitch):
+    """
+    Work around for a MDSwitch bug, refs:
+    https://gitlab.com/kivymd/KivyMD/issues/99
+    """
+
+    def _set_colors(self, *args):
+        """
+        Overrides `MDSwitch._set_colors()` fixes missing attribute
+        `thumb_color_disabled`, refs:
+        https://gitlab.com/kivymd/KivyMD/issues/99
+        """
+        super(CustomMDSwitch, self)._set_colors(*args)
+        self.thumb_color_disabled = get_color_from_hex(colors['Grey']['800'])
 
 
 class IconLeftWidget(ILeftBodyTouch, MDIconButton):
