@@ -137,19 +137,19 @@
         write_tab: False
         text: root.new_password2
         on_text: root.new_password2 = args[1]
-    # BoxLayout:
-    #     orientation: 'horizontal'
-    #     MDLabel:
-    #         text: "Advanced mode"
-    #     MDSwitch:
-    #         size_hint: None, None
-    #         size: dp(36), dp(48)
-    #         active: False
-    #         on_active:
-    #             root.toggle_advanced(self.active)
     BoxLayout:
-        orientation: 'vertical'
+        orientation: 'horizontal'
+        MDLabel:
+            text: "Advanced mode"
+        MDSwitch:
+            size_hint: None, None
+            size: dp(36), dp(48)
+            active: False
+            on_active:
+                root.toggle_advanced(self.active)
+    BoxLayout:
         id: advanced_id
+        orientation: 'vertical'
         MDLabel:
             text: "Security: %s%%" % int(security_slider_id.value)
         MDSlider:
