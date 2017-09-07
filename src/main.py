@@ -35,8 +35,9 @@ from kivymd.toolbar import Toolbar
 from raven import Client
 from requests.exceptions import ConnectionError
 
-from pywalib import (InsufficientFundsException, NoTransactionFoundException,
-                     PyWalib, UnknownEtherscanException)
+from pywalib import (ROUND_DIGITS, InsufficientFundsException,
+                     NoTransactionFoundException, PyWalib,
+                     UnknownEtherscanException)
 from testsuite import suite
 from version import __version__
 
@@ -216,7 +217,7 @@ class Send(BoxLayout):
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
         address = normalize_address(self.send_to_address)
-        amount_eth = self.send_amount
+        amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
         account = controller.pywalib.get_main_account()
         Controller.snackbar_message("Unlocking account...")

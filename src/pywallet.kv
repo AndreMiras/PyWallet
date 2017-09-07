@@ -1,5 +1,6 @@
 #:kivy 1.10.0
 
+#:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import webbrowser webbrowser
 #:import Window kivy.core.window.Window
 #:import MDList kivymd.list.MDList
@@ -73,7 +74,7 @@
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
         write_tab: False
-        text: str(root.send_amount)
+        text: str(round(root.send_amount, ROUND_DIGITS))
         on_text: root.send_amount = args[1]
     AnchorLayout:
         MDRaisedButton:
