@@ -3,6 +3,7 @@
 from __future__ import print_function, unicode_literals
 
 import os
+import shutil
 from os.path import expanduser
 
 import requests
@@ -227,6 +228,26 @@ class PyWalib(object):
             PBKDF2_CONSTANTS["c"] = default_iterations
         return account
 
+    @staticmethod
+    def deleted_account_dir(keystore_dir):
+        """
+        Given a `keystore_dir`, returns the corresponding
+        `deleted_keystore_dir`.
+        >>> keystore_dir = '/tmp/keystore'
+        >>> PyWalib.deleted_account_dir(keystore_dir)
+        u'/tmp/keystore-deleted'
+        >>> keystore_dir = '/tmp/keystore/'
+        >>> PyWalib.deleted_account_dir(keystore_dir)
+        u'/tmp/keystore-deleted'
+        """
+        keystore_dir = keystore_dir.rstrip('/')
+        keystore_dir_name = os.path.basename(keystore_dir)
+        deleted_keystore_dir_name = "%s-deleted" % (keystore_dir_name)
+        deleted_keystore_dir = os.path.join(
+            os.path.dirname(keystore_dir),
+            deleted_keystore_dir_name)
+        return deleted_keystore_dir
+
     def new_account(self, password, security_ratio=None):
         """
         Creates an account on the disk and returns it.
@@ -239,6 +260,25 @@ class PyWalib(object):
             app.services.accounts.keystore_dir, account.address.encode('hex'))
         self.app.services.accounts.add_account(account)
         return account
+
+    def delete_account(self, account):
+        """
+        Deletes the given `account` from the `keystore_dir` directory.
+        Then deletes it from the `AccountsService` account manager instance.
+        In fact, moves it to another location; another directory at the same
+        level.
+        """
+        app = self.app
+        keystore_dir = app.services.accounts.keystore_dir
+        deleted_keystore_dir = PyWalib.deleted_account_dir(keystore_dir)
+        # create the deleted account dir if required
+        if not os.path.exists(deleted_keystore_dir):
+            os.makedirs(deleted_keystore_dir)
+        # "removes" it from the file system
+        shutil.move(account.path, deleted_keystore_dir)
+        # deletes it from the `AccountsService` account manager instance
+        account_service = self.get_account_list()
+        account_service.accounts.remove(account)
 
     def update_account_password(
             self, account, new_password, current_password=None):
@@ -268,8 +308,8 @@ class PyWalib(object):
         """
         Returns the Account list.
         """
-        account = self.app.services.accounts
-        return account
+        accounts = self.app.services.accounts
+        return accounts
 
     def get_main_account(self):
         """

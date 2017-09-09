@@ -29,11 +29,11 @@ source.exclude_dirs = bin, venv, src/python-for-android
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 2017.0719
+# version = 0.1
 
 # (str) Application versioning (method 2)
-# version.regex = __version__ = ['"](.*)['"]
-# version.filename = %(source.dir)s/main.py
+version.regex = __version__ = ['"](.*)['"]
+version.filename = %(source.dir)s/version.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
@@ -180,6 +180,9 @@ android.blacklist_src = blacklist.txt
 
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = stable
+# Ethereum recipes are not yet in the stable branch
+# https://github.com/kivy/python-for-android/pull/1080
+p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled

@@ -1,5 +1,23 @@
 # Change Log
 
+## [v20170909]
+
+  - Add install documentation
+  - Add tab key navigation (desktop app), refs #43
+  - Disable Sentry in "debug" mode #64
+  - Add account deletion feature, refs #51
+  - Do not allow empty account password, refs #69
+  - Document testing, refs #62
+  - Fix account address on small screen, refs #75
+  - Fix account address not centered, refs #74
+  - Refresh account list after creation, refs #56
+  - Add global account selection control, refs #70
+  - Use upstream recipes, refs #28
+  - Toolbar title refactoring, refs #80
+  - Hide advanced account options, refs #53
+  - Show version in about, refs #46
+  - Fix rounding issues in "send" page
+
 ## [v20170719]
 
   - Fix crash on send click, refs #63

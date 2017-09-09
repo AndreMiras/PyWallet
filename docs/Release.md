@@ -11,7 +11,7 @@ Start the release with git flow:
 git flow release start vYYYYMMDD
 ```
 Now update the CHANGELOG.md `[Unreleased]` section to match the new release version.
-Eventually also update the `buildozer.spec` `version` section. Then commit and finish release.
+Also update the `__version__` string of the [version.py](/src/version.py) file. Then commit and finish release.
 ```
 git commit -a -m "vYYYYMMDD"
 git flow release finish
@@ -34,19 +34,27 @@ Useful links:
   * my-project - The directory for your project
   * my-new-key - The name of the key you generate
   * my-alias - A short alias name for the key
-  * MyProject - The name of your project, and APK
-  * version - The version of this APK (not Kivy version)
 
 ### Commands
+Prepare the environment variables:
 ```
-export P4A_RELEASE_KEYSTORE=~/.android/<ALIAS>.keystore
+export P4A_RELEASE_KEYSTORE=~/.android/<my-alias>.keystore
 export P4A_RELEASE_KEYSTORE_PASSWD=android
 export P4A_RELEASE_KEYALIAS_PASSWD=android
-export P4A_RELEASE_KEYALIAS=<ALIAS>
-
+export P4A_RELEASE_KEYALIAS=<my-alias>
+```
+Generate a keystore if not yet generated:
+```
 keytool -genkey -v -keystore ~/.android/<my-new-key>.keystore -alias <my-alias> -keyalg RSA -keysize 2048 -validity 10000
+```
+Run buildozer:
+```
 buildozer android release
 ```
+
+### Play Store
+
+<https://play.google.com/apps/publish/>
 
 ## GitHub
 

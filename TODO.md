@@ -25,4 +25,3 @@
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect
-   * https://gitter.im/
