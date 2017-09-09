@@ -16,6 +16,7 @@
   - Toolbar title refactoring, refs #80
   - Hide advanced account options, refs #53
   - Show version in about, refs #46
+  - Fix rounding issues in "send" page
 
 ## [v20170719]
 
