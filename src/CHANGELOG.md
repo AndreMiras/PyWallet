@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170909]
 
   - Add install documentation
   - Add tab key navigation (desktop app), refs #43
