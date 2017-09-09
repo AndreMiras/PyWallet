@@ -34,17 +34,21 @@ Useful links:
   * my-project - The directory for your project
   * my-new-key - The name of the key you generate
   * my-alias - A short alias name for the key
-  * MyProject - The name of your project, and APK
-  * version - The version of this APK (not Kivy version)
 
 ### Commands
+Prepare the environment variables:
 ```
-export P4A_RELEASE_KEYSTORE=~/.android/<ALIAS>.keystore
+export P4A_RELEASE_KEYSTORE=~/.android/<my-alias>.keystore
 export P4A_RELEASE_KEYSTORE_PASSWD=android
 export P4A_RELEASE_KEYALIAS_PASSWD=android
-export P4A_RELEASE_KEYALIAS=<ALIAS>
-
+export P4A_RELEASE_KEYALIAS=<my-alias>
+```
+Generate a keystore if not yet generated:
+```
 keytool -genkey -v -keystore ~/.android/<my-new-key>.keystore -alias <my-alias> -keyalg RSA -keysize 2048 -validity 10000
+```
+Run buildozer:
+```
 buildozer android release
 ```
 
