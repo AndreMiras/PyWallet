@@ -4,7 +4,7 @@
 
   - Add install documentation
   - Add tab key navigation (desktop app), refs #43
-  - Disable Sentry in "debug" mode #64
+  - Disable Sentry in "debug" mode, refs #64
   - Add account deletion feature, refs #51
   - Do not allow empty account password, refs #69
   - Document testing, refs #62
@@ -16,7 +16,7 @@
   - Toolbar title refactoring, refs #80
   - Hide advanced account options, refs #53
   - Show version in about, refs #46
-  - Fix rounding issues in "send" page
+  - Fix rounding issues in send page
 
 ## [v20170719]
 
