@@ -87,7 +87,7 @@
 <Receive>:
     orientation: 'vertical'
     AddressButton:
-        text: root.address_property
+        address_property: root.address_property
         on_release: app.controller.load_switch_account()
     QRCodeWidget:
         id: qr_code_id
@@ -95,7 +95,7 @@
 <Overview>:
     orientation: 'vertical'
     AddressButton:
-        text: root.current_account_string
+        address_property: root.current_account_string
         on_release: app.controller.load_switch_account()
     History:
         id: history_id
@@ -118,6 +118,14 @@
 
 <CreateNewAccount>:
     orientation: 'vertical'
+    MDTextField:
+        id: alias_id
+        hint_text: "Account alias"
+        helper_text: "The alias associated with your account"
+        helper_text_mode: "on_focus"
+        write_tab: False
+        text: root.alias
+        on_text: root.alias = args[1]
     MDTextField:
         id: new_password1_id
         hint_text: "Password"
@@ -179,7 +187,7 @@
     orientation: 'vertical'
     AddressButton:
         id: account_address_id
-        text: root.address_property
+        address_property: root.address_property
         on_release: app.controller.load_switch_account()
     MDTextField:
         hint_text: "Current password"

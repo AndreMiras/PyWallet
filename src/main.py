@@ -15,6 +15,7 @@ from kivy.clock import Clock, mainthread
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.storage.jsonstore import JsonStore
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
@@ -576,6 +577,7 @@ class CreateNewAccount(BoxLayout):
     https://security.stackexchange.com/q/3959
     """
 
+    alias = StringProperty()
     new_password1 = StringProperty()
     new_password2 = StringProperty()
 
@@ -680,6 +682,7 @@ class CreateNewAccount(BoxLayout):
                 password=password, security_ratio=security_ratio)
         Controller.snackbar_message("Created!")
         self.toggle_widgets(True)
+        Controller.set_account_alias(account, self.alias)
         self.on_account_created(account)
         CreateNewAccount.try_unlock(account, password)
         self.show_redirect_dialog()
@@ -705,6 +708,8 @@ class AddressButton(MDFlatButton):
     Also shorten content size using ellipsis.
     """
 
+    address_property = StringProperty()
+
     def __init__(self, **kwargs):
         super(AddressButton, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
@@ -725,6 +730,16 @@ class AddressButton(MDFlatButton):
         # call it once manually, refs:
         # https://github.com/AndreMiras/PyWallet/issues/74
         on_parent_size(self.parent, None)
+
+    def on_address_property(self, instance, address):
+        """
+        Sets the address alias if it exists or defaults to the address itself.
+        """
+        try:
+            text = Controller.get_address_alias(address)
+        except KeyError:
+            text = address
+        self.text = text
 
 
 class PWToolbar(Toolbar):
@@ -993,6 +1008,52 @@ class Controller(FloatLayout):
             Controller.patch_keystore_path()
             keystore_path = PyWalib.get_default_keystore_path()
         return keystore_path
+
+    @staticmethod
+    def get_store_path():
+        """
+        Returns the full user store path.
+        """
+        user_data_dir = App.get_running_app().user_data_dir
+        store_path = os.path.join(user_data_dir, 'store.json')
+        return store_path
+
+    @staticmethod
+    def get_store():
+        """
+        Returns the full user Store object instance.
+        """
+        store_path = Controller.get_store_path()
+        store = JsonStore(store_path)
+        return store
+
+    @staticmethod
+    def set_account_alias(account, alias):
+        """
+        Sets an alias for a given Account object.
+        """
+        if alias == '':
+            return
+        address = "0x" + account.address.encode("hex")
+        store = Controller.get_store()
+        store.put('alias', address=alias)
+        store['alias'] = {address: alias}
+
+    @staticmethod
+    def get_address_alias(address):
+        """
+        Returns the alias of the given address string.
+        """
+        store = Controller.get_store()
+        return store.get('alias')[address]
+
+    @staticmethod
+    def get_account_alias(account):
+        """
+        Returns the alias of the given Account object.
+        """
+        address = "0x" + account.address.encode("hex")
+        return Controller.get_address_alias(address)
 
     @staticmethod
     def src_dir():
