@@ -373,7 +373,12 @@ class SwitchAccount(BoxLayout):
         Creates an account list item from given account.
         """
         address = "0x" + account.address.encode("hex")
-        list_item = OneLineListItem(text=address)
+        # gets the alias if exists
+        try:
+            text = Controller.get_address_alias(address)
+        except KeyError:
+            text = address
+        list_item = OneLineListItem(text=text)
         # makes sure the address doesn't overlap on small screen
         list_item.ids._lbl_primary.shorten = True
         list_item.account = account
