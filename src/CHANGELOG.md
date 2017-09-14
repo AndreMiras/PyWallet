@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Migrate kivyunittest==0.1.8, refs #78
+
 ## [v20170909]
 
   - Add install documentation
