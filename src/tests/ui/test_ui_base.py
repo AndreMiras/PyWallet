@@ -11,6 +11,7 @@ from functools import partial
 from tempfile import mkdtemp
 
 import kivymd
+import mock
 from kivy.clock import Clock
 
 # TODO: hardcoded path, refs:
@@ -28,11 +29,11 @@ class Test(unittest.TestCase):
         Sets a temporay KEYSTORE_PATH, so keystore directory and related
         application files will be stored here until tearDown().
         """
-        self.keystore_path = mkdtemp()
-        os.environ['KEYSTORE_PATH'] = self.keystore_path
+        self.temp_path = mkdtemp()
+        os.environ['KEYSTORE_PATH'] = self.temp_path
 
     def tearDown(self):
-        shutil.rmtree(self.keystore_path, ignore_errors=True)
+        shutil.rmtree(self.temp_path, ignore_errors=True)
 
     # sleep function that catches `dt` from Clock
     def pause(*args):
@@ -217,6 +218,62 @@ class Test(unittest.TestCase):
         self.assertEqual(switch_account.__class__, main.SwitchAccount)
         return switch_account
 
+    def helper_test_address_alias(self, app):
+        """
+        Creates, updates and deletes account address aliases.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        account1 = pywalib.get_account_list()[0]
+        # creates a second account
+        account2 = pywalib.new_account(password="password", security_ratio=1)
+        address1 = '0x' + account1.address.encode("hex")
+        address2 = '0x' + account2.address.encode("hex")
+        Controller = main.Controller
+
+        @staticmethod
+        def get_store_path():
+            """
+            Makes sure we don't mess up with actual store config file.
+            """
+            os.environ['KEYSTORE_PATH'] = self.temp_path
+            store_path = os.path.join(self.temp_path, 'store.json')
+            return store_path
+        with mock.patch.object(Controller, 'get_store_path', get_store_path):
+            # no alias by default
+            with self.assertRaises(KeyError):
+                Controller.get_account_alias(account1)
+            with self.assertRaises(KeyError):
+                Controller.get_address_alias(address1)
+            # sets some aliases
+            alias1 = 'alias1'
+            alias2 = 'alias2'
+            Controller.set_account_alias(account1, alias1)
+            Controller.set_account_alias(account2, alias2)
+            # checks we can retrieve them
+            self.assertEqual(
+                Controller.get_account_alias(account1), alias1)
+            self.assertEqual(
+                Controller.get_account_alias(account2), alias2)
+            self.assertEqual(
+                Controller.get_address_alias(address1), alias1)
+            self.assertEqual(
+                Controller.get_address_alias(address2), alias2)
+            # updates an alias
+            alias1 = 'alias0'
+            Controller.set_account_alias(account1, alias1)
+            self.assertEqual(
+                Controller.get_account_alias(account1), alias1)
+            # deletes one and see if it worked
+            Controller.delete_account_alias(account1)
+            with self.assertRaises(KeyError):
+                Controller.get_account_alias(account1)
+            # the second one should still be there
+            self.assertEqual(
+                Controller.get_address_alias(address2), alias2)
+        # tears down
+        pywalib.delete_account(account2)
+
     # TODO:
     # also test we're getting invited to create a new account
     # when all accounts were deleted
@@ -277,6 +334,7 @@ class Test(unittest.TestCase):
         self.helper_test_create_first_account(app)
         self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
+        self.helper_test_address_alias(app)
         self.helper_test_delete_account(app)
 
         # Comment out if you are editing the test, it'll leave the
