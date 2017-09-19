@@ -1,9 +1,7 @@
 from __future__ import unicode_literals
 
 import os
-import os.path as op
 import shutil
-import sys
 import threading
 import time
 import unittest
@@ -14,12 +12,7 @@ import kivymd
 import mock
 from kivy.clock import Clock
 
-# TODO: hardcoded path, refs:
-# https://github.com/KeyWeeUsr/KivyUnitTest/issues/3
-main_path = op.dirname(op.dirname(op.dirname(op.abspath(__file__))))
-sys.path.append(main_path)
-
-import main    # NOQA: F402 # isort:skip
+import main
 
 
 class Test(unittest.TestCase):

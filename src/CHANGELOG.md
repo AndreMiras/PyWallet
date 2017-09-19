@@ -1,7 +1,8 @@
 # Change Log
 
-## [Unrelease]
+## [Unreleased]
 
+  - Migrate kivyunittest==0.1.8, refs #78
   - Add account alias feature, refs #66
 
 ## [v20170909]
