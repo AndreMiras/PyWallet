@@ -21,6 +21,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, platform
+from kivymd.bottomsheet import MDListBottomSheet
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.color_definitions import colors
 from kivymd.dialog import MDDialog
@@ -138,8 +139,22 @@ class PasswordForm(BoxLayout):
 
     password = StringProperty()
 
-    def __init__(self, **kwargs):
-        super(PasswordForm, self).__init__(**kwargs)
+
+class AliasForm(BoxLayout):
+
+    alias = StringProperty()
+    address = StringProperty()
+
+    def __init__(self, account, **kwargs):
+        """
+        Setups the current alias for the given account.
+        """
+        super(AliasForm, self).__init__(**kwargs)
+        self.address = "0x" + account.address.encode("hex")
+        try:
+            self.alias = Controller.get_address_alias(self.address)
+        except KeyError:
+            self.alias = ''
 
 
 class Send(BoxLayout):
@@ -720,6 +735,15 @@ class AddressButton(MDFlatButton):
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
+        self.controller = App.get_running_app().controller
+        self.set_font_and_shorten()
+
+    def set_font_and_shorten(self):
+        """
+        Makes the font slightly smaller on mobile
+        by using "Body1" rather than "Button" style.
+        Also shorten content size using ellipsis.
+        """
         content = self.ids.content
         content.font_style = 'Body1'
         content.shorten = True
@@ -1033,16 +1057,40 @@ class Controller(FloatLayout):
         return store
 
     @staticmethod
+    def delete_account_alias(account):
+        """
+        Deletes the alias for the given account.
+        """
+        address = "0x" + account.address.encode("hex")
+        store = Controller.get_store()
+        alias_dict = store['alias']
+        alias_dict.pop(address)
+        store['alias'] = alias_dict
+
+    @staticmethod
     def set_account_alias(account, alias):
         """
         Sets an alias for a given Account object.
+        Deletes the alias if empty.
         """
+        # if the alias is empty and an alias exists for this address,
+        # deletes it
         if alias == '':
+            try:
+                Controller.delete_account_alias(account)
+            except KeyError:
+                pass
             return
         address = "0x" + account.address.encode("hex")
         store = Controller.get_store()
-        store.put('alias', address=alias)
-        store['alias'] = {address: alias}
+        try:
+            alias_dict = store['alias']
+        except KeyError:
+            # creates store if doesn't yet exists
+            store.put('alias')
+            alias_dict = store['alias']
+        alias_dict.update({address: alias})
+        store['alias'] = alias_dict
 
     @staticmethod
     def get_address_alias(address):
@@ -1169,6 +1217,45 @@ class Controller(FloatLayout):
         except ConnectionError:
             Controller.on_balance_connection_error()
             return
+
+    def on_update_alias_clicked(self, dialog, alias):
+        account = self.current_account
+        Controller.set_account_alias(account, alias)
+        dialog.dismiss()
+
+    def prompt_alias_dialog(self):
+        """
+        Prompt the update alias dialog.
+        """
+        account = self.current_account
+        title = "Update your alias"
+        content = AliasForm(account)
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(250),
+                        auto_dismiss=False)
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
+        dialog.add_action_button(
+                "Update",
+                action=lambda *x: self.on_update_alias_clicked(
+                    dialog, content.alias))
+        dialog.open()
+
+    def open_address_options(self):
+        """
+        Loads the address options bottom sheet.
+        """
+        bottom_sheet = MDListBottomSheet()
+        bottom_sheet.add_item(
+            'Switch account',
+            lambda x: self.load_switch_account(), icon='swap-horizontal')
+        bottom_sheet.add_item(
+            'Change alias',
+            lambda x: self.prompt_alias_dialog(), icon='information')
+        bottom_sheet.open()
 
     def load_switch_account(self):
         """

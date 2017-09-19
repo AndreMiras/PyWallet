@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unrelease]
+
+  - Add account alias feature, refs #66
+
 ## [v20170909]
 
   - Add install documentation

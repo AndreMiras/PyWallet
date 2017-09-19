@@ -51,6 +51,20 @@
         on_text: root.password = args[1]
 
 
+<AliasForm>:
+    orientation: 'vertical'
+    MDLabel:
+        halign: 'center'
+        text: root.address
+    MDTextField:
+        id: alias_id
+        hint_text: "Alias"
+        helper_text: "Enter your new alias"
+        helper_text_mode: "on_focus"
+        text: root.alias
+        on_text: root.alias = args[1]
+
+
 <PWSelectList>:
     orientation: 'vertical'
     ScrollView:
@@ -88,7 +102,7 @@
     orientation: 'vertical'
     AddressButton:
         address_property: root.address_property
-        on_release: app.controller.load_switch_account()
+        on_release: app.controller.open_address_options()
     QRCodeWidget:
         id: qr_code_id
 
@@ -96,7 +110,7 @@
     orientation: 'vertical'
     AddressButton:
         address_property: root.current_account_string
-        on_release: app.controller.load_switch_account()
+        on_release: app.controller.open_address_options()
     History:
         id: history_id
 
@@ -188,7 +202,7 @@
     AddressButton:
         id: account_address_id
         address_property: root.address_property
-        on_release: app.controller.load_switch_account()
+        on_release: app.controller.open_address_options()
     MDTextField:
         hint_text: "Current password"
         helper_text: "Enter your current password for unlocking your account"
