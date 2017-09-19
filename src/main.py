@@ -12,6 +12,7 @@ import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
+from kivy.core.clipboard import Clipboard
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
@@ -1225,7 +1226,7 @@ class Controller(FloatLayout):
 
     def prompt_alias_dialog(self):
         """
-        Prompt the update alias dialog.
+        Prompts the update alias dialog.
         """
         account = self.current_account
         title = "Update your alias"
@@ -1244,6 +1245,14 @@ class Controller(FloatLayout):
                     dialog, content.alias))
         dialog.open()
 
+    def copy_address_clipboard(self):
+        """
+        Copies the current account address to the clipboard.
+        """
+        account = self.current_account
+        address = "0x" + account.address.encode("hex")
+        Clipboard.copy(address)
+
     def open_address_options(self):
         """
         Loads the address options bottom sheet.
@@ -1255,6 +1264,9 @@ class Controller(FloatLayout):
         bottom_sheet.add_item(
             'Change alias',
             lambda x: self.prompt_alias_dialog(), icon='information')
+        bottom_sheet.add_item(
+            'Copy address',
+            lambda x: self.copy_address_clipboard(), icon='content-copy')
         bottom_sheet.open()
 
     def load_switch_account(self):
