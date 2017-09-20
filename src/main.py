@@ -425,20 +425,36 @@ class Overview(BoxLayout):
 
     def setup(self):
         """
-        Binds Controller.current_account property.
+        Binds Controller current_account and on_alias_updated.
         """
         self.controller = App.get_running_app().controller
         self.controller.bind(current_account=self.setter('current_account'))
+        self.controller.bind(on_alias_updated=self.on_alias_updated)
         # triggers the update
         self.current_account = self.controller.current_account
+
+    def update_current_account_string(self):
+        """
+        Updates current_account_string from current_account.
+        """
+        account = self.current_account
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
 
     def on_current_account(self, instance, account):
         """
         Updates current_account_string and fetches the new account balance.
         """
-        address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.update_current_account_string()
         self.controller.fetch_balance()
+
+    def on_alias_updated(self, instance, alias):
+        """
+        Forces account string update, which will triggers an
+        AddressButton.on_address_property event.
+        """
+        self.current_account_string = ""
+        self.update_current_account_string()
 
 
 class PWSelectList(BoxLayout):
@@ -919,6 +935,7 @@ class Controller(FloatLayout):
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
         self.screen_history = []
+        self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
@@ -1222,7 +1239,12 @@ class Controller(FloatLayout):
     def on_update_alias_clicked(self, dialog, alias):
         account = self.current_account
         Controller.set_account_alias(account, alias)
+        # makes sure widgets that already rendered the address get updated
+        self.dispatch('on_alias_updated', alias)
         dialog.dismiss()
+
+    def on_alias_updated(self, *args):
+        pass
 
     def prompt_alias_dialog(self):
         """
