@@ -1376,7 +1376,7 @@ def configure_sentry(in_debug=False):
     if in_debug:
         client = DebugRavenClient()
     else:
-        client = Client(dsn)
+        client = Client(dsn=dsn, release=__version__)
     return client
 
 
