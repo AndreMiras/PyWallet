@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20170920]
 
   - Fix flaky scrypt test, refs #59
   - Migrate kivyunittest==0.1.8, refs #78
