@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+  - Fix flaky scrypt test, refs #59
   - Migrate kivyunittest==0.1.8, refs #78
   - Add account alias feature, refs #66
   - Add copy to clipboard feature, refs #84
