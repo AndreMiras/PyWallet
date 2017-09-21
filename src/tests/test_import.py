@@ -22,8 +22,7 @@ class ModulesImportTestCase(unittest.TestCase):
         data = scrypt.encrypt('a secret message', 'password', maxtime=0.1)
         self.assertIsNotNone(data)
         # 'scrypt\x00\r\x00\x00\x00\x08\x00\x00\x00\x01RX9H'
-        # This will also take at least 0.1 seconds
-        decrypted = scrypt.decrypt(data, 'password', maxtime=0.1)
+        decrypted = scrypt.decrypt(data, 'password', maxtime=0.5)
         self.assertEqual(decrypted, 'a secret message')
 
     def test_pyethereum(self):

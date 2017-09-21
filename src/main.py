@@ -12,14 +12,17 @@ import kivy
 from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
+from kivy.core.clipboard import Clipboard
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.storage.jsonstore import JsonStore
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, platform
+from kivymd.bottomsheet import MDListBottomSheet
 from kivymd.button import MDFlatButton, MDIconButton
 from kivymd.color_definitions import colors
 from kivymd.dialog import MDDialog
@@ -137,8 +140,22 @@ class PasswordForm(BoxLayout):
 
     password = StringProperty()
 
-    def __init__(self, **kwargs):
-        super(PasswordForm, self).__init__(**kwargs)
+
+class AliasForm(BoxLayout):
+
+    alias = StringProperty()
+    address = StringProperty()
+
+    def __init__(self, account, **kwargs):
+        """
+        Setups the current alias for the given account.
+        """
+        super(AliasForm, self).__init__(**kwargs)
+        self.address = "0x" + account.address.encode("hex")
+        try:
+            self.alias = Controller.get_address_alias(self.address)
+        except KeyError:
+            self.alias = ''
 
 
 class Send(BoxLayout):
@@ -261,22 +278,38 @@ class Receive(BoxLayout):
 
     def setup(self):
         """
-        Binds Controller.current_account property.
+        Binds Controller current_account and on_alias_updated.
         """
         self.controller = App.get_running_app().controller
         self.controller.bind(current_account=self.setter('current_account'))
+        self.controller.bind(on_alias_updated=self.on_alias_updated)
         # triggers the update
         self.current_account = self.controller.current_account
 
     def show_address(self, address):
         self.ids.qr_code_id.data = address
 
-    def on_current_account(self, instance, account):
+    def update_address_property(self):
+        """
+        Updates address_property from current_account.
+        """
+        account = self.current_account
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
+    def on_current_account(self, instance, account):
+        self.update_address_property()
+
     def on_address_property(self, instance, value):
         self.show_address(value)
+
+    def on_alias_updated(self, instance, alias):
+        """
+        Forces account string update, which will triggers an
+        AddressButton.on_address_property event.
+        """
+        self.address_property = ""
+        self.update_address_property()
 
 
 class History(BoxLayout):
@@ -372,7 +405,12 @@ class SwitchAccount(BoxLayout):
         Creates an account list item from given account.
         """
         address = "0x" + account.address.encode("hex")
-        list_item = OneLineListItem(text=address)
+        # gets the alias if exists
+        try:
+            text = Controller.get_address_alias(address)
+        except KeyError:
+            text = address
+        list_item = OneLineListItem(text=text)
         # makes sure the address doesn't overlap on small screen
         list_item.ids._lbl_primary.shorten = True
         list_item.account = account
@@ -403,20 +441,36 @@ class Overview(BoxLayout):
 
     def setup(self):
         """
-        Binds Controller.current_account property.
+        Binds Controller current_account and on_alias_updated.
         """
         self.controller = App.get_running_app().controller
         self.controller.bind(current_account=self.setter('current_account'))
+        self.controller.bind(on_alias_updated=self.on_alias_updated)
         # triggers the update
         self.current_account = self.controller.current_account
+
+    def update_current_account_string(self):
+        """
+        Updates current_account_string from current_account.
+        """
+        account = self.current_account
+        address = "0x" + account.address.encode("hex")
+        self.current_account_string = address
 
     def on_current_account(self, instance, account):
         """
         Updates current_account_string and fetches the new account balance.
         """
-        address = "0x" + account.address.encode("hex")
-        self.current_account_string = address
+        self.update_current_account_string()
         self.controller.fetch_balance()
+
+    def on_alias_updated(self, instance, alias):
+        """
+        Forces account string update, which will triggers an
+        AddressButton.on_address_property event.
+        """
+        self.current_account_string = ""
+        self.update_current_account_string()
 
 
 class PWSelectList(BoxLayout):
@@ -576,6 +630,7 @@ class CreateNewAccount(BoxLayout):
     https://security.stackexchange.com/q/3959
     """
 
+    alias = StringProperty()
     new_password1 = StringProperty()
     new_password2 = StringProperty()
 
@@ -680,6 +735,7 @@ class CreateNewAccount(BoxLayout):
                 password=password, security_ratio=security_ratio)
         Controller.snackbar_message("Created!")
         self.toggle_widgets(True)
+        Controller.set_account_alias(account, self.alias)
         self.on_account_created(account)
         CreateNewAccount.try_unlock(account, password)
         self.show_redirect_dialog()
@@ -705,11 +761,22 @@ class AddressButton(MDFlatButton):
     Also shorten content size using ellipsis.
     """
 
+    address_property = StringProperty()
+
     def __init__(self, **kwargs):
         super(AddressButton, self).__init__(**kwargs)
         Clock.schedule_once(lambda dt: self.setup())
 
     def setup(self):
+        self.controller = App.get_running_app().controller
+        self.set_font_and_shorten()
+
+    def set_font_and_shorten(self):
+        """
+        Makes the font slightly smaller on mobile
+        by using "Body1" rather than "Button" style.
+        Also shorten content size using ellipsis.
+        """
         content = self.ids.content
         content.font_style = 'Body1'
         content.shorten = True
@@ -725,6 +792,16 @@ class AddressButton(MDFlatButton):
         # call it once manually, refs:
         # https://github.com/AndreMiras/PyWallet/issues/74
         on_parent_size(self.parent, None)
+
+    def on_address_property(self, instance, address):
+        """
+        Sets the address alias if it exists or defaults to the address itself.
+        """
+        try:
+            text = Controller.get_address_alias(address)
+        except KeyError:
+            text = address
+        self.text = text
 
 
 class PWToolbar(Toolbar):
@@ -874,6 +951,7 @@ class Controller(FloatLayout):
         keystore_path = Controller.get_keystore_path()
         self.pywalib = PyWalib(keystore_path)
         self.screen_history = []
+        self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
 
     @property
@@ -995,6 +1073,76 @@ class Controller(FloatLayout):
         return keystore_path
 
     @staticmethod
+    def get_store_path():
+        """
+        Returns the full user store path.
+        """
+        user_data_dir = App.get_running_app().user_data_dir
+        store_path = os.path.join(user_data_dir, 'store.json')
+        return store_path
+
+    @staticmethod
+    def get_store():
+        """
+        Returns the full user Store object instance.
+        """
+        store_path = Controller.get_store_path()
+        store = JsonStore(store_path)
+        return store
+
+    @staticmethod
+    def delete_account_alias(account):
+        """
+        Deletes the alias for the given account.
+        """
+        address = "0x" + account.address.encode("hex")
+        store = Controller.get_store()
+        alias_dict = store['alias']
+        alias_dict.pop(address)
+        store['alias'] = alias_dict
+
+    @staticmethod
+    def set_account_alias(account, alias):
+        """
+        Sets an alias for a given Account object.
+        Deletes the alias if empty.
+        """
+        # if the alias is empty and an alias exists for this address,
+        # deletes it
+        if alias == '':
+            try:
+                Controller.delete_account_alias(account)
+            except KeyError:
+                pass
+            return
+        address = "0x" + account.address.encode("hex")
+        store = Controller.get_store()
+        try:
+            alias_dict = store['alias']
+        except KeyError:
+            # creates store if doesn't yet exists
+            store.put('alias')
+            alias_dict = store['alias']
+        alias_dict.update({address: alias})
+        store['alias'] = alias_dict
+
+    @staticmethod
+    def get_address_alias(address):
+        """
+        Returns the alias of the given address string.
+        """
+        store = Controller.get_store()
+        return store.get('alias')[address]
+
+    @staticmethod
+    def get_account_alias(account):
+        """
+        Returns the alias of the given Account object.
+        """
+        address = "0x" + account.address.encode("hex")
+        return Controller.get_address_alias(address)
+
+    @staticmethod
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
 
@@ -1104,6 +1252,61 @@ class Controller(FloatLayout):
             Controller.on_balance_connection_error()
             return
 
+    def on_update_alias_clicked(self, dialog, alias):
+        account = self.current_account
+        Controller.set_account_alias(account, alias)
+        # makes sure widgets that already rendered the address get updated
+        self.dispatch('on_alias_updated', alias)
+        dialog.dismiss()
+
+    def on_alias_updated(self, *args):
+        pass
+
+    def prompt_alias_dialog(self):
+        """
+        Prompts the update alias dialog.
+        """
+        account = self.current_account
+        title = "Update your alias"
+        content = AliasForm(account)
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(250),
+                        auto_dismiss=False)
+        # workaround for MDDialog container size (too small by default)
+        dialog.ids.container.size_hint_y = 1
+        dialog.add_action_button(
+                "Update",
+                action=lambda *x: self.on_update_alias_clicked(
+                    dialog, content.alias))
+        dialog.open()
+
+    def copy_address_clipboard(self):
+        """
+        Copies the current account address to the clipboard.
+        """
+        account = self.current_account
+        address = "0x" + account.address.encode("hex")
+        Clipboard.copy(address)
+
+    def open_address_options(self):
+        """
+        Loads the address options bottom sheet.
+        """
+        bottom_sheet = MDListBottomSheet()
+        bottom_sheet.add_item(
+            'Switch account',
+            lambda x: self.load_switch_account(), icon='swap-horizontal')
+        bottom_sheet.add_item(
+            'Change alias',
+            lambda x: self.prompt_alias_dialog(), icon='information')
+        bottom_sheet.add_item(
+            'Copy address',
+            lambda x: self.copy_address_clipboard(), icon='content-copy')
+        bottom_sheet.open()
+
     def load_switch_account(self):
         """
         Loads the switch account screen.
@@ -1173,7 +1376,7 @@ def configure_sentry(in_debug=False):
     if in_debug:
         client = DebugRavenClient()
     else:
-        client = Client(dsn)
+        client = Client(dsn=dsn, release=__version__)
     return client
 
 
