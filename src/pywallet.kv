@@ -84,6 +84,9 @@
         write_tab: False
         text: root.send_to_address
         on_text: root.send_to_address = args[1]
+    MDRaisedButton:
+        text: "Flash QR Code"
+        on_release: app.controller.load_flash_qr_code()
     FloatInput:
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
@@ -411,6 +414,18 @@
         Window.dispatch('on_resize', *Window.size)
     ManageKeystoreBottomNavigation:
         id: manage_keystores_id
+
+
+<FlashQrCodeScreen@BoxLayout>:
+    on_pre_enter:
+        camera_id.play = True
+    on_pre_leave:
+        camera_id.play = False
+    Camera:
+        id: camera_id
+        resolution: (640, 480)
+        play: False
+        # TODO: camera_id (front vs back on Android))
 
 
 <AboutScreen>:

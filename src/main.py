@@ -939,6 +939,10 @@ class AboutScreen(Screen):
     pass
 
 
+class FlashQrCodeScreen(Screen):
+    pass
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty()
@@ -1024,6 +1028,7 @@ class Controller(FloatLayout):
             'overview': OverviewScreen,
             'switch_account': SwitchAccountScreen,
             'manage_keystores': ManageKeystoreScreen,
+            'flashqrcode': FlashQrCodeScreen,
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
@@ -1331,6 +1336,13 @@ class Controller(FloatLayout):
         create_new_account_nav_item = \
             manage_keystores.ids.create_new_account_nav_item_id
         create_new_account_nav_item.dispatch('on_tab_press')
+
+    def load_flash_qr_code(self):
+        """
+        Loads the flash QR Code screen.
+        """
+        # loads the flash QR Code screen
+        self.screen_manager_current('flashqrcode', direction='left')
 
     def load_about_screen(self):
         """
