@@ -1,5 +1,6 @@
 #:kivy 1.10.0
 
+#:import ZBarCam zbarcam
 #:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import webbrowser webbrowser
 #:import Window kivy.core.window.Window
@@ -418,14 +419,11 @@
 
 <FlashQrCodeScreen@BoxLayout>:
     on_pre_enter:
-        camera_id.play = True
+        zbarcam_id.play = True
     on_pre_leave:
-        camera_id.play = False
-    Camera:
-        id: camera_id
-        resolution: (640, 480)
-        play: False
-        # TODO: camera_id (front vs back on Android))
+        zbarcam_id.play = False
+    ZBarCam:
+        id: zbarcam_id
 
 
 <AboutScreen>:

@@ -940,7 +940,15 @@ class AboutScreen(Screen):
 
 
 class FlashQrCodeScreen(Screen):
-    pass
+
+    def __init__(self, **kwargs):
+        super(FlashQrCodeScreen, self).__init__(**kwargs)
+        zbarcam = self.ids.zbarcam_id
+        zbarcam.bind(symbols=self.on_symbols)
+
+    def on_symbols(self, instance, symbols):
+        # TODO: popup an error if multiple symbols were found
+        print("on_symbols instance: %s value: %s" % (instance, value))
 
 
 class Controller(FloatLayout):
