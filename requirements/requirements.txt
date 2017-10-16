@@ -16,4 +16,4 @@ Kivy-Garden==0.1.4
 https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b
 Pillow==4.1.1
 raven==6.1.0
-zbarcam==20171016
+https://github.com/AndreMiras/garden.zbarcam/archive/20171016.zip
