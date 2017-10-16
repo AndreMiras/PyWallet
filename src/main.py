@@ -943,12 +943,25 @@ class FlashQrCodeScreen(Screen):
 
     def __init__(self, **kwargs):
         super(FlashQrCodeScreen, self).__init__(**kwargs)
-        zbarcam = self.ids.zbarcam_id
-        zbarcam.bind(symbols=self.on_symbols)
+        self.setup()
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.zbarcam = self.ids.zbarcam_id
+        self.zbarcam.bind(symbols=self.on_symbols)
 
     def on_symbols(self, instance, symbols):
-        # TODO: popup an error if multiple symbols were found
-        print("on_symbols instance: %s value: %s" % (instance, value))
+        # TODO:
+        #   - popup an error if multiple symbols were found
+        #   - verify the address is valid
+        symbol = symbols[0]
+        # update Send screen address
+        self.controller.send.send_to_address = symbol.data
+        self.zbarcam.play = False
+        self.controller.load_landing_page()
 
 
 class Controller(FloatLayout):
