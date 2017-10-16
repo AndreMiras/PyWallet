@@ -420,8 +420,10 @@
 <FlashQrCodeScreen@BoxLayout>:
     on_pre_enter:
         zbarcam_id.play = True
+        self.bind_on_symbols()
     on_pre_leave:
         zbarcam_id.play = False
+        self.unbind_on_symbols()
     ZBarCam:
         id: zbarcam_id
 
