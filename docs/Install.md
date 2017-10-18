@@ -27,3 +27,14 @@ Before installing additional dependencies.
 sudo apt install zlib1g-dev default-jdk
 ```
 Check [script_android.sh](/travis/script_android.sh) or [Dockerfile](https://github.com/AndreMiras/PyWallet/blob/feature/ticket37_travis_docker/Dockerfile) to see two different ways to do it in Travis.
+
+## Gentoo 64 host, Android target
+Build zlib in 32-bit:
+```
+echo 'sys-libs/zlib abi_x86_32' >> /etc/portage/package.use
+emerge -1av sys-libs/zlib
+```
+Install buildozer outside the virtualenv:
+```
+pip install --user buildozer
+```
