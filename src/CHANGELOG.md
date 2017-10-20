@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Add flash QR Code support, refs #85
+
 ## [v20170920]
 
   - Fix flaky scrypt test, refs #59
