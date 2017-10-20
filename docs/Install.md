@@ -17,6 +17,8 @@ Installing `test_requirements.txt` is only required if you want to contribute an
 
 You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see how it's being automated for Travis.
 
+### Linux Camera support (optional)
+See [OpenCV.md](/docs/OpenCV.md).
 
 ## Ubuntu host, Android target
 To be able to build the project for Android from Ubuntu, follow python-for-android official guide (for core dependencies):

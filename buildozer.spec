@@ -62,7 +62,12 @@ requirements =
     secp256k1,
     qrcode,
     contextlib2,
-    raven
+    raven,
+    libiconv,
+    libzbar,
+    zbar,
+    pil,
+    https://github.com/AndreMiras/garden.zbarcam/archive/20171020.zip
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -70,7 +75,7 @@ requirements =
 
 # (list) Garden requirements
 #garden_requirements =
-garden_requirements = qrcode
+garden_requirements = qrcode, xcamera
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -115,7 +120,7 @@ fullscreen = 0
 
 # (list) Permissions
 #android.permissions = INTERNET
-android.permissions = INTERNET
+android.permissions = INTERNET, CAMERA
 
 # (int) Android API to use
 #android.api = 19
