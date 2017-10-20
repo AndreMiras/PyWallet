@@ -67,7 +67,7 @@ requirements =
     libzbar,
     zbar,
     pil,
-    https://github.com/AndreMiras/garden.zbarcam/archive/20171019.zip
+    https://github.com/AndreMiras/garden.zbarcam/archive/20171020.zip
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -75,7 +75,7 @@ requirements =
 
 # (list) Garden requirements
 #garden_requirements =
-garden_requirements = qrcode
+garden_requirements = qrcode, xcamera
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
