@@ -62,7 +62,12 @@ requirements =
     secp256k1,
     qrcode,
     contextlib2,
-    raven
+    raven,
+    libiconv,
+    libzbar,
+    zbar,
+    pil,
+    https://github.com/AndreMiras/garden.zbarcam/archive/20171019.zip
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
