@@ -59,6 +59,12 @@ Fix it by installing autogen autoconf and libtool:
 sudo apt install autogen autoconf libtool
 ```
 
+Buildozer fails with when building cffi:
+```
+c/_cffi_backend.c:13:17: fatal error: ffi.h: No such file or directory
+```
+See upstream ticket: https://github.com/kivy/python-for-android/issues/1148
+
 
 ## Kivy
 
