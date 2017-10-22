@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20171022]
 
   - Add flash QR Code support, refs #85
 
