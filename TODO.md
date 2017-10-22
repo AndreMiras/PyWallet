@@ -22,6 +22,14 @@
      * pydevp2p
        * fix broken tests:
          * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
+     * python-for-android recipes
+       * secp256k1
+         * `env['CFLAGS'] += ' -I' + join(libsecp256k1_dir, 'include')` # note the `+=`
+         * `env['INCLUDE_DIR'] = join(libsecp256k1_dir, 'include')` # see secp256k1-py README.md
+         * `env['LIB_DIR'] = join(libsecp256k1_dir, '.libs')` # see secp256k1-py README.md
+         * `env['LDFLAGS'] += ' -L' + join(libsecp256k1_dir, '.libs')` # note the `.libs`
+         * But in fact passing the library path ("LIB_DIR" and "LDFLAGS") may not be required
+           because libsecp256k1 recipe has `self.install_libs(arch, *libs)`
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect

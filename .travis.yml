@@ -12,6 +12,8 @@ before_install:
     # https://kivy.org/docs/installation/installation-linux.html#dependencies-with-sdl2
     - sudo apt-get install python-pip build-essential git python-dev
     - sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+    # Required for the project
+    - sudo apt-get install libzbar-dev
 
 install:
     - sudo pip install coveralls

@@ -939,6 +939,45 @@ class AboutScreen(Screen):
     pass
 
 
+class FlashQrCodeScreen(Screen):
+
+    def __init__(self, **kwargs):
+        super(FlashQrCodeScreen, self).__init__(**kwargs)
+        self.setup()
+
+    def setup(self):
+        """
+        Binds Controller.current_account property.
+        """
+        self.controller = App.get_running_app().controller
+        self.zbarcam = self.ids.zbarcam_id
+
+    def bind_on_symbols(self):
+        """
+        Since the camera doesn't seem to stop properly, we always bind/unbind
+        on_pre_enter/on_pre_leave.
+        """
+        self.zbarcam.bind(symbols=self.on_symbols)
+
+    def unbind_on_symbols(self):
+        """
+        Since the camera doesn't seem to stop properly, makes sure at least
+        events are unbound.
+        """
+        self.zbarcam.unbind(symbols=self.on_symbols)
+
+    def on_symbols(self, instance, symbols):
+        # also ignores if more than 1 code were found since we don't want to
+        # send to the wrong one
+        if len(symbols) != 1:
+            return
+        symbol = symbols[0]
+        # update Send screen address
+        self.controller.send.send_to_address = symbol.data
+        self.zbarcam.play = False
+        self.controller.load_landing_page()
+
+
 class Controller(FloatLayout):
 
     current_account = ObjectProperty()
@@ -1024,6 +1063,7 @@ class Controller(FloatLayout):
             'overview': OverviewScreen,
             'switch_account': SwitchAccountScreen,
             'manage_keystores': ManageKeystoreScreen,
+            'flashqrcode': FlashQrCodeScreen,
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
@@ -1331,6 +1371,13 @@ class Controller(FloatLayout):
         create_new_account_nav_item = \
             manage_keystores.ids.create_new_account_nav_item_id
         create_new_account_nav_item.dispatch('on_tab_press')
+
+    def load_flash_qr_code(self):
+        """
+        Loads the flash QR Code screen.
+        """
+        # loads the flash QR Code screen
+        self.screen_manager_current('flashqrcode', direction='left')
 
     def load_about_screen(self):
         """
