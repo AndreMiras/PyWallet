@@ -1376,6 +1376,9 @@ class Controller(FloatLayout):
         """
         Loads the flash QR Code screen.
         """
+        # loads ZBarCam only when needed, refs:
+        # https://github.com/AndreMiras/PyWallet/issues/94
+        from zbarcam import ZBarCam  # noqa
         # loads the flash QR Code screen
         self.screen_manager_current('flashqrcode', direction='left')
 
