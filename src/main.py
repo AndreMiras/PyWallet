@@ -267,7 +267,7 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
     address_property = StringProperty()
 
     def __init__(self, **kwargs):
@@ -302,6 +302,8 @@ class Receive(BoxLayout):
         self.address_property = address
 
     def on_current_account(self, instance, account):
+        if account is None:
+            return
         self.update_address_property()
 
     def on_address_property(self, instance, value):
@@ -318,7 +320,7 @@ class Receive(BoxLayout):
 
 class History(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super(History, self).__init__(**kwargs)
@@ -374,6 +376,8 @@ class History(BoxLayout):
 
     @run_in_thread
     def _load_history(self):
+        if self.current_account is None:
+            return
         account = self.current_account
         address = '0x' + account.address.encode("hex")
         try:
@@ -436,7 +440,7 @@ class SwitchAccount(BoxLayout):
 
 class Overview(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
     current_account_string = StringProperty()
 
     def __init__(self, **kwargs):
@@ -457,6 +461,8 @@ class Overview(BoxLayout):
         """
         Updates current_account_string from current_account.
         """
+        if self.current_account is None:
+            return
         account = self.current_account
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
@@ -585,6 +591,8 @@ class ManageExisting(BoxLayout):
         account = self.current_account
         self.pywalib.delete_account(account)
         dialog.dismiss()
+        # TODO
+        self.controller.current_account = None
         self.show_redirect_dialog()
         self.controller.load_landing_page()
 
@@ -1307,6 +1315,8 @@ class Controller(FloatLayout):
         """
         Fetches the new balance and current_account_balance property.
         """
+        if self.current_account is None:
+            return
         account = self.current_account
         try:
             self.current_account_balance = self.pywalib.get_balance(

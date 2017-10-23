@@ -46,6 +46,14 @@ class ModulesImportTestCase(unittest.TestCase):
         self.assertIsNotNone(account)
         self.assertIsNotNone(address)
 
+    def test_zbarcam(self):
+        import zbarcam
+        # zbarcam imports PIL and monkey patches it so it has
+        # the same interfaces as Pillow
+        self.assertTrue(hasattr(zbarcam, 'PIL'))
+        self.assertTrue(hasattr(zbarcam.PIL.Image, 'frombytes'))
+        self.assertTrue(hasattr(zbarcam.PIL.Image.Image, 'tobytes'))
+
 
 if __name__ == '__main__':
     unittest.main()
