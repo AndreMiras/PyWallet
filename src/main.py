@@ -588,10 +588,23 @@ class ManageExisting(BoxLayout):
         self.show_redirect_dialog()
         self.controller.load_landing_page()
 
+    def prompt_no_account_error(self):
+        """
+        Prompts an error since no account are selected for deletion, refs:
+        https://github.com/AndreMiras/PyWallet/issues/90
+        """
+        title = "No account selected."
+        body = "No account selected for deletion."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
     def prompt_delete_account_dialog(self):
         """
-        Not yet implemented.
+        Prompt a confirmation dialog before deleting the account.
         """
+        if self.current_account is None:
+            self.prompt_no_account_error()
+            return
         title = "Are you sure?"
         body = ""
         body += "This action cannot be undone.\n"

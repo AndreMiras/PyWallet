@@ -326,7 +326,6 @@ class Test(unittest.TestCase):
         https://github.com/AndreMiras/PyWallet/issues/90
         """
         controller = app.controller
-        pywalib = controller.pywalib
         manage_existing = controller.manage_existing
         # ManageExisting and Controller current_account should be in sync
         self.assertEqual(
@@ -338,19 +337,11 @@ class Test(unittest.TestCase):
         # let's try to delete this "None account"
         delete_button_id = manage_existing.ids.delete_button_id
         delete_button_id.dispatch('on_release')
-        # a confirmation popup should show
+        # an error dialog should pop
         dialogs = controller.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
-        self.assertEqual(dialog.title, 'Are you sure?')
-        # confirm it
-        # TODO: click on the dialog action button itself
-        manage_existing.on_delete_account_yes(dialog)
-        # the dialog should be replaced by another one
-        dialogs = controller.dialogs
-        self.assertEqual(len(dialogs), 1)
-        dialog = dialogs[0]
-        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        self.assertEqual(dialog.title, 'No account selected.')
         controller.dismiss_all_dialogs()
 
     # main test function
