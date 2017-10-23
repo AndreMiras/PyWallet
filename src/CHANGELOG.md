@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix app may crash on startup, refs #94
+
 ## [v20171022]
 
   - Add flash QR Code support, refs #85
