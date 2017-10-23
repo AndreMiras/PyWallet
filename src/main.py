@@ -90,6 +90,10 @@ class NavigationDrawerTwoLineListItem(
             current_account=lambda _, value: self.on_current_account(value))
 
     def on_current_account(self, account):
+        # e.g. deleting the last account, would set
+        # Controller.current_account to None
+        if account is None:
+            return
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
@@ -516,7 +520,8 @@ class ImportKeystore(BoxLayout):
 # TODO: create a generic account form
 class ManageExisting(BoxLayout):
 
-    current_account = ObjectProperty()
+    # e.g. when the last account was deleted
+    current_account = ObjectProperty(allownone=True)
     address_property = StringProperty()
     current_password = StringProperty()
     new_password1 = StringProperty()
@@ -620,6 +625,10 @@ class ManageExisting(BoxLayout):
         Controller.snackbar_message("Updated!")
 
     def on_current_account(self, instance, account):
+        # e.g. deleting the last account, would set
+        # Controller.current_account to None
+        if account is None:
+            return
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
@@ -980,7 +989,8 @@ class FlashQrCodeScreen(Screen):
 
 class Controller(FloatLayout):
 
-    current_account = ObjectProperty()
+    # e.g. when the keystore is void
+    current_account = ObjectProperty(allownone=True)
     current_account_balance = NumericProperty(0)
     # keeps track of all dialogs alive
     dialogs = []

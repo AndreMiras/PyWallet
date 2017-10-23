@@ -320,6 +320,39 @@ class Test(unittest.TestCase):
         account_list_id = switch_account.ids.account_list_id
         self.assertEqual(len(account_list_id.children), 0)
 
+    def helper_test_delete_account_none_selected(self, app):
+        """
+        Tries to delete account when none are selected, refs:
+        https://github.com/AndreMiras/PyWallet/issues/90
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        manage_existing = controller.manage_existing
+        # ManageExisting and Controller current_account should be in sync
+        self.assertEqual(
+            manage_existing.current_account, controller.current_account)
+        # chaning in the Controller, should trigger the change on the other
+        self.assertTrue(manage_existing.current_account is not None)
+        controller.current_account = None
+        self.assertIsNone(manage_existing.current_account)
+        # let's try to delete this "None account"
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        # TODO: click on the dialog action button itself
+        manage_existing.on_delete_account_yes(dialog)
+        # the dialog should be replaced by another one
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -329,6 +362,7 @@ class Test(unittest.TestCase):
         self.helper_test_on_send_click(app)
         self.helper_test_address_alias(app)
         self.helper_test_delete_account(app)
+        self.helper_test_delete_account_none_selected(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
