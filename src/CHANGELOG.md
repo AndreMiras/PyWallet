@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Fix app may crash on startup, refs #94
+  - Fix app may crash on account deletion, refs #90
 
 ## [v20171022]
 
