@@ -22,6 +22,9 @@
      * pydevp2p
        * fix broken tests:
          * https://github.com/ethereum/pydevp2p/commit/8e1f2b2ef28ecba22bf27eac346bfa7007eaf0fe
+     * pyethereum
+       * take a look at the potential unlock wallet performance improvement:
+         https://github.com/ethereum/pyethereum/pull/777
      * python-for-android recipes
        * secp256k1
          * `env['CFLAGS'] += ' -I' + join(libsecp256k1_dir, 'include')` # note the `+=`
