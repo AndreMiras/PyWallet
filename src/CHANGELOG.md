@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20171024]
 
   - Fix crash on startup, refs #94
   - Fix crash on null account deletion, refs #90
