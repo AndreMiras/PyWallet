@@ -110,7 +110,7 @@ class PywalibTestCase(unittest.TestCase):
     def test_delete_account(self):
         """
         Creates a new account and delete it.
-        Then verify we can load the account from the backup location.
+        Then verify we can load the account from the backup/trash location.
         """
         pywalib = self.pywalib
         account = self.helper_new_account()
@@ -122,11 +122,35 @@ class PywalibTestCase(unittest.TestCase):
         # even recreating the PyWalib object
         pywalib = PyWalib(self.keystore_dir)
         self.assertEqual(len(pywalib.get_account_list()), 0)
-        # tries to reload it from the backup location
+        # tries to reload it from the backup/trash location
         deleted_keystore_dir = PyWalib.deleted_account_dir(self.keystore_dir)
         pywalib = PyWalib(deleted_keystore_dir)
         self.assertEqual(len(pywalib.get_account_list()), 1)
         self.assertEqual(pywalib.get_account_list()[0].address, address)
+
+    def test_delete_account_already_exists(self):
+        """
+        If the destination (backup/trash) directory where the account is moved
+        already exists, it should be handled gracefully.
+        This could happens if the account gets deleted, then reimported and
+        deleted again, refs:
+        https://github.com/AndreMiras/PyWallet/issues/88
+        """
+        pywalib = self.pywalib
+        account = self.helper_new_account()
+        # creates a file in the backup/trash folder that would conflict
+        # with the deleted account
+        deleted_keystore_dir = PyWalib.deleted_account_dir(self.keystore_dir)
+        os.makedirs(deleted_keystore_dir)
+        account_filename = os.path.basename(account.path)
+        deleted_account_path = os.path.join(
+            deleted_keystore_dir, account_filename)
+        # create that file
+        open(deleted_account_path, 'a').close()
+        # then deletes the account and verifies it worked
+        self.assertEqual(len(pywalib.get_account_list()), 1)
+        pywalib.delete_account(account)
+        self.assertEqual(len(pywalib.get_account_list()), 0)
 
     def test_handle_etherscan_error(self):
         """
