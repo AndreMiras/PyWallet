@@ -2,9 +2,10 @@
 
 ## [Unreleased]
 
-  - Fix app may crash on startup, refs #94
-  - Fix app may crash on null account deletion, refs #90
-  - Fix app may crash on account deletion twice, refs #88
+  - Fix crash on startup, refs #94
+  - Fix crash on null account deletion, refs #90
+  - Fix crash on account deletion twice, refs #88
+  - Fix crash on dialog dismiss, refs #89
 
 ## [v20171022]
 

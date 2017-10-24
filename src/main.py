@@ -1222,7 +1222,12 @@ class Controller(FloatLayout):
         """
         Removes it from the dialogs track list.
         """
-        Controller.dialogs.remove(dialog)
+        try:
+            Controller.dialogs.remove(dialog)
+        except ValueError:
+            # fails silently if the dialog was dismissed twice, refs:
+            # https://github.com/AndreMiras/PyWallet/issues/89
+            pass
 
     @staticmethod
     def dismiss_all_dialogs():
