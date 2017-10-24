@@ -90,6 +90,10 @@ class NavigationDrawerTwoLineListItem(
             current_account=lambda _, value: self.on_current_account(value))
 
     def on_current_account(self, account):
+        # e.g. deleting the last account, would set
+        # Controller.current_account to None
+        if account is None:
+            return
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
@@ -263,7 +267,7 @@ class Send(BoxLayout):
 
 class Receive(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
     address_property = StringProperty()
 
     def __init__(self, **kwargs):
@@ -298,6 +302,8 @@ class Receive(BoxLayout):
         self.address_property = address
 
     def on_current_account(self, instance, account):
+        if account is None:
+            return
         self.update_address_property()
 
     def on_address_property(self, instance, value):
@@ -314,7 +320,7 @@ class Receive(BoxLayout):
 
 class History(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
 
     def __init__(self, **kwargs):
         super(History, self).__init__(**kwargs)
@@ -370,6 +376,8 @@ class History(BoxLayout):
 
     @run_in_thread
     def _load_history(self):
+        if self.current_account is None:
+            return
         account = self.current_account
         address = '0x' + account.address.encode("hex")
         try:
@@ -432,7 +440,7 @@ class SwitchAccount(BoxLayout):
 
 class Overview(BoxLayout):
 
-    current_account = ObjectProperty()
+    current_account = ObjectProperty(allownone=True)
     current_account_string = StringProperty()
 
     def __init__(self, **kwargs):
@@ -453,6 +461,8 @@ class Overview(BoxLayout):
         """
         Updates current_account_string from current_account.
         """
+        if self.current_account is None:
+            return
         account = self.current_account
         address = "0x" + account.address.encode("hex")
         self.current_account_string = address
@@ -516,7 +526,8 @@ class ImportKeystore(BoxLayout):
 # TODO: create a generic account form
 class ManageExisting(BoxLayout):
 
-    current_account = ObjectProperty()
+    # e.g. when the last account was deleted
+    current_account = ObjectProperty(allownone=True)
     address_property = StringProperty()
     current_password = StringProperty()
     new_password1 = StringProperty()
@@ -580,13 +591,28 @@ class ManageExisting(BoxLayout):
         account = self.current_account
         self.pywalib.delete_account(account)
         dialog.dismiss()
+        # TODO
+        self.controller.current_account = None
         self.show_redirect_dialog()
         self.controller.load_landing_page()
 
+    def prompt_no_account_error(self):
+        """
+        Prompts an error since no account are selected for deletion, refs:
+        https://github.com/AndreMiras/PyWallet/issues/90
+        """
+        title = "No account selected."
+        body = "No account selected for deletion."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
     def prompt_delete_account_dialog(self):
         """
-        Not yet implemented.
+        Prompt a confirmation dialog before deleting the account.
         """
+        if self.current_account is None:
+            self.prompt_no_account_error()
+            return
         title = "Are you sure?"
         body = ""
         body += "This action cannot be undone.\n"
@@ -620,6 +646,10 @@ class ManageExisting(BoxLayout):
         Controller.snackbar_message("Updated!")
 
     def on_current_account(self, instance, account):
+        # e.g. deleting the last account, would set
+        # Controller.current_account to None
+        if account is None:
+            return
         address = "0x" + account.address.encode("hex")
         self.address_property = address
 
@@ -980,7 +1010,8 @@ class FlashQrCodeScreen(Screen):
 
 class Controller(FloatLayout):
 
-    current_account = ObjectProperty()
+    # e.g. when the keystore is void
+    current_account = ObjectProperty(allownone=True)
     current_account_balance = NumericProperty(0)
     # keeps track of all dialogs alive
     dialogs = []
@@ -1191,7 +1222,12 @@ class Controller(FloatLayout):
         """
         Removes it from the dialogs track list.
         """
-        Controller.dialogs.remove(dialog)
+        try:
+            Controller.dialogs.remove(dialog)
+        except ValueError:
+            # fails silently if the dialog was dismissed twice, refs:
+            # https://github.com/AndreMiras/PyWallet/issues/89
+            pass
 
     @staticmethod
     def dismiss_all_dialogs():
@@ -1284,6 +1320,8 @@ class Controller(FloatLayout):
         """
         Fetches the new balance and current_account_balance property.
         """
+        if self.current_account is None:
+            return
         account = self.current_account
         try:
             self.current_account_balance = self.pywalib.get_balance(
@@ -1376,6 +1414,9 @@ class Controller(FloatLayout):
         """
         Loads the flash QR Code screen.
         """
+        # loads ZBarCam only when needed, refs:
+        # https://github.com/AndreMiras/PyWallet/issues/94
+        from zbarcam import ZBarCam  # noqa
         # loads the flash QR Code screen
         self.screen_manager_current('flashqrcode', direction='left')
 

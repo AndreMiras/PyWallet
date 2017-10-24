@@ -30,6 +30,9 @@
          * `env['LDFLAGS'] += ' -L' + join(libsecp256k1_dir, '.libs')` # note the `.libs`
          * But in fact passing the library path ("LIB_DIR" and "LDFLAGS") may not be required
            because libsecp256k1 recipe has `self.install_libs(arch, *libs)`
+       * libsecp256k1
+         * remove java symbols from libsecp256k1 (configure `--enable-jni=no`) to reduce library size
+         * `should_build()` with `.libs/libsecp256k1.so` check
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect

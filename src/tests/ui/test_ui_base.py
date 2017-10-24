@@ -320,6 +320,116 @@ class Test(unittest.TestCase):
         account_list_id = switch_account.ids.account_list_id
         self.assertEqual(len(account_list_id.children), 0)
 
+    def helper_test_delete_account_none_selected(self, app):
+        """
+        Tries to delete account when none are selected, refs:
+        https://github.com/AndreMiras/PyWallet/issues/90
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        manage_existing = controller.manage_existing
+        # makes sure an account is selected
+        pywalib.new_account(password="password", security_ratio=1)
+        controller.current_account = pywalib.get_account_list()[0]
+        # ManageExisting and Controller current_account should be in sync
+        self.assertEqual(
+            manage_existing.current_account, controller.current_account)
+        # chaning in the Controller, should trigger the change on the other
+        self.assertTrue(manage_existing.current_account is not None)
+        controller.current_account = None
+        self.assertIsNone(manage_existing.current_account)
+        # let's try to delete this "None account"
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # an error dialog should pop
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'No account selected.')
+        controller.dismiss_all_dialogs()
+
+    def helper_confirm_account_deletion(self, app):
+        """
+        Helper method for confirming account deletion popups.
+        """
+        controller = app.controller
+        manage_existing = controller.manage_existing
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        # TODO: click on the dialog action button itself
+        manage_existing.on_delete_account_yes(dialog)
+        # the dialog should be replaced by another one
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+        self.assertEqual(len(dialogs), 0)
+
+    def helper_test_delete_account_twice(self, app):
+        """
+        Trying to delete the same account twice, shoult not crash the app:
+        https://github.com/AndreMiras/PyWallet/issues/51
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        manage_existing = controller.manage_existing
+        # makes sure an account is selected
+        pywalib.new_account(password="password", security_ratio=1)
+        controller.current_account = pywalib.get_account_list()[0]
+        self.assertTrue(manage_existing.current_account is not None)
+        account_count_before = len(pywalib.get_account_list())
+        # let's try to delete this account once
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        self.helper_confirm_account_deletion(app)
+        # the account should be deleted
+        self.assertEqual(
+            len(pywalib.get_account_list()), account_count_before - 1)
+        # makes sure the account was also cleared from the selection view
+        switch_account = self.helper_load_switch_account(app)
+        account_list_id = switch_account.ids.account_list_id
+        self.assertEqual(
+            len(account_list_id.children), len(pywalib.get_account_list()))
+        # TODO: the selected account should now be None
+        # self.assertIsNone(manage_existing.current_account)
+        # self.assertIsNone(controller.current_account)
+        # let's try to delete this account a second time
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # TODO: the second time an error dialog should pop
+        # dialogs = controller.dialogs
+        # self.assertEqual(len(dialogs), 1)
+        # dialog = dialogs[0]
+        # self.assertEqual(dialog.title, 'No account selected.')
+        controller.dismiss_all_dialogs()
+
+    def helper_test_dismiss_dialog_twice(self, app):
+        """
+        If by some choice the dismiss event of a dialog created with
+        Controller.create_dialog_helper() is fired twice, it should be
+        handled gracefully, refs:
+        https://github.com/AndreMiras/PyWallet/issues/89
+        """
+        Controller = main.Controller
+        title = "title"
+        body = "body"
+        # makes sure the controller has no dialog
+        self.assertEqual(Controller.dialogs, [])
+        # creates one and verifies it was created
+        dialog = Controller.create_dialog_helper(title, body)
+        self.assertEqual(len(Controller.dialogs), 1)
+        # dimisses it once and verifies it was handled
+        dialog.dispatch('on_dismiss')
+        self.assertEqual(Controller.dialogs, [])
+        # then a second time and it should not crash
+        dialog.dispatch('on_dismiss')
+        self.assertEqual(Controller.dialogs, [])
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -329,6 +439,9 @@ class Test(unittest.TestCase):
         self.helper_test_on_send_click(app)
         self.helper_test_address_alias(app)
         self.helper_test_delete_account(app)
+        self.helper_test_delete_account_none_selected(app)
+        self.helper_test_delete_account_twice(app)
+        self.helper_test_dismiss_dialog_twice(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.

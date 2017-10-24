@@ -275,7 +275,10 @@ class PyWalib(object):
         if not os.path.exists(deleted_keystore_dir):
             os.makedirs(deleted_keystore_dir)
         # "removes" it from the file system
-        shutil.move(account.path, deleted_keystore_dir)
+        account_filename = os.path.basename(account.path)
+        deleted_account_path = os.path.join(
+            deleted_keystore_dir, account_filename)
+        shutil.move(account.path, deleted_account_path)
         # deletes it from the `AccountsService` account manager instance
         account_service = self.get_account_list()
         account_service.accounts.remove(account)

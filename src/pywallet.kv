@@ -1,6 +1,5 @@
 #:kivy 1.10.0
 
-#:import ZBarCam zbarcam
 #:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import webbrowser webbrowser
 #:import Window kivy.core.window.Window
@@ -418,7 +417,7 @@
         id: manage_keystores_id
 
 
-<FlashQrCodeScreen@BoxLayout>:
+<FlashQrCodeScreen>:
     on_pre_enter:
         zbarcam_id.play = True
         self.bind_on_symbols()
