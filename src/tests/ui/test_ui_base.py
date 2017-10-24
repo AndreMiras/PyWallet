@@ -408,6 +408,28 @@ class Test(unittest.TestCase):
         # self.assertEqual(dialog.title, 'No account selected.')
         controller.dismiss_all_dialogs()
 
+    def helper_test_dismiss_dialog_twice(self, app):
+        """
+        If by some choice the dismiss event of a dialog created with
+        Controller.create_dialog_helper() is fired twice, it should be
+        handled gracefully, refs:
+        https://github.com/AndreMiras/PyWallet/issues/89
+        """
+        Controller = main.Controller
+        title = "title"
+        body = "body"
+        # makes sure the controller has no dialog
+        self.assertEqual(Controller.dialogs, [])
+        # creates one and verifies it was created
+        dialog = Controller.create_dialog_helper(title, body)
+        self.assertEqual(len(Controller.dialogs), 1)
+        # dimisses it once and verifies it was handled
+        dialog.dispatch('on_dismiss')
+        self.assertEqual(Controller.dialogs, [])
+        # then a second time and it should not crash
+        dialog.dispatch('on_dismiss')
+        self.assertEqual(Controller.dialogs, [])
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -419,6 +441,7 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account(app)
         self.helper_test_delete_account_none_selected(app)
         self.helper_test_delete_account_twice(app)
+        self.helper_test_dismiss_dialog_twice(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
