@@ -21,7 +21,7 @@ You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see ho
 See [OpenCV.md](/docs/OpenCV.md).
 You also need to install `garden.xcamera` as it's a `garden.zbarcam` requirement.
 ```
-garden install garden.xcamera
+garden install xcamera
 ```
 
 ## Ubuntu host, Android target
