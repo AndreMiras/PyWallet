@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix crash on fetch balance, refs #91
+
 ## [v20171024]
 
   - Fix crash on startup, refs #94
