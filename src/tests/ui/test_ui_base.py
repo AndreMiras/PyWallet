@@ -482,7 +482,7 @@ class Test(unittest.TestCase):
         self.assertEqual(dialog.title, 'Decode error')
         Controller.dismiss_all_dialogs()
         # the error should be logged
-        mock_logger.warning.assert_called_with(
+        mock_logger.error.assert_called_with(
             'ValueError', exc_info=True)
         Controller.dismiss_all_dialogs()
 
