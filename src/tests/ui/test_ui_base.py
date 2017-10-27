@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import io
 import os
 import shutil
 import threading
@@ -10,6 +11,7 @@ from tempfile import mkdtemp
 
 import kivymd
 import mock
+import requests
 from kivy.clock import Clock
 
 import main
@@ -158,14 +160,18 @@ class Test(unittest.TestCase):
             # click the create account button
             create_account_button_id.dispatch('on_release')
             # after submitting the account verification thread should run
-            self.assertEqual(len(threading.enumerate()), 2)
-            create_account_thread = threading.enumerate()[1]
-            self.assertEqual(type(create_account_thread), threading.Thread)
-            self.assertEqual(
-                create_account_thread._Thread__target.func_name,
-                "create_account")
-            # waits for the end of the thread
-            create_account_thread.join()
+            threads = threading.enumerate()
+            # since we may run into race condition with threading.enumerate()
+            # we make the test conditional
+            if len(threads) == 2:
+                create_account_thread = threading.enumerate()[1]
+                self.assertEqual(
+                    type(create_account_thread), threading.Thread)
+                self.assertEqual(
+                    create_account_thread._Thread__target.func_name,
+                    "create_account")
+                # waits for the end of the thread
+                create_account_thread.join()
             # the form should popup an error dialog
             dialogs = controller.dialogs
             self.assertEqual(len(dialogs), 1)
@@ -430,6 +436,56 @@ class Test(unittest.TestCase):
         dialog.dispatch('on_dismiss')
         self.assertEqual(Controller.dialogs, [])
 
+    def helper_test_controller_fetch_balance(self, app):
+        """
+        Verifies Controller.fetch_balance() works in most common cases.
+        1) simple case, library PyWalib.get_balance() gets called
+        2) ConnectionError should be handled
+        3) handles 503 "service is unavailable", refs #91
+        """
+        Controller = main.Controller
+        controller = app.controller
+        account = controller.current_account
+        balance = 42
+        # 1) simple case, library PyWalib.get_balance() gets called
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+            mock_get_balance.return_value = balance
+            controller.fetch_balance()
+        mock_get_balance.assert_called_with(account.address.encode("hex"))
+        # and the balance updated
+        self.assertEqual(controller.current_account_balance, balance)
+        # 2) ConnectionError should be handled
+        self.assertEqual(len(Controller.dialogs), 0)
+        # logger.warning('ConnectionError', exc_info=True)
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
+                mock.patch('main.Logger') as mock_logger:
+            mock_get_balance.side_effect = requests.exceptions.ConnectionError
+            controller.fetch_balance()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Network error')
+        Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.warning.assert_called_with(
+            'ConnectionError', exc_info=True)
+        # 3) handles 503 "service is unavailable", refs #91
+        self.assertEqual(len(Controller.dialogs), 0)
+        response = requests.Response()
+        response.status_code = 503
+        response.raw = io.BytesIO(b'The service is unavailable.')
+        with mock.patch('requests.get') as mock_requests_get, \
+                mock.patch('main.Logger') as mock_logger:
+            mock_requests_get.return_value = response
+            controller.fetch_balance()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Decode error')
+        Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.warning.assert_called_with(
+            'ValueError', exc_info=True)
+        Controller.dismiss_all_dialogs()
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -442,6 +498,7 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account_none_selected(app)
         self.helper_test_delete_account_twice(app)
         self.helper_test_dismiss_dialog_twice(app)
+        self.helper_test_controller_fetch_balance(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
