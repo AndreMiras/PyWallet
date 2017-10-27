@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import io
 import os
 import shutil
 import threading
@@ -10,8 +11,8 @@ from tempfile import mkdtemp
 
 import kivymd
 import mock
+import requests
 from kivy.clock import Clock
-from requests.exceptions import ConnectionError
 
 import main
 
@@ -440,6 +441,7 @@ class Test(unittest.TestCase):
         Verifies Controller.fetch_balance() works in most common cases.
         1) simple case, library PyWalib.get_balance() gets called
         2) ConnectionError should be handled
+        3) handles 503 "service is unavailable", refs #91
         """
         Controller = main.Controller
         controller = app.controller
@@ -455,12 +457,20 @@ class Test(unittest.TestCase):
         # 2) ConnectionError should be handled
         self.assertEqual(len(Controller.dialogs), 0)
         with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
-            # mock.patch('main.Controller.PyWalib.get_balance') as mock_get_balance:
-            mock_get_balance.side_effect = ConnectionError
+            mock_get_balance.side_effect = requests.exceptions.ConnectionError
             controller.fetch_balance()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Network error')
+        Controller.dismiss_all_dialogs()
+        # 3) handles 503 "service is unavailable", refs #91
+        self.assertEqual(len(Controller.dialogs), 0)
+        response = requests.Response()
+        response.status_code = 503
+        response.raw = io.BytesIO(b'The service is unavailable.')
+        with mock.patch('requests.get') as mock_requests_get:
+            mock_requests_get.return_value = response
+            controller.fetch_balance()
 
     # main test function
     def run_test(self, app, *args):
