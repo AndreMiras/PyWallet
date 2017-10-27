@@ -458,7 +458,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(Controller.dialogs), 0)
         # logger.warning('ConnectionError', exc_info=True)
         with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
-                mock.patch('main.logger') as mock_logger:
+                mock.patch('main.Logger') as mock_logger:
             mock_get_balance.side_effect = requests.exceptions.ConnectionError
             controller.fetch_balance()
         self.assertEqual(len(Controller.dialogs), 1)
@@ -474,7 +474,7 @@ class Test(unittest.TestCase):
         response.status_code = 503
         response.raw = io.BytesIO(b'The service is unavailable.')
         with mock.patch('requests.get') as mock_requests_get, \
-                mock.patch('main.logger') as mock_logger:
+                mock.patch('main.Logger') as mock_logger:
             mock_requests_get.return_value = response
             controller.fetch_balance()
         self.assertEqual(len(Controller.dialogs), 1)

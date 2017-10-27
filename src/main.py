@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
-import logging
 import os
 import re
 import unittest
@@ -37,6 +36,8 @@ from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from raven import Client
+from raven.conf import setup_logging
+from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
@@ -46,7 +47,6 @@ from testsuite import suite
 from version import __version__
 
 kivy.require('1.10.0')
-logger = logging.getLogger(__name__)
 
 
 def run_in_thread(fn):
@@ -388,14 +388,16 @@ class History(BoxLayout):
             transactions.reverse()
         except ConnectionError:
             Controller.on_history_connection_error()
-            logger.warning('ConnectionError', exc_info=True)
+            Logger.warning('ConnectionError', exc_info=True)
             return
         except NoTransactionFoundException:
             transactions = []
         except ValueError:
             # most likely the JSON object could not be decoded, refs #91
             Controller.on_history_value_error()
-            logger.warning('ValueError', exc_info=True)
+            # currently logged as an error, because we want more insight
+            # in order to eventually handle it more specifically
+            Logger.error('ValueError', exc_info=True)
             return
         list_items = []
         for transaction in transactions:
@@ -1350,11 +1352,13 @@ class Controller(FloatLayout):
                 account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
-            logger.warning('ConnectionError', exc_info=True)
+            Logger.warning('ConnectionError', exc_info=True)
         except ValueError:
             # most likely the JSON object could not be decoded, refs #91
+            # currently logged as an error, because we want more insight
+            # in order to eventually handle it more specifically
             Controller.on_balance_value_error()
-            logger.warning('ValueError', exc_info=True)
+            Logger.error('ValueError', exc_info=True)
             return
 
     def on_update_alias_clicked(self, dialog, alias):
@@ -1492,6 +1496,11 @@ def configure_sentry(in_debug=False):
         client = DebugRavenClient()
     else:
         client = Client(dsn=dsn, release=__version__)
+        # Logger.error() to Sentry
+        # https://docs.sentry.io/clients/python/integrations/logging/
+        handler = SentryHandler(client)
+        handler.setLevel(LOG_LEVELS.get('error'))
+        setup_logging(handler)
     return client
 
 
