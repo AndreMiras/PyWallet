@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
+import logging
 import os
 import re
 import unittest
@@ -45,6 +46,7 @@ from testsuite import suite
 from version import __version__
 
 kivy.require('1.10.0')
+logger = logging.getLogger(__name__)
 
 
 def run_in_thread(fn):
@@ -386,6 +388,7 @@ class History(BoxLayout):
             transactions.reverse()
         except ConnectionError:
             Controller.on_history_connection_error()
+            logger.warning('ConnectionError', exc_info=True)
             return
         except NoTransactionFoundException:
             transactions = []
@@ -1328,6 +1331,7 @@ class Controller(FloatLayout):
                 account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
+            logger.warning('ConnectionError', exc_info=True)
             return
 
     def on_update_alias_clicked(self, dialog, alias):

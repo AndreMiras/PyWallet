@@ -456,13 +456,18 @@ class Test(unittest.TestCase):
         self.assertEqual(controller.current_account_balance, balance)
         # 2) ConnectionError should be handled
         self.assertEqual(len(Controller.dialogs), 0)
-        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+        # logger.warning('ConnectionError', exc_info=True)
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
+                mock.patch('main.logger') as mock_logger:
             mock_get_balance.side_effect = requests.exceptions.ConnectionError
             controller.fetch_balance()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Network error')
         Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.warning.assert_called_with(
+            'ConnectionError', exc_info=True)
         # 3) handles 503 "service is unavailable", refs #91
         self.assertEqual(len(Controller.dialogs), 0)
         response = requests.Response()
