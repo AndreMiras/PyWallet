@@ -473,9 +473,18 @@ class Test(unittest.TestCase):
         response = requests.Response()
         response.status_code = 503
         response.raw = io.BytesIO(b'The service is unavailable.')
-        with mock.patch('requests.get') as mock_requests_get:
+        with mock.patch('requests.get') as mock_requests_get, \
+                mock.patch('main.logger') as mock_logger:
             mock_requests_get.return_value = response
             controller.fetch_balance()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Decode error')
+        Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.warning.assert_called_with(
+            'ValueError', exc_info=True)
+        Controller.dismiss_all_dialogs()
 
     # main test function
     def run_test(self, app, *args):

@@ -1285,6 +1285,13 @@ class Controller(FloatLayout):
         dialog.open()
 
     @staticmethod
+    def on_balance_value_error():
+        title = "Decode error"
+        body = "Couldn't not decode balance data."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
     def on_history_connection_error():
         title = "Network error"
         body = "Couldn't load history, no network access."
@@ -1332,6 +1339,10 @@ class Controller(FloatLayout):
         except ConnectionError:
             Controller.on_balance_connection_error()
             logger.warning('ConnectionError', exc_info=True)
+        except ValueError:
+            # most likely the JSON object could not be decoded, refs #91
+            Controller.on_balance_value_error()
+            logger.warning('ValueError', exc_info=True)
             return
 
     def on_update_alias_clicked(self, dialog, alias):
