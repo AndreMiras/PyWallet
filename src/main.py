@@ -1050,7 +1050,7 @@ class Controller(FloatLayout):
                 overview_bnavigation = self.overview_bnavigation
                 tab_manager = overview_bnavigation.ids['tab_manager']
                 if tab_manager.current != 'overview':
-                    tab_manager.current = 'overview'
+                    self.select_overview_subtab()
                     return True
                 else:
                     # if we were already in the overview:overview subtab,
@@ -1458,6 +1458,23 @@ class Controller(FloatLayout):
             'Copy address',
             lambda x: self.copy_address_clipboard(), icon='content-copy')
         bottom_sheet.open()
+
+    def select_overview_subtab(self):
+        """
+        Selects the overview sub tab.
+        """
+        # this is what we would normally do:
+        # tab_manager.current = 'overview'
+        # but instead we need to simulate the click on the
+        # navigation bar children or the associated screen button
+        # would not have the selected color
+        overview_bnavigation = self.overview_bnavigation
+        navigation_bar = overview_bnavigation.children[0]
+        boxlayout = navigation_bar.children[0]
+        nav_headers = boxlayout.children
+        # the overview is the first/last button
+        overview_nav_header = nav_headers[-1]
+        overview_nav_header.dispatch('on_press')
 
     def load_switch_account(self):
         """
