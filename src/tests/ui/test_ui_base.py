@@ -430,6 +430,20 @@ class Test(unittest.TestCase):
         dialog.dispatch('on_dismiss')
         self.assertEqual(Controller.dialogs, [])
 
+    def helper_test_controller_fetch_balance(self, app):
+        """
+        Verifies Controller.fetch_balance() works in most common cases.
+        1) simple case, library PyWalib.get_balance() gets called
+        """
+        controller = app.controller
+        account = controller.current_account
+        balance = 42
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+            mock_get_balance.return_value = balance
+            controller.fetch_balance()
+        mock_get_balance.assert_called_with(account.address.encode("hex"))
+        self.assertEqual(controller.current_account_balance, balance)
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -442,6 +456,7 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account_none_selected(app)
         self.helper_test_delete_account_twice(app)
         self.helper_test_dismiss_dialog_twice(app)
+        self.helper_test_controller_fetch_balance(app)
 
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
