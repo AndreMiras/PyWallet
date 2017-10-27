@@ -11,6 +11,7 @@ from tempfile import mkdtemp
 import kivymd
 import mock
 from kivy.clock import Clock
+from requests.exceptions import ConnectionError
 
 import main
 
@@ -438,7 +439,9 @@ class Test(unittest.TestCase):
         """
         Verifies Controller.fetch_balance() works in most common cases.
         1) simple case, library PyWalib.get_balance() gets called
+        2) ConnectionError should be handled
         """
+        Controller = main.Controller
         controller = app.controller
         account = controller.current_account
         balance = 42
@@ -447,7 +450,17 @@ class Test(unittest.TestCase):
             mock_get_balance.return_value = balance
             controller.fetch_balance()
         mock_get_balance.assert_called_with(account.address.encode("hex"))
+        # and the balance updated
         self.assertEqual(controller.current_account_balance, balance)
+        # 2) ConnectionError should be handled
+        self.assertEqual(len(Controller.dialogs), 0)
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+            # mock.patch('main.Controller.PyWalib.get_balance') as mock_get_balance:
+            mock_get_balance.side_effect = ConnectionError
+            controller.fetch_balance()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Network error')
 
     # main test function
     def run_test(self, app, *args):
