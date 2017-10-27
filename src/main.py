@@ -392,6 +392,11 @@ class History(BoxLayout):
             return
         except NoTransactionFoundException:
             transactions = []
+        except ValueError:
+            # most likely the JSON object could not be decoded, refs #91
+            Controller.on_history_value_error()
+            logger.warning('ValueError', exc_info=True)
+            return
         list_items = []
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
@@ -1295,6 +1300,13 @@ class Controller(FloatLayout):
     def on_history_connection_error():
         title = "Network error"
         body = "Couldn't load history, no network access."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
+    def on_history_value_error():
+        title = "Decode error"
+        body = "Couldn't not decode history data."
         dialog = Controller.create_dialog(title, body)
         dialog.open()
 
