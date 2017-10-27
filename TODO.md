@@ -36,6 +36,9 @@
        * libsecp256k1
          * remove java symbols from libsecp256k1 (configure `--enable-jni=no`) to reduce library size
          * `should_build()` with `.libs/libsecp256k1.so` check
+       * Error: Could not load any libpythonXXX.so (Android 4)
+         * https://github.com/HelloZeroNet/ZeroNet-kivy/issues/10
+         * https://groups.google.com/forum/#!topic/kivy-users/lkrolZjym0Y
  * MISC
    * kill running threads on application leave
      so it doesn't hangs when you quite while the thread tries to connect
