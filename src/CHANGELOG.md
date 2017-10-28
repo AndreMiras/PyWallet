@@ -4,6 +4,7 @@
 
   - Fix crash on fetch balance, refs #91
   - Handle back button, refs #95
+  - Fix Error loading texture, refs #101
 
 ## [v20171024]
 
