@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Fix crash on fetch balance, refs #91
+  - Handle back button, refs #95
 
 ## [v20171024]
 
