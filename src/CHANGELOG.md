@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20171029]
 
   - Fix crash on fetch balance, refs #91
   - Handle back button, refs #95
