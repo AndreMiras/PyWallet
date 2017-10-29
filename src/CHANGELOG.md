@@ -4,7 +4,8 @@
 
   - Fix crash on fetch balance, refs #91
   - Handle back button, refs #95
-  - Fix Error loading texture, refs #101
+  - Fix error loading texture, refs #101
+  - Fix android module ImportError, refs #103
 
 ## [v20171024]
 

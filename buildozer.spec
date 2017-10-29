@@ -40,6 +40,7 @@ version.filename = %(source.dir)s/version.py
 requirements =
     hostpython2,
     kivy,
+    android,
     setuptools,
     openssl,
     pycryptodome,
