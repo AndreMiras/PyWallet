@@ -1,5 +1,13 @@
 # Change Log
 
+## [v20171029]
+
+  - Fix crash on fetch balance, refs #91
+  - Handle back button, refs #95
+  - Fix error loading texture, refs #101
+  - Fix android module ImportError, refs #103
+  - Fix PIL module AttributeError, refs #104
+
 ## [v20171024]
 
   - Fix crash on startup, refs #94

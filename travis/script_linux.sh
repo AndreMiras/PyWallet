@@ -13,6 +13,9 @@ pip install --install-option="--no-cython-compile" $(grep Cython requirements/re
 pip install -r requirements/test_requirements.txt
 pip install -r requirements.txt
 
+# installs garden requirements
+garden install xcamera
+
 # runs tests
 isort --check-only --recursive src/
 flake8 src/

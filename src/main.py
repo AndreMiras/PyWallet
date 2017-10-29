@@ -13,6 +13,7 @@ from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.core.clipboard import Clipboard
+from kivy.core.window import Window
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
@@ -35,7 +36,10 @@ from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
+from PIL import Image as PILImage
 from raven import Client
+from raven.conf import setup_logging
+from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
@@ -43,6 +47,19 @@ from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      UnknownEtherscanException)
 from testsuite import suite
 from version import __version__
+
+# monkey patching PIL, until it gets monkey patched upstream, refs:
+# https://github.com/kivy/kivy/issues/5460
+# and refs:
+# https://github.com/AndreMiras/PyWallet/issues/104
+try:
+    # Pillow
+    PILImage.frombytes
+    PILImage.Image.tobytes
+except AttributeError:
+    # PIL
+    PILImage.frombytes = PILImage.frombuffer
+    PILImage.Image.tobytes = PILImage.Image.tostring
 
 kivy.require('1.10.0')
 
@@ -386,9 +403,17 @@ class History(BoxLayout):
             transactions.reverse()
         except ConnectionError:
             Controller.on_history_connection_error()
+            Logger.warning('ConnectionError', exc_info=True)
             return
         except NoTransactionFoundException:
             transactions = []
+        except ValueError:
+            # most likely the JSON object could not be decoded, refs #91
+            Controller.on_history_value_error()
+            # currently logged as an error, because we want more insight
+            # in order to eventually handle it more specifically
+            Logger.error('ValueError', exc_info=True)
+            return
         list_items = []
         for transaction in transactions:
             list_item = History.create_item_from_dict(transaction)
@@ -1023,11 +1048,44 @@ class Controller(FloatLayout):
         self.screen_history = []
         self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
+        Window.bind(on_keyboard=self.on_keyboard)
+
+    def on_keyboard(self, window, key, *args):
+        """
+        Handles the back button (Android) and ESC key.
+        Goes back to the previous screen or quite the application
+        if there's none left.
+        """
+        if key == 27:
+            screen_manager = self.screen_manager
+            # if we already are in the overview screen, also move back to
+            # the overview subtab of the overview screen
+            if screen_manager.current == 'overview':
+                overview_bnavigation = self.overview_bnavigation
+                tab_manager = overview_bnavigation.ids['tab_manager']
+                if tab_manager.current != 'overview':
+                    self.select_overview_subtab()
+                    return True
+                else:
+                    # if we were already in the overview:overview subtab,
+                    # then propagates the key which in this case will exit
+                    # the application
+                    return False
+            self.screen_manager_previous()
+            # stops the propagation
+            return True
+        return False
+
+    @property
+    def overview_bnavigation(self):
+        screen_manager = self.screen_manager
+        overview_screen = screen_manager.get_screen('overview')
+        overview_bnavigation = overview_screen.ids.overview_bnavigation_id
+        return overview_bnavigation
 
     @property
     def overview(self):
-        overview_screen = self.ids.overview_screen_id
-        overview_bnavigation = overview_screen.ids.overview_bnavigation_id
+        overview_bnavigation = self.overview_bnavigation
         return overview_bnavigation.ids.overview_id
 
     @property
@@ -1043,10 +1101,8 @@ class Controller(FloatLayout):
 
     @property
     def send(self):
-        screen_manager = self.screen_manager
-        overview_screen = screen_manager.get_screen('overview')
-        overview_bnavigation_id = overview_screen.ids.overview_bnavigation_id
-        return overview_bnavigation_id.ids.send_id
+        overview_bnavigation = self.overview_bnavigation
+        return overview_bnavigation.ids.send_id
 
     @property
     def manage_keystores(self):
@@ -1089,7 +1145,7 @@ class Controller(FloatLayout):
         """
         self.unbind(current_account_balance=self.update_toolbar_title_balance)
 
-    def screen_manager_current(self, current, direction=None):
+    def screen_manager_current(self, current, direction=None, history=True):
         screens = {
             'overview': OverviewScreen,
             'switch_account': SwitchAccountScreen,
@@ -1098,20 +1154,31 @@ class Controller(FloatLayout):
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
+        # creates the Screen object if it doesn't exist
         if not screen_manager.has_screen(current):
             screen = screens[current](name=current)
             screen_manager.add_widget(screen)
         if direction is not None:
             screen_manager.transition.direction = direction
         screen_manager.current = current
-        self.screen_history.append(current)
+        if history:
+            # do not update history if it's the same screen because we do not
+            # want the go back button to behave like it was doing nothing
+            if not self.screen_history or self.screen_history[-1] != current:
+                self.screen_history.append(current)
+        # in this case let's reset since the overview is the root screen
+        # because we never want the back button to bring us from overview
+        # to another screen
+        if current == 'overview':
+            self.screen_history = []
 
     def screen_manager_previous(self):
         try:
-            previous_screen = self.screen_history[-2]
+            previous_screen = self.screen_history.pop(-2)
         except IndexError:
             previous_screen = 'overview'
-        self.screen_manager_current(previous_screen, direction='right')
+        self.screen_manager_current(
+            previous_screen, direction='right', history=False)
 
     @staticmethod
     def show_invalid_form_dialog():
@@ -1282,9 +1349,23 @@ class Controller(FloatLayout):
         dialog.open()
 
     @staticmethod
+    def on_balance_value_error():
+        title = "Decode error"
+        body = "Couldn't not decode balance data."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
     def on_history_connection_error():
         title = "Network error"
         body = "Couldn't load history, no network access."
+        dialog = Controller.create_dialog(title, body)
+        dialog.open()
+
+    @staticmethod
+    def on_history_value_error():
+        title = "Decode error"
+        body = "Couldn't not decode history data."
         dialog = Controller.create_dialog(title, body)
         dialog.open()
 
@@ -1328,6 +1409,13 @@ class Controller(FloatLayout):
                 account.address.encode("hex"))
         except ConnectionError:
             Controller.on_balance_connection_error()
+            Logger.warning('ConnectionError', exc_info=True)
+        except ValueError:
+            # most likely the JSON object could not be decoded, refs #91
+            # currently logged as an error, because we want more insight
+            # in order to eventually handle it more specifically
+            Controller.on_balance_value_error()
+            Logger.error('ValueError', exc_info=True)
             return
 
     def on_update_alias_clicked(self, dialog, alias):
@@ -1384,6 +1472,23 @@ class Controller(FloatLayout):
             'Copy address',
             lambda x: self.copy_address_clipboard(), icon='content-copy')
         bottom_sheet.open()
+
+    def select_overview_subtab(self):
+        """
+        Selects the overview sub tab.
+        """
+        # this is what we would normally do:
+        # tab_manager.current = 'overview'
+        # but instead we need to simulate the click on the
+        # navigation bar children or the associated screen button
+        # would not have the selected color
+        overview_bnavigation = self.overview_bnavigation
+        navigation_bar = overview_bnavigation.children[0]
+        boxlayout = navigation_bar.children[0]
+        nav_headers = boxlayout.children
+        # the overview is the first/last button
+        overview_nav_header = nav_headers[-1]
+        overview_nav_header.dispatch('on_press')
 
     def load_switch_account(self):
         """
@@ -1465,6 +1570,11 @@ def configure_sentry(in_debug=False):
         client = DebugRavenClient()
     else:
         client = Client(dsn=dsn, release=__version__)
+        # Logger.error() to Sentry
+        # https://docs.sentry.io/clients/python/integrations/logging/
+        handler = SentryHandler(client)
+        handler.setLevel(LOG_LEVELS.get('error'))
+        setup_logging(handler)
     return client
 
 

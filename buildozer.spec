@@ -40,6 +40,7 @@ version.filename = %(source.dir)s/version.py
 requirements =
     hostpython2,
     kivy,
+    android,
     setuptools,
     openssl,
     pycryptodome,
@@ -55,7 +56,7 @@ requirements =
     gevent,
     pbkdf2,
     https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip,
-    https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b,
+    https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1,
     requests,
     pyelliptic==1.5.7,
     cffi,

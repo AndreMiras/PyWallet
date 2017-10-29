@@ -19,6 +19,10 @@ You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see ho
 
 ### Linux Camera support (optional)
 See [OpenCV.md](/docs/OpenCV.md).
+You also need to install `garden.xcamera` as it's a `garden.zbarcam` requirement.
+```
+garden install xcamera
+```
 
 ## Ubuntu host, Android target
 To be able to build the project for Android from Ubuntu, follow python-for-android official guide (for core dependencies):

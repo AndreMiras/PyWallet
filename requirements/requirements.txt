@@ -12,8 +12,8 @@ pyethash==0.1.27
 # https://github.com/kivy/kivy/archive/27e3b90eae2a0155b22a435f1b6f65c913519db6.zip
 Kivy==1.10.0
 Kivy-Garden==0.1.4
-# 2017/06/08 master
-https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=7de5790274a45c4fa2fb9c6fcd875645e536c95b
+https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1
 Pillow==4.1.1
 raven==6.1.0
-https://github.com/AndreMiras/garden.zbarcam/archive/20171016.zip
+https://github.com/AndreMiras/garden.zbarcam/archive/20171020.zip
+qrcode==5.3
