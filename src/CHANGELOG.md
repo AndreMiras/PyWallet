@@ -6,6 +6,7 @@
   - Handle back button, refs #95
   - Fix error loading texture, refs #101
   - Fix android module ImportError, refs #103
+  - Fix PIL module AttributeError, refs #104
 
 ## [v20171024]
 

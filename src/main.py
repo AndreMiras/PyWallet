@@ -36,6 +36,7 @@ from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
+from PIL import Image as PILImage
 from raven import Client
 from raven.conf import setup_logging
 from raven.handlers.logging import SentryHandler
@@ -46,6 +47,19 @@ from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      UnknownEtherscanException)
 from testsuite import suite
 from version import __version__
+
+# monkey patching PIL, until it gets monkey patched upstream, refs:
+# https://github.com/kivy/kivy/issues/5460
+# and refs:
+# https://github.com/AndreMiras/PyWallet/issues/104
+try:
+    # Pillow
+    PILImage.frombytes
+    PILImage.Image.tobytes
+except AttributeError:
+    # PIL
+    PILImage.frombytes = PILImage.frombuffer
+    PILImage.Image.tobytes = PILImage.Image.tostring
 
 kivy.require('1.10.0')
 
