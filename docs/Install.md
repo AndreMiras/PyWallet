@@ -12,6 +12,11 @@ pip install -r requirements/test_requirements.txt
 pip install -r requirements.txt
 ```
 Cython needs to be installed explicitly because it's not in any sub-dependency `setup.py` `install_requires`.
+You also need to install garden requirements:
+```
+garden install qrcode
+garden install xcamera
+```
 
 Installing `test_requirements.txt` is only required if you want to contribute and run tests.
 
@@ -19,10 +24,7 @@ You can also take a look at [script_linux.sh](/travis/script_linux.sh) to see ho
 
 ### Linux Camera support (optional)
 See [OpenCV.md](/docs/OpenCV.md).
-You also need to install `garden.xcamera` as it's a `garden.zbarcam` requirement.
-```
-garden install xcamera
-```
+You also need to have previously installed `garden.xcamera` as it's a `garden.zbarcam` requirement.
 
 ## Ubuntu host, Android target
 To be able to build the project for Android from Ubuntu, follow python-for-android official guide (for core dependencies):

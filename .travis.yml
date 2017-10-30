@@ -3,6 +3,11 @@ sudo: required
 
 language: generic
 
+before_script:
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb some time to start
+
 before_install:
     # Required by Buildozer Android
     # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-12-04-64bit
@@ -12,6 +17,8 @@ before_install:
     # https://kivy.org/docs/installation/installation-linux.html#dependencies-with-sdl2
     - sudo apt-get install python-pip build-essential git python-dev
     - sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+    # Optional dependency for the cut and multitouch support
+    - sudo apt-get install xclip libmtdev1
     # Required for the project
     - sudo apt-get install libzbar-dev
 

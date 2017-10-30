@@ -14,9 +14,11 @@ pip install -r requirements/test_requirements.txt
 pip install -r requirements.txt
 
 # installs garden requirements
+garden install qrcode
 garden install xcamera
 
 # runs tests
 isort --check-only --recursive src/
 flake8 src/
 coverage run --source=src/ -m unittest discover --start-directory=src/
+python -m kivyunittest --folder src/tests/ui/ --pythonpath src/

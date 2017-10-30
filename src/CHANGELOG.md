@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Add UI testing to Travis, refs #105
+
 ## [v20171029]
 
   - Fix crash on fetch balance, refs #91
