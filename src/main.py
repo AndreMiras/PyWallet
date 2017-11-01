@@ -1397,6 +1397,7 @@ class Controller(FloatLayout):
         except IndexError:
             self.load_create_new_account()
 
+    @run_in_thread
     def fetch_balance(self):
         """
         Fetches the new balance and current_account_balance property.
