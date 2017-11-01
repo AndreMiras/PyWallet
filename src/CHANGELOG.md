@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Add UI testing to Travis, refs #105
+  - Add accounts history & balance caching, refs #76
 
 ## [v20171029]
 
