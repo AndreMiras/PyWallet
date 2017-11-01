@@ -4,9 +4,9 @@ from __future__ import print_function, unicode_literals
 
 import os
 import re
+import threading
 import unittest
 from io import StringIO
-import threading
 
 import kivy
 from ethereum.utils import normalize_address
