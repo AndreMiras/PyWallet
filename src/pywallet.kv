@@ -352,7 +352,7 @@
             # and binds on update
             app.controller.bind_current_account_balance()
         on_pre_leave:
-            # makes ure the title doesn't get updated async
+            # makes sure the title doesn't get updated async
             # if we're not in this screen
             app.controller.unbind_current_account_balance()
         Overview:

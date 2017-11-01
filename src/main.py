@@ -6,7 +6,7 @@ import os
 import re
 import unittest
 from io import StringIO
-from threading import Thread
+import threading
 
 import kivy
 from ethereum.utils import normalize_address
@@ -16,7 +16,8 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
-from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.properties import (DictProperty, NumericProperty, ObjectProperty,
+                             StringProperty)
 from kivy.storage.jsonstore import JsonStore
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -83,7 +84,7 @@ def run_in_thread(fn):
     False
     """
     def run(*k, **kw):
-        t = Thread(target=fn, args=k, kwargs=kw)
+        t = threading.Thread(target=fn, args=k, kwargs=kw)
         t.start()
         return t
     return run
@@ -351,9 +352,14 @@ class History(BoxLayout):
         self.controller.bind(current_account=self.setter('current_account'))
         # triggers the update
         self.current_account = self.controller.current_account
+        self.controller.bind(accounts_history=self.update_history_list)
 
     def on_current_account(self, instance, account):
-        self._load_history()
+        """
+        Updates with last known (cached values) and update the cache.
+        """
+        self.update_history_list()
+        self.fetch_history()
 
     @staticmethod
     def create_item(sent, amount, from_to):
@@ -370,8 +376,8 @@ class History(BoxLayout):
         list_item.add_widget(icon_widget)
         return list_item
 
-    @staticmethod
-    def create_item_from_dict(transaction_dict):
+    @classmethod
+    def create_item_from_dict(cls, transaction_dict):
         """
         Creates a history list item from a transaction dictionary.
         """
@@ -381,26 +387,34 @@ class History(BoxLayout):
         from_address = extra_dict['from_address']
         to_address = extra_dict['to_address']
         from_to = to_address if sent else from_address
-        list_item = History.create_item(sent, amount, from_to)
+        list_item = cls.create_item(sent, amount, from_to)
         return list_item
 
     @mainthread
-    def update_history_list(self, list_items):
+    def update_history_list(self, instance=None, value=None):
+        """
+        Updates the history list widget from last known (cached) values.
+        """
+        address = '0x' + self.current_account.address.encode("hex")
+        try:
+            transactions = self.controller.accounts_history[address]
+        except KeyError:
+            transactions = []
+        # new transactions first, but do not change the list using reverse()
+        transactions = transactions[::-1]
         history_list_id = self.ids.history_list_id
         history_list_id.clear_widgets()
-        for list_item in list_items:
+        for transaction in transactions:
+            list_item = History.create_item_from_dict(transaction)
             history_list_id.add_widget(list_item)
 
     @run_in_thread
-    def _load_history(self):
+    def fetch_history(self):
         if self.current_account is None:
             return
-        account = self.current_account
-        address = '0x' + account.address.encode("hex")
+        address = '0x' + self.current_account.address.encode("hex")
         try:
             transactions = PyWalib.get_transaction_history(address)
-            # new transactions first
-            transactions.reverse()
         except ConnectionError:
             Controller.on_history_connection_error()
             Logger.warning('ConnectionError', exc_info=True)
@@ -414,11 +428,8 @@ class History(BoxLayout):
             # in order to eventually handle it more specifically
             Logger.error('ValueError', exc_info=True)
             return
-        list_items = []
-        for transaction in transactions:
-            list_item = History.create_item_from_dict(transaction)
-            list_items.append(list_item)
-        self.update_history_list(list_items)
+        # triggers accounts_history observers update
+        self.controller.accounts_history[address] = transactions
 
 
 class SwitchAccount(BoxLayout):
@@ -616,7 +627,6 @@ class ManageExisting(BoxLayout):
         account = self.current_account
         self.pywalib.delete_account(account)
         dialog.dismiss()
-        # TODO
         self.controller.current_account = None
         self.show_redirect_dialog()
         self.controller.load_landing_page()
@@ -1035,11 +1045,16 @@ class FlashQrCodeScreen(Screen):
 
 class Controller(FloatLayout):
 
-    # e.g. when the keystore is void
+    # allownone, e.g. when the keystore is void
     current_account = ObjectProperty(allownone=True)
-    current_account_balance = NumericProperty(0)
+    # pseudo Etherscan cache, keeps a local copy of accounts balance & history
+    # accounts_balance[account_0xaddress]
+    accounts_balance = DictProperty({})
+    # accounts_history[account_0xaddress]
+    accounts_history = DictProperty({})
     # keeps track of all dialogs alive
     dialogs = []
+    __lock = threading.Lock()
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
@@ -1135,15 +1150,15 @@ class Controller(FloatLayout):
 
     def bind_current_account_balance(self):
         """
-        Binds the current_account_balance to the Toolbar title.
+        Binds the accounts_balance to the Toolbar title.
         """
-        self.bind(current_account_balance=self.update_toolbar_title_balance)
+        self.bind(accounts_balance=self.update_toolbar_title_balance)
 
     def unbind_current_account_balance(self):
         """
-        Unbinds the current_account_balance from the Toolbar title.
+        Unbinds the accounts_balance from the Toolbar title.
         """
-        self.unbind(current_account_balance=self.update_toolbar_title_balance)
+        self.unbind(accounts_balance=self.update_toolbar_title_balance)
 
     def screen_manager_current(self, current, direction=None, history=True):
         screens = {
@@ -1180,11 +1195,11 @@ class Controller(FloatLayout):
         self.screen_manager_current(
             previous_screen, direction='right', history=False)
 
-    @staticmethod
-    def show_invalid_form_dialog():
+    @classmethod
+    def show_invalid_form_dialog(cls):
         title = "Invalid form"
         body = "Please check form fields."
-        dialog = Controller.create_dialog(title, body)
+        dialog = cls.create_dialog(title, body)
         dialog.open()
 
     @staticmethod
@@ -1199,8 +1214,8 @@ class Controller(FloatLayout):
         # uses kivy user_data_dir (/sdcard/<app_name>)
         pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
 
-    @staticmethod
-    def get_keystore_path():
+    @classmethod
+    def get_keystore_path(cls):
         """
         This is the Kivy default keystore path.
         """
@@ -1219,28 +1234,28 @@ class Controller(FloatLayout):
         store_path = os.path.join(user_data_dir, 'store.json')
         return store_path
 
-    @staticmethod
-    def get_store():
+    @classmethod
+    def get_store(cls):
         """
         Returns the full user Store object instance.
         """
-        store_path = Controller.get_store_path()
+        store_path = cls.get_store_path()
         store = JsonStore(store_path)
         return store
 
-    @staticmethod
-    def delete_account_alias(account):
+    @classmethod
+    def delete_account_alias(cls, account):
         """
         Deletes the alias for the given account.
         """
         address = "0x" + account.address.encode("hex")
-        store = Controller.get_store()
+        store = cls.get_store()
         alias_dict = store['alias']
         alias_dict.pop(address)
         store['alias'] = alias_dict
 
-    @staticmethod
-    def set_account_alias(account, alias):
+    @classmethod
+    def set_account_alias(cls, account, alias):
         """
         Sets an alias for a given Account object.
         Deletes the alias if empty.
@@ -1249,12 +1264,12 @@ class Controller(FloatLayout):
         # deletes it
         if alias == '':
             try:
-                Controller.delete_account_alias(account)
+                cls.delete_account_alias(account)
             except KeyError:
                 pass
             return
         address = "0x" + account.address.encode("hex")
-        store = Controller.get_store()
+        store = cls.get_store()
         try:
             alias_dict = store['alias']
         except KeyError:
@@ -1264,49 +1279,51 @@ class Controller(FloatLayout):
         alias_dict.update({address: alias})
         store['alias'] = alias_dict
 
-    @staticmethod
-    def get_address_alias(address):
+    @classmethod
+    def get_address_alias(cls, address):
         """
         Returns the alias of the given address string.
         """
-        store = Controller.get_store()
+        store = cls.get_store()
         return store.get('alias')[address]
 
-    @staticmethod
-    def get_account_alias(account):
+    @classmethod
+    def get_account_alias(cls, account):
         """
         Returns the alias of the given Account object.
         """
         address = "0x" + account.address.encode("hex")
-        return Controller.get_address_alias(address)
+        return cls.get_address_alias(address)
 
     @staticmethod
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
 
-    @staticmethod
-    def on_dialog_dismiss(dialog):
+    @classmethod
+    def on_dialog_dismiss(cls, dialog):
         """
         Removes it from the dialogs track list.
         """
-        try:
-            Controller.dialogs.remove(dialog)
-        except ValueError:
-            # fails silently if the dialog was dismissed twice, refs:
-            # https://github.com/AndreMiras/PyWallet/issues/89
-            pass
+        with cls.__lock:
+            try:
+                cls.dialogs.remove(dialog)
+            except ValueError:
+                # fails silently if the dialog was dismissed twice, refs:
+                # https://github.com/AndreMiras/PyWallet/issues/89
+                pass
 
-    @staticmethod
-    def dismiss_all_dialogs():
+    @classmethod
+    def dismiss_all_dialogs(cls):
         """
         Dispatches dismiss event for all dialogs.
         """
-        dialogs = Controller.dialogs[:]
+        # keeps a local copy since we're altering them as we iterate
+        dialogs = cls.dialogs[:]
         for dialog in dialogs:
             dialog.dispatch('on_dismiss')
 
-    @staticmethod
-    def create_dialog_helper(title, body):
+    @classmethod
+    def create_dialog_helper(cls, title, body):
         """
         Creates a dialog from given title and body.
         Adds it to the dialogs track list.
@@ -1324,61 +1341,60 @@ class Controller(FloatLayout):
                         size_hint=(.8, None),
                         height=dp(250),
                         auto_dismiss=False)
-        dialog.bind(on_dismiss=Controller.on_dialog_dismiss)
-        Controller.dialogs.append(dialog)
+        dialog.bind(on_dismiss=cls.on_dialog_dismiss)
+        with cls.__lock:
+            cls.dialogs.append(dialog)
         return dialog
 
-    @staticmethod
-    def create_dialog(title, body):
+    @classmethod
+    def create_dialog(cls, title, body):
         """
         Creates a dialog from given title and body.
         Adds it to the dialogs track list.
         Appends dismiss action.
         """
-        dialog = Controller.create_dialog_helper(title, body)
+        dialog = cls.create_dialog_helper(title, body)
         dialog.add_action_button(
                 "Dismiss",
                 action=lambda *x: dialog.dismiss())
         return dialog
 
-    @staticmethod
-    def on_balance_connection_error():
+    @classmethod
+    def on_balance_connection_error(cls):
         title = "Network error"
         body = "Couldn't load balance, no network access."
-        dialog = Controller.create_dialog(title, body)
+        dialog = cls.create_dialog(title, body)
         dialog.open()
 
-    @staticmethod
-    def on_balance_value_error():
+    @classmethod
+    def on_balance_value_error(cls):
         title = "Decode error"
         body = "Couldn't not decode balance data."
-        dialog = Controller.create_dialog(title, body)
+        dialog = cls.create_dialog(title, body)
         dialog.open()
 
-    @staticmethod
-    def on_history_connection_error():
+    @classmethod
+    def on_history_connection_error(cls):
         title = "Network error"
         body = "Couldn't load history, no network access."
-        dialog = Controller.create_dialog(title, body)
+        dialog = cls.create_dialog(title, body)
         dialog.open()
 
-    @staticmethod
-    def on_history_value_error():
+    @classmethod
+    def on_history_value_error(cls):
         title = "Decode error"
         body = "Couldn't not decode history data."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
-    @staticmethod
-    def show_not_implemented_dialog():
-        title = "Not implemented"
-        body = "This feature is not yet implemented."
-        dialog = Controller.create_dialog(title, body)
+        dialog = cls.create_dialog(title, body)
         dialog.open()
 
     @mainthread
     def update_toolbar_title_balance(self, instance=None, value=None):
-        title = "%s ETH" % (self.current_account_balance)
+        address = '0x' + self.current_account.address.encode("hex")
+        try:
+            balance = self.accounts_balance[address]
+        except KeyError:
+            balance = 0
+        title = "%s ETH" % (balance)
         self.set_toolbar_title(title)
 
     @staticmethod
@@ -1397,19 +1413,20 @@ class Controller(FloatLayout):
         except IndexError:
             self.load_create_new_account()
 
+    @run_in_thread
     def fetch_balance(self):
         """
-        Fetches the new balance and current_account_balance property.
+        Fetches the new balance & sets accounts_balance property.
         """
         if self.current_account is None:
             return
-        account = self.current_account
+        address = '0x' + self.current_account.address.encode("hex")
         try:
-            self.current_account_balance = self.pywalib.get_balance(
-                account.address.encode("hex"))
+            balance = PyWalib.get_balance(address)
         except ConnectionError:
             Controller.on_balance_connection_error()
             Logger.warning('ConnectionError', exc_info=True)
+            return
         except ValueError:
             # most likely the JSON object could not be decoded, refs #91
             # currently logged as an error, because we want more insight
@@ -1417,6 +1434,8 @@ class Controller(FloatLayout):
             Controller.on_balance_value_error()
             Logger.error('ValueError', exc_info=True)
             return
+        # triggers accounts_balance observers update
+        self.accounts_balance[address] = balance
 
     def on_update_alias_clicked(self, dialog, alias):
         account = self.current_account
