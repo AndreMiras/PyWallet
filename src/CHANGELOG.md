@@ -4,6 +4,7 @@
 
   - Add UI testing to Travis, refs #105
   - Add accounts history & balance caching, refs #76
+  - Fix lag after camera use, refs #106
 
 ## [v20171029]
 
