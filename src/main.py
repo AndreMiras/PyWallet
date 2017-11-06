@@ -1012,10 +1012,18 @@ class FlashQrCodeScreen(Screen):
 
     def setup(self):
         """
-        Binds Controller.current_account property.
+        Configures scanner to handle only QRCodes.
         """
         self.controller = App.get_running_app().controller
         self.zbarcam = self.ids.zbarcam_id
+        # loads ZBarCam only when needed, refs:
+        # https://github.com/AndreMiras/PyWallet/issues/94
+        import zbar
+        # enables QRCode scanning only
+        self.zbarcam.scanner.set_config(
+            zbar.Symbol.NONE, zbar.Config.ENABLE, 0)
+        self.zbarcam.scanner.set_config(
+            zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1)
 
     def bind_on_symbols(self):
         """
