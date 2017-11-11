@@ -222,7 +222,8 @@ class PywalibTestCase(unittest.TestCase):
                 'nonce', 'contractAddress', 'cumulativeGasUsed', 'hash',
                 'blockHash', 'extra_dict', 'timeStamp', 'gas', 'value',
                 'blockNumber', 'to', 'confirmations', 'input', 'from',
-                'transactionIndex', 'isError', 'gasPrice', 'gasUsed'
+                'transactionIndex', 'isError', 'gasPrice', 'gasUsed',
+                'txreceipt_status',
             ]))
 
     def test_get_transaction_history(self):
