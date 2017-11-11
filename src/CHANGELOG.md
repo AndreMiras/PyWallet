@@ -5,6 +5,7 @@
   - Add UI testing to Travis, refs #105
   - Add accounts history & balance caching, refs #76
   - Fix lag after camera use, refs #106
+  - Reduce APK size from 21M to 15M, refs #60
 
 ## [v20171029]
 

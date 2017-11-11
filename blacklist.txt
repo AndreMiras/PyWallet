@@ -13,5 +13,11 @@ audio_sdl2.so
 svg.so
 ftplib.pyo
 
-# ./lib/python2.7/site-packages/Crypto/SelfTest/Cipher/test_vectors/
+# ./lib/python2.7/site-packages/Crypto/SelfTest/Cipher/test_vectors/*
 test_vectors/*
+
+# ./lib/python2.7/site-packages/kivy/tests/*
+kivy/tests/*
+
+# ./lib/python2.7/site-packages/Crypto/SelfTest/*
+SelfTest/*
