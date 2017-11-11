@@ -1597,6 +1597,19 @@ def configure_sentry(in_debug=False):
         client = DebugRavenClient()
     else:
         client = Client(dsn=dsn, release=__version__)
+        # adds context for Android devices
+        if platform == 'android':
+            from jnius import autoclass
+            Build = autoclass("android.os.Build")
+            VERSION = autoclass('android.os.Build$VERSION')
+            android_os_build = {
+                'model': Build.MODEL,
+                'brand': Build.BRAND,
+                'device': Build.DEVICE,
+                'manufacturer': Build.MANUFACTURER,
+                'version_release': VERSION.RELEASE,
+            }
+            client.user_context({'android_os_build': android_os_build})
         # Logger.error() to Sentry
         # https://docs.sentry.io/clients/python/integrations/logging/
         handler = SentryHandler(client)
