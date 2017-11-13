@@ -1533,7 +1533,7 @@ class Controller(FloatLayout):
 
     def load_create_new_account(self):
         """
-        Loads the create new account tab from the maage keystores screen.
+        Loads the create new account tab from the manage keystores screen.
         """
         self.load_manage_keystores()
         # loads the create new account tab

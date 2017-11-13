@@ -8,6 +8,7 @@ import time
 import unittest
 from functools import partial
 from tempfile import mkdtemp
+from time import sleep
 
 import kivymd
 import mock
@@ -42,10 +43,16 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # loading the app with empty account directory
         self.assertEqual(len(pywalib.get_account_list()), 0)
-        # should open the trigger the "Create new account" view to be open
+        # should trigger the "Create new account" view to be open
         self.assertEqual('Create new account', app.controller.toolbar.title)
         self.assertEqual(controller.screen_manager.current, 'manage_keystores')
         dialogs = controller.dialogs
+        # the dialog may not appear straight away,
+        # so give it some time/chances, refs #110
+        retry = 0
+        while len(dialogs) != 1 and retry < 3:
+            retry += 1
+            sleep(0.5)
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'No keystore found.')
