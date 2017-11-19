@@ -8,7 +8,6 @@ import time
 import unittest
 from functools import partial
 from tempfile import mkdtemp
-from time import sleep
 
 import kivymd
 import mock
@@ -35,6 +34,16 @@ class Test(unittest.TestCase):
     def pause(*args):
         time.sleep(0.000001)
 
+    def advance_frames(self, count):
+        """
+        Borrowed from Kivy 1.10.0+ /kivy/tests/common.py
+        GraphicUnitTest.advance_frames()
+        Makes it possible to to wait for UI to process, refs #110.
+        """
+        from kivy.base import EventLoop
+        for i in range(count):
+            EventLoop.idle()
+
     def helper_test_empty_account(self, app):
         """
         Verifies the UI behaves as expected on empty account list.
@@ -44,15 +53,11 @@ class Test(unittest.TestCase):
         # loading the app with empty account directory
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should trigger the "Create new account" view to be open
+        self.advance_frames(1)
         self.assertEqual('Create new account', app.controller.toolbar.title)
         self.assertEqual(controller.screen_manager.current, 'manage_keystores')
         dialogs = controller.dialogs
-        # the dialog may not appear straight away,
-        # so give it some time/chances, refs #110
-        retry = 0
-        while len(dialogs) != 1 and retry < 3:
-            retry += 1
-            sleep(0.5)
+        self.advance_frames(1)
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'No keystore found.')
@@ -194,8 +199,7 @@ class Test(unittest.TestCase):
     def helper_test_on_send_click(self, app):
         """
         This is a regression test for #63, verify clicking "Send" Ethers works
-        as expected.
-        https://github.com/AndreMiras/PyWallet/issues/63
+        as expected, refs #63.
         """
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
@@ -335,8 +339,7 @@ class Test(unittest.TestCase):
 
     def helper_test_delete_account_none_selected(self, app):
         """
-        Tries to delete account when none are selected, refs:
-        https://github.com/AndreMiras/PyWallet/issues/90
+        Tries to delete account when none are selected, refs #90.
         """
         controller = app.controller
         pywalib = controller.pywalib
@@ -385,8 +388,8 @@ class Test(unittest.TestCase):
 
     def helper_test_delete_account_twice(self, app):
         """
-        Trying to delete the same account twice, shoult not crash the app:
-        https://github.com/AndreMiras/PyWallet/issues/51
+        Trying to delete the same account twice, shoult not crash the app,
+        refs #51.
         """
         controller = app.controller
         pywalib = controller.pywalib
@@ -425,8 +428,7 @@ class Test(unittest.TestCase):
         """
         If by some choice the dismiss event of a dialog created with
         Controller.create_dialog_helper() is fired twice, it should be
-        handled gracefully, refs:
-        https://github.com/AndreMiras/PyWallet/issues/89
+        handled gracefully, refs #89.
         """
         Controller = main.Controller
         title = "title"
@@ -514,7 +516,6 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account_twice(app)
         self.helper_test_dismiss_dialog_twice(app)
         self.helper_test_controller_fetch_balance(app)
-
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()
@@ -523,9 +524,7 @@ class Test(unittest.TestCase):
     def test_ui_base(self):
         app = main.PyWalletApp()
         p = partial(self.run_test, app)
-        # schedule_once() timeout is high here so the application has time
-        # to initialize, refs #52
-        Clock.schedule_once(p, 2.0)
+        Clock.schedule_once(p, 0.000001)
         app.run()
 
 
