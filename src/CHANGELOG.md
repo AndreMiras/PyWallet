@@ -1,6 +1,6 @@
 # Change Log
 
-## [v20171125]
+## [v20171126]
 
   - Add UI testing to Travis, refs #105
   - Add accounts history & balance caching, refs #76
