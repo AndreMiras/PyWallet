@@ -1,5 +1,13 @@
 # Change Log
 
+## [v20171125]
+
+  - Add UI testing to Travis, refs #105
+  - Add accounts history & balance caching, refs #76
+  - Fix lag after camera use, refs #106
+  - Reduce APK size from 21M to 15M, refs #60
+  - Add Android device info to error logs, refs #109
+
 ## [v20171029]
 
   - Fix crash on fetch balance, refs #91

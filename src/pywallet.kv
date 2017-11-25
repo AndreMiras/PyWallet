@@ -352,7 +352,7 @@
             # and binds on update
             app.controller.bind_current_account_balance()
         on_pre_leave:
-            # makes ure the title doesn't get updated async
+            # makes sure the title doesn't get updated async
             # if we're not in this screen
             app.controller.unbind_current_account_balance()
         Overview:
@@ -419,10 +419,10 @@
 
 <FlashQrCodeScreen>:
     on_pre_enter:
-        zbarcam_id.play = True
+        zbarcam_id.start()
         self.bind_on_symbols()
     on_pre_leave:
-        zbarcam_id.play = False
+        zbarcam_id.stop()
         self.unbind_on_symbols()
     ZBarCam:
         id: zbarcam_id
