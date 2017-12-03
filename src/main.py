@@ -1397,6 +1397,8 @@ class Controller(FloatLayout):
 
     @mainthread
     def update_toolbar_title_balance(self, instance=None, value=None):
+        if self.current_account is None:
+            return
         address = '0x' + self.current_account.address.encode("hex")
         try:
             balance = self.accounts_balance[address]

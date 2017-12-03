@@ -64,6 +64,22 @@ class Test(unittest.TestCase):
         dialog.dismiss()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_test_back_home_empty_account(self, app):
+        """
+        Loading the overview (back button) with no account should
+        not crash the application, refs #115.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # loading the app with empty account directory
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # tries to go back to the home screen with escape key
+        # def on_keyboard(self, window, key, *args):
+        controller.on_keyboard(window=None, key=27)
+        # loading the overview with empty account should not crash
+        self.assertEqual('', app.controller.toolbar.title)
+        self.assertEqual(controller.screen_manager.current, 'overview')
+
     def helper_test_create_first_account(self, app):
         """
         Creates the first account.
@@ -72,6 +88,7 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
+        controller.load_create_new_account()
         self.assertEqual('Create new account', app.controller.toolbar.title)
         self.assertEqual(controller.current_account, None)
         # retrieves the create_new_account widget
@@ -507,6 +524,7 @@ class Test(unittest.TestCase):
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
         self.helper_test_empty_account(app)
+        self.helper_test_back_home_empty_account(app)
         self.helper_test_create_first_account(app)
         self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
