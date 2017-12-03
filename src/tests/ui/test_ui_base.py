@@ -484,21 +484,18 @@ class Test(unittest.TestCase):
             controller.accounts_balance[address], balance)
         # 2) ConnectionError should be handled
         self.assertEqual(len(Controller.dialogs), 0)
-        # logger.warning('ConnectionError', exc_info=True)
-        # with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
         with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
                 mock.patch('main.Logger') as mock_logger:
             mock_get_balance.side_effect = requests.exceptions.ConnectionError
             thread = controller.fetch_balance()
-        thread.join()
+            thread.join()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Network error')
         Controller.dismiss_all_dialogs()
         # the error should be logged
-        # TODO: doesn't seem to be mocked properly, is it thread safe?
-        # mock_logger.warning.assert_called_with(
-        #     'ConnectionError', exc_info=True)
+        mock_logger.warning.assert_called_with(
+            'ConnectionError', exc_info=True)
         # 3) handles 503 "service is unavailable", refs #91
         self.assertEqual(len(Controller.dialogs), 0)
         response = requests.Response()
@@ -508,17 +505,13 @@ class Test(unittest.TestCase):
                 mock.patch('main.Logger') as mock_logger:
             mock_requests_get.return_value = response
             thread = controller.fetch_balance()
-        thread.join()
+            thread.join()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Decode error')
         Controller.dismiss_all_dialogs()
         # the error should be logged
-        # TODO: doesn't seem to be mocked properly, is it thread safe?
-        # mock_logger.error.assert_called_with(
-        #     'ValueError', exc_info=True)
-        mock_logger.error.assert_called_with  # makes flakes8 happy until then
-        Controller.dismiss_all_dialogs()
+        mock_logger.error.assert_called_with('ValueError', exc_info=True)
 
     # main test function
     def run_test(self, app, *args):
