@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix back to home on empty account, fixes #115
+
 ## [v20171126]
 
   - Add UI testing to Travis, refs #105
@@ -7,7 +11,6 @@
   - Fix lag after camera use, refs #106
   - Reduce APK size from 21M to 15M, refs #60
   - Add Android device info to error logs, refs #109
-  - Fix back to home on empty account, fixes #115
 
 ## [v20171029]
 
