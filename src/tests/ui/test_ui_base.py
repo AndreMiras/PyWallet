@@ -15,6 +15,7 @@ import requests
 from kivy.clock import Clock
 
 import main
+import pywalib
 
 
 class Test(unittest.TestCase):
@@ -468,6 +469,7 @@ class Test(unittest.TestCase):
         1) simple case, library PyWalib.get_balance() gets called
         2) ConnectionError should be handled
         3) handles 503 "service is unavailable", refs #91
+        4) UnknownEtherscanException should be handled
         """
         Controller = main.Controller
         controller = app.controller
@@ -512,6 +514,20 @@ class Test(unittest.TestCase):
         Controller.dismiss_all_dialogs()
         # the error should be logged
         mock_logger.error.assert_called_with('ValueError', exc_info=True)
+        # 4) UnknownEtherscanException should be handled
+        self.assertEqual(len(Controller.dialogs), 0)
+        with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
+                mock.patch('main.Logger') as mock_logger:
+            mock_get_balance.side_effect = pywalib.UnknownEtherscanException
+            thread = controller.fetch_balance()
+            thread.join()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Unknown error')
+        Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.error.assert_called_with(
+            'UnknownEtherscanException', exc_info=True)
 
     # main test function
     def run_test(self, app, *args):

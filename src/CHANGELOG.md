@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Fix back to home on empty account, fixes #115
+  - Handle UnknownEtherscanException gracefully, fixes #112
 
 ## [v20171126]
 

@@ -275,6 +275,7 @@ class Send(BoxLayout):
             return
         except UnknownEtherscanException:
             Controller.snackbar_message("Unknown error")
+            Logger.error('UnknownEtherscanException', exc_info=True)
             return
         # TODO: handle ConnectionError
         Controller.snackbar_message("Sent!")
@@ -1382,6 +1383,13 @@ class Controller(FloatLayout):
         dialog.open()
 
     @classmethod
+    def on_balance_unknown_error(cls):
+        title = "Unknown error"
+        body = "Unknown error while fetching balance."
+        dialog = cls.create_dialog(title, body)
+        dialog.open()
+
+    @classmethod
     def on_history_connection_error(cls):
         title = "Network error"
         body = "Couldn't load history, no network access."
@@ -1443,6 +1451,11 @@ class Controller(FloatLayout):
             # in order to eventually handle it more specifically
             Controller.on_balance_value_error()
             Logger.error('ValueError', exc_info=True)
+            return
+        except UnknownEtherscanException:
+            # also handles uknown errors, refs #112
+            Controller.on_balance_unknown_error()
+            Logger.error('UnknownEtherscanException', exc_info=True)
             return
         # triggers accounts_balance observers update
         self.accounts_balance[address] = balance
