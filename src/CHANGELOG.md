@@ -4,6 +4,7 @@
 
   - Fix back to home on empty account, fixes #115
   - Handle UnknownEtherscanException gracefully, fixes #112
+  - Fix crash on delete last account, fixes #120
 
 ## [v20171126]
 

@@ -396,6 +396,8 @@ class History(BoxLayout):
         """
         Updates the history list widget from last known (cached) values.
         """
+        if self.current_account is None:
+            return
         address = '0x' + self.current_account.address.encode("hex")
         try:
             transactions = self.controller.accounts_history[address]

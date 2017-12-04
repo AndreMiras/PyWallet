@@ -529,6 +529,41 @@ class Test(unittest.TestCase):
         mock_logger.error.assert_called_with(
             'UnknownEtherscanException', exc_info=True)
 
+    def helper_test_delete_last_account(self, app):
+        """
+        Trying to delete the last account, should not crash the app,
+        refs #120.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        manage_existing = controller.manage_existing
+        # makes sure there's only one account left
+        self.assertEqual(
+            len(pywalib.get_account_list()), 1)
+        # deletes it
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        manage_existing.on_delete_account_yes(dialog)
+        # account was deleted dialog message
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+        self.advance_frames(1)
+        # verifies the account was deleted
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # this should be done by the events, but doesn't seem to happen
+        # so we have to trigger it manually
+        controller.history.current_account = None
+        self.advance_frames(1)
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -543,6 +578,7 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account_twice(app)
         self.helper_test_dismiss_dialog_twice(app)
         self.helper_test_controller_fetch_balance(app)
+        self.helper_test_delete_last_account(app)
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()
