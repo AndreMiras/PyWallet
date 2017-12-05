@@ -45,6 +45,9 @@ class Test(unittest.TestCase):
         for i in range(count):
             EventLoop.idle()
 
+    def helper_setup(self, app):
+        main.SCREEN_SWITCH_DELAY = 0.001
+
     def helper_test_empty_account(self, app):
         """
         Verifies the UI behaves as expected on empty account list.
@@ -130,6 +133,7 @@ class Test(unittest.TestCase):
         # self.assertEqual(new_password1_id.text, '')
         # self.assertEqual(new_password2_id.text, '')
         # we should get redirected to the overview page
+        self.advance_frames(1)
         self.assertEqual(controller.screen_manager.current, 'overview')
         # the new account should be loaded in the controller
         self.assertEqual(
@@ -137,6 +141,8 @@ class Test(unittest.TestCase):
             pywalib.get_account_list()[0])
         # TODO: also verify the Toolbar title was updated correctly
         # self.assertEqual('TODO', app.controller.toolbar.title)
+        # joins ongoing threads
+        [t.join() for t in threading.enumerate()[1:]]
         # check the redirect dialog
         dialogs = controller.dialogs
         self.assertEqual(len(dialogs), 1)
@@ -242,6 +248,7 @@ class Test(unittest.TestCase):
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_switch_account()
+        self.advance_frames(1)
         switch_account = controller.switch_account
         self.assertEqual(switch_account.__class__, main.SwitchAccount)
         return switch_account
@@ -324,6 +331,7 @@ class Test(unittest.TestCase):
         # go to the manage account screen
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_manage_keystores()
+        self.advance_frames(1)
         self.assertEqual('Manage existing', app.controller.toolbar.title)
         # verifies an account is showing
         manage_existing = controller.manage_existing
@@ -567,6 +575,7 @@ class Test(unittest.TestCase):
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
+        self.helper_setup(app)
         self.helper_test_empty_account(app)
         self.helper_test_back_home_empty_account(app)
         self.helper_test_create_first_account(app)

@@ -2,9 +2,10 @@
 
 ## [Unreleased]
 
-  - Fix back to home on empty account, fixes #115
-  - Handle UnknownEtherscanException gracefully, fixes #112
-  - Fix crash on delete last account, fixes #120
+  - Fix back to home on empty account, refs #115
+  - Handle UnknownEtherscanException gracefully, refs #112
+  - Fix crash on delete last account, refs #120
+  - Fix laggy sidebar animations, refs #122
 
 ## [v20171126]
 
