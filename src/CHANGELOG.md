@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20171206]
 
   - Fix back to home on empty account, refs #115
   - Handle UnknownEtherscanException gracefully, refs #112
