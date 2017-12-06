@@ -15,6 +15,7 @@ import requests
 from kivy.clock import Clock
 
 import main
+import pywalib
 
 
 class Test(unittest.TestCase):
@@ -44,6 +45,9 @@ class Test(unittest.TestCase):
         for i in range(count):
             EventLoop.idle()
 
+    def helper_setup(self, app):
+        main.SCREEN_SWITCH_DELAY = 0.001
+
     def helper_test_empty_account(self, app):
         """
         Verifies the UI behaves as expected on empty account list.
@@ -64,6 +68,22 @@ class Test(unittest.TestCase):
         dialog.dismiss()
         self.assertEqual(len(dialogs), 0)
 
+    def helper_test_back_home_empty_account(self, app):
+        """
+        Loading the overview (back button) with no account should
+        not crash the application, refs #115.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        # loading the app with empty account directory
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # tries to go back to the home screen with escape key
+        # def on_keyboard(self, window, key, *args):
+        controller.on_keyboard(window=None, key=27)
+        # loading the overview with empty account should not crash
+        self.assertEqual('', app.controller.toolbar.title)
+        self.assertEqual(controller.screen_manager.current, 'overview')
+
     def helper_test_create_first_account(self, app):
         """
         Creates the first account.
@@ -72,6 +92,7 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
+        controller.load_create_new_account()
         self.assertEqual('Create new account', app.controller.toolbar.title)
         self.assertEqual(controller.current_account, None)
         # retrieves the create_new_account widget
@@ -112,6 +133,7 @@ class Test(unittest.TestCase):
         # self.assertEqual(new_password1_id.text, '')
         # self.assertEqual(new_password2_id.text, '')
         # we should get redirected to the overview page
+        self.advance_frames(1)
         self.assertEqual(controller.screen_manager.current, 'overview')
         # the new account should be loaded in the controller
         self.assertEqual(
@@ -119,6 +141,8 @@ class Test(unittest.TestCase):
             pywalib.get_account_list()[0])
         # TODO: also verify the Toolbar title was updated correctly
         # self.assertEqual('TODO', app.controller.toolbar.title)
+        # joins ongoing threads
+        [t.join() for t in threading.enumerate()[1:]]
         # check the redirect dialog
         dialogs = controller.dialogs
         self.assertEqual(len(dialogs), 1)
@@ -224,6 +248,7 @@ class Test(unittest.TestCase):
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_switch_account()
+        self.advance_frames(1)
         switch_account = controller.switch_account
         self.assertEqual(switch_account.__class__, main.SwitchAccount)
         return switch_account
@@ -306,6 +331,7 @@ class Test(unittest.TestCase):
         # go to the manage account screen
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_manage_keystores()
+        self.advance_frames(1)
         self.assertEqual('Manage existing', app.controller.toolbar.title)
         # verifies an account is showing
         manage_existing = controller.manage_existing
@@ -451,6 +477,7 @@ class Test(unittest.TestCase):
         1) simple case, library PyWalib.get_balance() gets called
         2) ConnectionError should be handled
         3) handles 503 "service is unavailable", refs #91
+        4) UnknownEtherscanException should be handled
         """
         Controller = main.Controller
         controller = app.controller
@@ -467,21 +494,18 @@ class Test(unittest.TestCase):
             controller.accounts_balance[address], balance)
         # 2) ConnectionError should be handled
         self.assertEqual(len(Controller.dialogs), 0)
-        # logger.warning('ConnectionError', exc_info=True)
-        # with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
         with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
                 mock.patch('main.Logger') as mock_logger:
             mock_get_balance.side_effect = requests.exceptions.ConnectionError
             thread = controller.fetch_balance()
-        thread.join()
+            thread.join()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Network error')
         Controller.dismiss_all_dialogs()
         # the error should be logged
-        # TODO: doesn't seem to be mocked properly, is it thread safe?
-        # mock_logger.warning.assert_called_with(
-        #     'ConnectionError', exc_info=True)
+        mock_logger.warning.assert_called_with(
+            'ConnectionError', exc_info=True)
         # 3) handles 503 "service is unavailable", refs #91
         self.assertEqual(len(Controller.dialogs), 0)
         response = requests.Response()
@@ -491,22 +515,69 @@ class Test(unittest.TestCase):
                 mock.patch('main.Logger') as mock_logger:
             mock_requests_get.return_value = response
             thread = controller.fetch_balance()
-        thread.join()
+            thread.join()
         self.assertEqual(len(Controller.dialogs), 1)
         dialog = Controller.dialogs[0]
         self.assertEqual(dialog.title, 'Decode error')
         Controller.dismiss_all_dialogs()
         # the error should be logged
-        # TODO: doesn't seem to be mocked properly, is it thread safe?
-        # mock_logger.error.assert_called_with(
-        #     'ValueError', exc_info=True)
-        mock_logger.error.assert_called_with  # makes flakes8 happy until then
+        mock_logger.error.assert_called_with('ValueError', exc_info=True)
+        # 4) UnknownEtherscanException should be handled
+        self.assertEqual(len(Controller.dialogs), 0)
+        with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
+                mock.patch('main.Logger') as mock_logger:
+            mock_get_balance.side_effect = pywalib.UnknownEtherscanException
+            thread = controller.fetch_balance()
+            thread.join()
+        self.assertEqual(len(Controller.dialogs), 1)
+        dialog = Controller.dialogs[0]
+        self.assertEqual(dialog.title, 'Unknown error')
         Controller.dismiss_all_dialogs()
+        # the error should be logged
+        mock_logger.error.assert_called_with(
+            'UnknownEtherscanException', exc_info=True)
+
+    def helper_test_delete_last_account(self, app):
+        """
+        Trying to delete the last account, should not crash the app,
+        refs #120.
+        """
+        controller = app.controller
+        pywalib = controller.pywalib
+        manage_existing = controller.manage_existing
+        # makes sure there's only one account left
+        self.assertEqual(
+            len(pywalib.get_account_list()), 1)
+        # deletes it
+        delete_button_id = manage_existing.ids.delete_button_id
+        delete_button_id.dispatch('on_release')
+        # a confirmation popup should show
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Are you sure?')
+        # confirm it
+        manage_existing.on_delete_account_yes(dialog)
+        # account was deleted dialog message
+        dialogs = controller.dialogs
+        self.assertEqual(len(dialogs), 1)
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Account deleted, redirecting...')
+        controller.dismiss_all_dialogs()
+        self.advance_frames(1)
+        # verifies the account was deleted
+        self.assertEqual(len(pywalib.get_account_list()), 0)
+        # this should be done by the events, but doesn't seem to happen
+        # so we have to trigger it manually
+        controller.history.current_account = None
+        self.advance_frames(1)
 
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
+        self.helper_setup(app)
         self.helper_test_empty_account(app)
+        self.helper_test_back_home_empty_account(app)
         self.helper_test_create_first_account(app)
         self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
@@ -516,6 +587,7 @@ class Test(unittest.TestCase):
         self.helper_test_delete_account_twice(app)
         self.helper_test_dismiss_dialog_twice(app)
         self.helper_test_controller_fetch_balance(app)
+        self.helper_test_delete_last_account(app)
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()

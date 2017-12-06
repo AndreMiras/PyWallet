@@ -1,5 +1,12 @@
 # Change Log
 
+## [v20171206]
+
+  - Fix back to home on empty account, refs #115
+  - Handle UnknownEtherscanException gracefully, refs #112
+  - Fix crash on delete last account, refs #120
+  - Fix laggy sidebar animations, refs #122
+
 ## [v20171126]
 
   - Add UI testing to Travis, refs #105

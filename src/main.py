@@ -64,6 +64,11 @@ except AttributeError:
 
 kivy.require('1.10.0')
 
+# Time before loading the next screen.
+# The idea is to let the application render before trying to add child widget,
+# refs #122.
+SCREEN_SWITCH_DELAY = 0.4
+
 
 def run_in_thread(fn):
     """
@@ -275,6 +280,7 @@ class Send(BoxLayout):
             return
         except UnknownEtherscanException:
             Controller.snackbar_message("Unknown error")
+            Logger.error('UnknownEtherscanException', exc_info=True)
             return
         # TODO: handle ConnectionError
         Controller.snackbar_message("Sent!")
@@ -395,6 +401,8 @@ class History(BoxLayout):
         """
         Updates the history list widget from last known (cached) values.
         """
+        if self.current_account is None:
+            return
         address = '0x' + self.current_account.address.encode("hex")
         try:
             transactions = self.controller.accounts_history[address]
@@ -1382,6 +1390,13 @@ class Controller(FloatLayout):
         dialog.open()
 
     @classmethod
+    def on_balance_unknown_error(cls):
+        title = "Unknown error"
+        body = "Unknown error while fetching balance."
+        dialog = cls.create_dialog(title, body)
+        dialog.open()
+
+    @classmethod
     def on_history_connection_error(cls):
         title = "Network error"
         body = "Couldn't load history, no network access."
@@ -1397,6 +1412,8 @@ class Controller(FloatLayout):
 
     @mainthread
     def update_toolbar_title_balance(self, instance=None, value=None):
+        if self.current_account is None:
+            return
         address = '0x' + self.current_account.address.encode("hex")
         try:
             balance = self.accounts_balance[address]
@@ -1417,7 +1434,12 @@ class Controller(FloatLayout):
         try:
             # will trigger account data fetching
             self.current_account = self.pywalib.get_main_account()
-            self.screen_manager_current('overview')
+            if SCREEN_SWITCH_DELAY:
+                Clock.schedule_once(
+                    lambda dt: self.screen_manager_current('overview'),
+                    SCREEN_SWITCH_DELAY)
+            else:
+                self.screen_manager_current('overview')
         except IndexError:
             self.load_create_new_account()
 
@@ -1441,6 +1463,11 @@ class Controller(FloatLayout):
             # in order to eventually handle it more specifically
             Controller.on_balance_value_error()
             Logger.error('ValueError', exc_info=True)
+            return
+        except UnknownEtherscanException:
+            # also handles uknown errors, refs #112
+            Controller.on_balance_unknown_error()
+            Logger.error('UnknownEtherscanException', exc_info=True)
             return
         # triggers accounts_balance observers update
         self.accounts_balance[address] = balance
@@ -1522,20 +1549,35 @@ class Controller(FloatLayout):
         Loads the switch account screen.
         """
         # loads the switch account screen
-        self.screen_manager_current('switch_account', direction='left')
+        Clock.schedule_once(
+            lambda dt: self.screen_manager_current(
+                'switch_account', direction='left'),
+            SCREEN_SWITCH_DELAY)
 
     def load_manage_keystores(self):
         """
         Loads the manage keystores screen.
         """
         # loads the manage keystores screen
-        self.screen_manager_current('manage_keystores', direction='left')
+        if SCREEN_SWITCH_DELAY:
+            Clock.schedule_once(
+                lambda dt: self.screen_manager_current(
+                    'manage_keystores', direction='left'),
+                SCREEN_SWITCH_DELAY)
+        else:
+            self.screen_manager_current(
+                'manage_keystores', direction='left')
 
     def load_create_new_account(self):
         """
         Loads the create new account tab from the manage keystores screen.
         """
+        # we need the screen now
+        global SCREEN_SWITCH_DELAY
+        saved_delay = SCREEN_SWITCH_DELAY
+        SCREEN_SWITCH_DELAY = None
         self.load_manage_keystores()
+        SCREEN_SWITCH_DELAY = saved_delay
         # loads the create new account tab
         manage_keystores = self.manage_keystores
         create_new_account_nav_item = \
@@ -1556,7 +1598,9 @@ class Controller(FloatLayout):
         """
         Loads the about screen.
         """
-        self.screen_manager_current('about', direction='left')
+        Clock.schedule_once(
+            lambda dt: self.screen_manager_current('about', direction='left'),
+            SCREEN_SWITCH_DELAY)
 
 
 class DebugRavenClient(object):
