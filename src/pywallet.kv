@@ -2,6 +2,7 @@
 
 #:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import NavigationDrawerTwoLineListItem pywallet.navigationdrawer.NavigationDrawerTwoLineListItem
+#:import PasswordForm pywallet.passwordform.PasswordForm
 #:import CustomMDSwitch pywallet.selectioncontrols.CustomMDSwitch
 #:import FloatInput pywallet.textfields.FloatInput
 #:import webbrowser webbrowser
@@ -41,18 +42,6 @@
             icon: "help"
             text: "About"
             on_release: app.controller.load_about_screen()
-
-
-<PasswordForm>:
-    orientation: 'vertical'
-    MDTextField:
-        id: password_id
-        hint_text: "Password"
-        helper_text: "Enter the password to unlock your account"
-        helper_text_mode: "on_focus"
-        text: root.password
-        password: True
-        on_text: root.password = args[1]
 
 
 <AliasForm>:

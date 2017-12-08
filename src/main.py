@@ -37,10 +37,11 @@ from raven.conf import setup_logging
 from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
-from pywallet.list import IconLeftWidget
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      NoTransactionFoundException, PyWalib,
                      UnknownEtherscanException)
+from pywallet.list import IconLeftWidget
+from pywallet.passwordform import PasswordForm
 from testsuite import suite
 from version import __version__
 
@@ -88,11 +89,6 @@ def run_in_thread(fn):
         t.start()
         return t
     return run
-
-
-class PasswordForm(BoxLayout):
-
-    password = StringProperty()
 
 
 class AliasForm(BoxLayout):
