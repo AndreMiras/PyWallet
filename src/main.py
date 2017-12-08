@@ -37,7 +37,7 @@ from raven.conf import setup_logging
 from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
-from custom_list import IconLeftWidget
+from pywallet.list import IconLeftWidget
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      NoTransactionFoundException, PyWalib,
                      UnknownEtherscanException)
