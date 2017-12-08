@@ -25,13 +25,11 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import get_color_from_hex, platform
 from kivymd.bottomsheet import MDListBottomSheet
-from kivymd.button import MDFlatButton, MDIconButton
+from kivymd.button import MDFlatButton
 from kivymd.color_definitions import colors
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
-from kivymd.list import (ILeftBodyTouch, OneLineListItem, TwoLineIconListItem,
-                         TwoLineListItem)
-from kivymd.navigationdrawer import NavigationDrawerHeaderBase
+from kivymd.list import OneLineListItem, TwoLineIconListItem
 from kivymd.selectioncontrols import MDSwitch
 from kivymd.snackbar import Snackbar
 from kivymd.textfields import MDTextField
@@ -43,6 +41,7 @@ from raven.conf import setup_logging
 from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
+from custom_list import IconLeftWidget
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      NoTransactionFoundException, PyWalib,
                      UnknownEtherscanException)
@@ -95,38 +94,6 @@ def run_in_thread(fn):
     return run
 
 
-class NavigationDrawerTwoLineListItem(
-        TwoLineListItem, NavigationDrawerHeaderBase):
-
-    address_property = StringProperty()
-
-    def __init__(self, **kwargs):
-        super(NavigationDrawerTwoLineListItem, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        """
-        Binds Controller.current_account property.
-        """
-        self.controller = App.get_running_app().controller
-        self.controller.bind(
-            current_account=lambda _, value: self.on_current_account(value))
-
-    def on_current_account(self, account):
-        # e.g. deleting the last account, would set
-        # Controller.current_account to None
-        if account is None:
-            return
-        address = "0x" + account.address.encode("hex")
-        self.address_property = address
-
-    def _update_specific_text_color(self, instance, value):
-        pass
-
-    def _set_active(self, active, list):
-        pass
-
-
 class CustomMDSwitch(MDSwitch):
     """
     Work around for a MDSwitch bug, refs:
@@ -141,10 +108,6 @@ class CustomMDSwitch(MDSwitch):
         """
         super(CustomMDSwitch, self)._set_colors(*args)
         self.thumb_color_disabled = get_color_from_hex(colors['Grey']['800'])
-
-
-class IconLeftWidget(ILeftBodyTouch, MDIconButton):
-    pass
 
 
 class FloatInput(MDTextField):
