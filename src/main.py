@@ -3,7 +3,6 @@
 from __future__ import print_function, unicode_literals
 
 import os
-import re
 import threading
 import unittest
 from io import StringIO
@@ -32,7 +31,6 @@ from kivymd.label import MDLabel
 from kivymd.list import OneLineListItem, TwoLineIconListItem
 from kivymd.selectioncontrols import MDSwitch
 from kivymd.snackbar import Snackbar
-from kivymd.textfields import MDTextField
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from PIL import Image as PILImage
@@ -108,22 +106,6 @@ class CustomMDSwitch(MDSwitch):
         """
         super(CustomMDSwitch, self)._set_colors(*args)
         self.thumb_color_disabled = get_color_from_hex(colors['Grey']['800'])
-
-
-class FloatInput(MDTextField):
-    """
-    Accepts float numbers only.
-    """
-
-    pat = re.compile('[^0-9]')
-
-    def insert_text(self, substring, from_undo=False):
-        pat = self.pat
-        if '.' in self.text:
-            s = re.sub(pat, '', substring)
-        else:
-            s = '.'.join([re.sub(pat, '', s) for s in substring.split('.', 1)])
-        return super(FloatInput, self).insert_text(s, from_undo=from_undo)
 
 
 class PasswordForm(BoxLayout):
