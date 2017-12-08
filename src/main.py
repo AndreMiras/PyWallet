@@ -22,14 +22,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
-from kivy.utils import get_color_from_hex, platform
+from kivy.utils import platform
 from kivymd.bottomsheet import MDListBottomSheet
 from kivymd.button import MDFlatButton
-from kivymd.color_definitions import colors
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.list import OneLineListItem, TwoLineIconListItem
-from kivymd.selectioncontrols import MDSwitch
 from kivymd.snackbar import Snackbar
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
@@ -90,22 +88,6 @@ def run_in_thread(fn):
         t.start()
         return t
     return run
-
-
-class CustomMDSwitch(MDSwitch):
-    """
-    Work around for a MDSwitch bug, refs:
-    https://gitlab.com/kivymd/KivyMD/issues/99
-    """
-
-    def _set_colors(self, *args):
-        """
-        Overrides `MDSwitch._set_colors()` fixes missing attribute
-        `thumb_color_disabled`, refs:
-        https://gitlab.com/kivymd/KivyMD/issues/99
-        """
-        super(CustomMDSwitch, self)._set_colors(*args)
-        self.thumb_color_disabled = get_color_from_hex(colors['Grey']['800'])
 
 
 class PasswordForm(BoxLayout):
