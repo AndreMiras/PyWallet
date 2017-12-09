@@ -16,6 +16,7 @@ from kivy.clock import Clock
 
 import main
 import pywalib
+from pywallet import switchaccount
 
 
 class Test(unittest.TestCase):
@@ -54,13 +55,14 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
+        Dialog = main.Dialog
         # loading the app with empty account directory
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should trigger the "Create new account" view to be open
         self.advance_frames(1)
         self.assertEqual('Create new account', app.controller.toolbar.title)
         self.assertEqual(controller.screen_manager.current, 'manage_keystores')
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.advance_frames(1)
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
@@ -90,6 +92,7 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
+        Dialog = main.Dialog
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
         controller.load_create_new_account()
@@ -144,7 +147,7 @@ class Test(unittest.TestCase):
         # joins ongoing threads
         [t.join() for t in threading.enumerate()[1:]]
         # check the redirect dialog
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Account created, redirecting...')
@@ -158,6 +161,7 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
+        Dialog = main.Dialog
         # number of existing accounts before the test
         account_count_before = len(pywalib.get_account_list())
         # TODO: use dispatch('on_release') on navigation drawer
@@ -209,7 +213,7 @@ class Test(unittest.TestCase):
                 # waits for the end of the thread
                 create_account_thread.join()
             # the form should popup an error dialog
-            dialogs = controller.dialogs
+            dialogs = Dialog.dialogs
             self.assertEqual(len(dialogs), 1)
             dialog = dialogs[0]
             self.assertEqual(dialog.title, 'Invalid form')
@@ -226,18 +230,19 @@ class Test(unittest.TestCase):
         as expected, refs #63.
         """
         controller = app.controller
+        Dialog = main.Dialog
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_landing_page()
         send = controller.send
         send_button_id = send.ids.send_button_id
         # verifies clicking send button doesn't crash the application
         send_button_id.dispatch('on_release')
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         # but it would still raise some popups since the form is invalid
         self.assertEqual(len(dialogs), 2)
         self.assertEqual(dialogs[0].title, 'Input error')
         self.assertEqual(dialogs[1].title, 'Invalid form')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
 
     def helper_load_switch_account(self, app):
@@ -250,7 +255,7 @@ class Test(unittest.TestCase):
         controller.load_switch_account()
         self.advance_frames(1)
         switch_account = controller.switch_account
-        self.assertEqual(switch_account.__class__, main.SwitchAccount)
+        self.assertEqual(switch_account.__class__, switchaccount.SwitchAccount)
         return switch_account
 
     def helper_test_address_alias(self, app):
@@ -317,6 +322,7 @@ class Test(unittest.TestCase):
         Deletes account from the UI.
         """
         controller = app.controller
+        Dialog = main.Dialog
         pywalib = controller.pywalib
         # makes sure we have an account to play with
         self.assertEqual(len(pywalib.get_account_list()), 1)
@@ -343,7 +349,7 @@ class Test(unittest.TestCase):
         delete_button_id = manage_existing.ids.delete_button_id
         delete_button_id.dispatch('on_release')
         # a confirmation popup should show
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Are you sure?')
@@ -351,11 +357,11 @@ class Test(unittest.TestCase):
         # TODO: click on the dialog action button itself
         manage_existing.on_delete_account_yes(dialog)
         # the dialog should be replaced by another one
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Account deleted, redirecting...')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         # and the account deleted
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # makes sure the account was also cleared from the selection view
@@ -369,6 +375,7 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
+        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # makes sure an account is selected
         pywalib.new_account(password="password", security_ratio=1)
@@ -384,20 +391,21 @@ class Test(unittest.TestCase):
         delete_button_id = manage_existing.ids.delete_button_id
         delete_button_id.dispatch('on_release')
         # an error dialog should pop
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'No account selected.')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
 
     def helper_confirm_account_deletion(self, app):
         """
         Helper method for confirming account deletion popups.
         """
         controller = app.controller
+        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # a confirmation popup should show
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Are you sure?')
@@ -405,11 +413,11 @@ class Test(unittest.TestCase):
         # TODO: click on the dialog action button itself
         manage_existing.on_delete_account_yes(dialog)
         # the dialog should be replaced by another one
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Account deleted, redirecting...')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
 
     def helper_test_delete_account_twice(self, app):
@@ -418,6 +426,7 @@ class Test(unittest.TestCase):
         refs #51.
         """
         controller = app.controller
+        Dialog = main.Dialog
         pywalib = controller.pywalib
         manage_existing = controller.manage_existing
         # makes sure an account is selected
@@ -444,11 +453,11 @@ class Test(unittest.TestCase):
         delete_button_id = manage_existing.ids.delete_button_id
         delete_button_id.dispatch('on_release')
         # TODO: the second time an error dialog should pop
-        # dialogs = controller.dialogs
+        # dialogs = Dialog.dialogs
         # self.assertEqual(len(dialogs), 1)
         # dialog = dialogs[0]
         # self.assertEqual(dialog.title, 'No account selected.')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
 
     def helper_test_dismiss_dialog_twice(self, app):
         """
@@ -457,19 +466,20 @@ class Test(unittest.TestCase):
         handled gracefully, refs #89.
         """
         Controller = main.Controller
+        Dialog = main.Dialog
         title = "title"
         body = "body"
         # makes sure the controller has no dialog
-        self.assertEqual(Controller.dialogs, [])
+        self.assertEqual(Dialog.dialogs, [])
         # creates one and verifies it was created
         dialog = Controller.create_dialog_helper(title, body)
-        self.assertEqual(len(Controller.dialogs), 1)
+        self.assertEqual(len(Dialog.dialogs), 1)
         # dimisses it once and verifies it was handled
         dialog.dispatch('on_dismiss')
-        self.assertEqual(Controller.dialogs, [])
+        self.assertEqual(Dialog.dialogs, [])
         # then a second time and it should not crash
         dialog.dispatch('on_dismiss')
-        self.assertEqual(Controller.dialogs, [])
+        self.assertEqual(Dialog.dialogs, [])
 
     def helper_test_controller_fetch_balance(self, app):
         """
@@ -479,8 +489,8 @@ class Test(unittest.TestCase):
         3) handles 503 "service is unavailable", refs #91
         4) UnknownEtherscanException should be handled
         """
-        Controller = main.Controller
         controller = app.controller
+        Dialog = main.Dialog
         account = controller.current_account
         balance = 42
         # 1) simple case, library PyWalib.get_balance() gets called
@@ -493,21 +503,21 @@ class Test(unittest.TestCase):
         self.assertEqual(
             controller.accounts_balance[address], balance)
         # 2) ConnectionError should be handled
-        self.assertEqual(len(Controller.dialogs), 0)
+        self.assertEqual(len(Dialog.dialogs), 0)
         with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
                 mock.patch('main.Logger') as mock_logger:
             mock_get_balance.side_effect = requests.exceptions.ConnectionError
             thread = controller.fetch_balance()
             thread.join()
-        self.assertEqual(len(Controller.dialogs), 1)
-        dialog = Controller.dialogs[0]
+        self.assertEqual(len(Dialog.dialogs), 1)
+        dialog = Dialog.dialogs[0]
         self.assertEqual(dialog.title, 'Network error')
-        Controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         # the error should be logged
         mock_logger.warning.assert_called_with(
             'ConnectionError', exc_info=True)
         # 3) handles 503 "service is unavailable", refs #91
-        self.assertEqual(len(Controller.dialogs), 0)
+        self.assertEqual(len(Dialog.dialogs), 0)
         response = requests.Response()
         response.status_code = 503
         response.raw = io.BytesIO(b'The service is unavailable.')
@@ -516,23 +526,23 @@ class Test(unittest.TestCase):
             mock_requests_get.return_value = response
             thread = controller.fetch_balance()
             thread.join()
-        self.assertEqual(len(Controller.dialogs), 1)
-        dialog = Controller.dialogs[0]
+        self.assertEqual(len(Dialog.dialogs), 1)
+        dialog = Dialog.dialogs[0]
         self.assertEqual(dialog.title, 'Decode error')
-        Controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         # the error should be logged
         mock_logger.error.assert_called_with('ValueError', exc_info=True)
         # 4) UnknownEtherscanException should be handled
-        self.assertEqual(len(Controller.dialogs), 0)
+        self.assertEqual(len(Dialog.dialogs), 0)
         with mock.patch('main.PyWalib.get_balance') as mock_get_balance, \
                 mock.patch('main.Logger') as mock_logger:
             mock_get_balance.side_effect = pywalib.UnknownEtherscanException
             thread = controller.fetch_balance()
             thread.join()
-        self.assertEqual(len(Controller.dialogs), 1)
-        dialog = Controller.dialogs[0]
+        self.assertEqual(len(Dialog.dialogs), 1)
+        dialog = Dialog.dialogs[0]
         self.assertEqual(dialog.title, 'Unknown error')
-        Controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         # the error should be logged
         mock_logger.error.assert_called_with(
             'UnknownEtherscanException', exc_info=True)
@@ -544,6 +554,7 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
+        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # makes sure there's only one account left
         self.assertEqual(
@@ -552,18 +563,18 @@ class Test(unittest.TestCase):
         delete_button_id = manage_existing.ids.delete_button_id
         delete_button_id.dispatch('on_release')
         # a confirmation popup should show
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Are you sure?')
         # confirm it
         manage_existing.on_delete_account_yes(dialog)
         # account was deleted dialog message
-        dialogs = controller.dialogs
+        dialogs = Dialog.dialogs
         self.assertEqual(len(dialogs), 1)
         dialog = dialogs[0]
         self.assertEqual(dialog.title, 'Account deleted, redirecting...')
-        controller.dismiss_all_dialogs()
+        Dialog.dismiss_all_dialogs()
         self.advance_frames(1)
         # verifies the account was deleted
         self.assertEqual(len(pywalib.get_account_list()), 0)

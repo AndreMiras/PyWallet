@@ -10,12 +10,11 @@ from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton
 from kivymd.dialog import MDDialog
-from kivymd.list import OneLineListItem, TwoLineIconListItem
+from kivymd.list import TwoLineIconListItem
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
 from PIL import Image as PILImage
@@ -27,9 +26,10 @@ from requests.exceptions import ConnectionError
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      NoTransactionFoundException, PyWalib,
                      UnknownEtherscanException)
-from pywallet.controller import Controller, run_in_thread
+from pywallet.controller import Controller
 from pywallet.list import IconLeftWidget
 from pywallet.passwordform import PasswordForm
+from pywallet.utils import Dialog, run_in_thread
 from version import __version__
 
 # monkey patching PIL, until it gets monkey patched upstream, refs:
@@ -63,7 +63,7 @@ class Send(BoxLayout):
         try:
             normalize_address(self.send_to_address)
         except Exception:
-            dialog = Controller.create_dialog(title, body)
+            dialog = Dialog.create_dialog(title, body)
             dialog.open()
             return False
         return True
@@ -72,7 +72,7 @@ class Send(BoxLayout):
         title = "Input error"
         body = "Invalid amount field"
         if self.send_amount == 0:
-            dialog = Controller.create_dialog(title, body)
+            dialog = Dialog.create_dialog(title, body)
             dialog.open()
             return False
         return True
@@ -110,7 +110,7 @@ class Send(BoxLayout):
 
     def on_send_click(self):
         if not self.verify_fields():
-            Controller.show_invalid_form_dialog()
+            Dialog.show_invalid_form_dialog()
             return
         dialog = self.prompt_password_dialog()
         dialog.open()
@@ -287,62 +287,20 @@ class History(BoxLayout):
         try:
             transactions = PyWalib.get_transaction_history(address)
         except ConnectionError:
-            Controller.on_history_connection_error()
+            Dialog.on_history_connection_error()
             Logger.warning('ConnectionError', exc_info=True)
             return
         except NoTransactionFoundException:
             transactions = []
         except ValueError:
             # most likely the JSON object could not be decoded, refs #91
-            Controller.on_history_value_error()
+            Dialog.on_history_value_error()
             # currently logged as an error, because we want more insight
             # in order to eventually handle it more specifically
             Logger.error('ValueError', exc_info=True)
             return
         # triggers accounts_history observers update
         self.controller.accounts_history[address] = transactions
-
-
-class SwitchAccount(BoxLayout):
-
-    def on_release(self, list_item):
-        """
-        Sets Controller.current_account and switches to previous screen.
-        """
-        # sets Controller.current_account
-        self.selected_list_item = list_item
-        self.controller.current_account = list_item.account
-        # switches to previous screen
-        self.controller.screen_manager_previous()
-
-    def create_item(self, account):
-        """
-        Creates an account list item from given account.
-        """
-        address = "0x" + account.address.encode("hex")
-        # gets the alias if exists
-        try:
-            text = Controller.get_address_alias(address)
-        except KeyError:
-            text = address
-        list_item = OneLineListItem(text=text)
-        # makes sure the address doesn't overlap on small screen
-        list_item.ids._lbl_primary.shorten = True
-        list_item.account = account
-        list_item.bind(on_release=lambda x: self.on_release(x))
-        return list_item
-
-    def load_account_list(self):
-        """
-        Fills account list widget from library account list.
-        """
-        self.controller = App.get_running_app().controller
-        account_list_id = self.ids.account_list_id
-        account_list_id.clear_widgets()
-        accounts = self.controller.pywalib.get_account_list()
-        for account in accounts:
-            list_item = self.create_item(account)
-            account_list_id.add_widget(list_item)
 
 
 class PWSelectList(BoxLayout):
@@ -362,287 +320,6 @@ class PWSelectList(BoxLayout):
         for item in self._items:
             item.bind(on_release=lambda x: self.on_release(x))
             address_list.add_widget(item)
-
-
-class ImportKeystore(BoxLayout):
-
-    keystore_path = StringProperty()
-
-    def __init__(self, **kwargs):
-        super(ImportKeystore, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        self.controller = App.get_running_app().controller
-        self.keystore_path = self.controller.get_keystore_path()
-        accounts = self.controller.pywalib.get_account_list()
-        if len(accounts) == 0:
-            title = "No keystore found."
-            body = "Import or create one."
-            dialog = Controller.create_dialog(title, body)
-            dialog.open()
-
-
-# TODO: also make it possible to update PBKDF2
-# TODO: create a generic password form
-# TODO: create a generic account form
-class ManageExisting(BoxLayout):
-
-    # e.g. when the last account was deleted
-    current_account = ObjectProperty(allownone=True)
-    address_property = StringProperty()
-    current_password = StringProperty()
-    new_password1 = StringProperty()
-    new_password2 = StringProperty()
-
-    def __init__(self, **kwargs):
-        super(ManageExisting, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        """
-        Binds Controller.current_account property.
-        """
-        self.controller = App.get_running_app().controller
-        self.pywalib = self.controller.pywalib
-        self.controller.bind(current_account=self.setter('current_account'))
-        # triggers the update
-        self.current_account = self.controller.current_account
-
-    def verify_current_password_field(self):
-        """
-        Makes sure passwords are matching.
-        """
-        account = self.current_account
-        password = self.current_password
-        # making sure it's locked first
-        account.lock()
-        try:
-            account.unlock(password)
-        except ValueError:
-            return False
-        return True
-
-    def verify_password_field(self):
-        """
-        Makes sure passwords are matching and are not void.
-        """
-        passwords_matching = self.new_password1 == self.new_password2
-        passwords_not_void = self.new_password1 != ''
-        return passwords_matching and passwords_not_void
-
-    def verify_fields(self):
-        """
-        Verifies password fields are valid.
-        """
-        return self.verify_password_field()
-
-    def show_redirect_dialog(self):
-        title = "Account deleted, redirecting..."
-        body = ""
-        body += "Your account was deleted, "
-        body += "you will be redirected to the overview."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
-    def on_delete_account_yes(self, dialog):
-        """
-        Deletes the account, discarts the warning dialog,
-        shows an info popup and redirects to the landing page.
-        """
-        account = self.current_account
-        self.pywalib.delete_account(account)
-        dialog.dismiss()
-        self.controller.current_account = None
-        self.show_redirect_dialog()
-        self.controller.load_landing_page()
-
-    def prompt_no_account_error(self):
-        """
-        Prompts an error since no account are selected for deletion, refs:
-        https://github.com/AndreMiras/PyWallet/issues/90
-        """
-        title = "No account selected."
-        body = "No account selected for deletion."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
-    def prompt_delete_account_dialog(self):
-        """
-        Prompt a confirmation dialog before deleting the account.
-        """
-        if self.current_account is None:
-            self.prompt_no_account_error()
-            return
-        title = "Are you sure?"
-        body = ""
-        body += "This action cannot be undone.\n"
-        body += "Are you sure you want to delete this account?\n"
-        dialog = Controller.create_dialog_helper(title, body)
-        dialog.add_action_button(
-                "No",
-                action=lambda *x: dialog.dismiss())
-        dialog.add_action_button(
-                "Yes",
-                action=lambda *x: self.on_delete_account_yes(dialog))
-        dialog.open()
-
-    @run_in_thread
-    def update_password(self):
-        """
-        Update account password with new password provided.
-        """
-        if not self.verify_fields():
-            Controller.show_invalid_form_dialog()
-            return
-        Controller.snackbar_message("Verifying current password...")
-        if not self.verify_current_password_field():
-            Controller.snackbar_message("Wrong account password")
-            return
-        pywalib = self.controller.pywalib
-        account = self.current_account
-        new_password = self.new_password1
-        Controller.snackbar_message("Updating account...")
-        pywalib.update_account_password(account, new_password=new_password)
-        Controller.snackbar_message("Updated!")
-
-    def on_current_account(self, instance, account):
-        # e.g. deleting the last account, would set
-        # Controller.current_account to None
-        if account is None:
-            return
-        address = "0x" + account.address.encode("hex")
-        self.address_property = address
-
-
-class CreateNewAccount(BoxLayout):
-    """
-    PBKDF2 iterations choice is a security vs speed trade off:
-    https://security.stackexchange.com/q/3959
-    """
-
-    alias = StringProperty()
-    new_password1 = StringProperty()
-    new_password2 = StringProperty()
-
-    def __init__(self, **kwargs):
-        super(CreateNewAccount, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.setup())
-
-    def setup(self):
-        """
-        Sets security vs speed default values.
-        Plus hides the advanced widgets.
-        """
-        self.security_slider = self.ids.security_slider_id
-        self.speed_slider = self.ids.speed_slider_id
-        self.security_slider.value = self.speed_slider.value = 50
-        self.controller = App.get_running_app().controller
-        self.toggle_advanced(False)
-
-    def verify_password_field(self):
-        """
-        Makes sure passwords are matching and are not void.
-        """
-        passwords_matching = self.new_password1 == self.new_password2
-        passwords_not_void = self.new_password1 != ''
-        return passwords_matching and passwords_not_void
-
-    def verify_fields(self):
-        """
-        Verifies password fields are valid.
-        """
-        return self.verify_password_field()
-
-    @property
-    def security_slider_value(self):
-        return self.security_slider.value
-
-    @staticmethod
-    def try_unlock(account, password):
-        """
-        Just as a security measure, verifies we can unlock
-        the newly created account with provided password.
-        """
-        # making sure it's locked first
-        account.lock()
-        try:
-            account.unlock(password)
-        except ValueError:
-            title = "Unlock error"
-            body = ""
-            body += "Couldn't unlock your account.\n"
-            body += "The issue should be reported."
-            dialog = Controller.create_dialog(title, body)
-            dialog.open()
-            return
-
-    @mainthread
-    def on_account_created(self, account):
-        """
-        Switches to the newly created account.
-        Clears the form.
-        """
-        self.controller.current_account = account
-        self.new_password1 = ''
-        self.new_password2 = ''
-
-    @mainthread
-    def toggle_widgets(self, enabled):
-        """
-        Enables/disables account creation widgets.
-        """
-        self.disabled = not enabled
-
-    def show_redirect_dialog(self):
-        title = "Account created, redirecting..."
-        body = ""
-        body += "Your account was created, "
-        body += "you will be redirected to the overview."
-        dialog = Controller.create_dialog(title, body)
-        dialog.open()
-
-    @run_in_thread
-    def create_account(self):
-        """
-        Creates an account from provided form.
-        Verify we can unlock it.
-        Disables widgets during the process, so the user doesn't try
-        to create another account during the process.
-        """
-        self.toggle_widgets(False)
-        if not self.verify_fields():
-            Controller.show_invalid_form_dialog()
-            self.toggle_widgets(True)
-            return
-        pywalib = self.controller.pywalib
-        password = self.new_password1
-        security_ratio = self.security_slider_value
-        # dividing again by 10, because otherwise it's
-        # too slow on smart devices
-        security_ratio /= 10.0
-        Controller.snackbar_message("Creating account...")
-        account = pywalib.new_account(
-                password=password, security_ratio=security_ratio)
-        Controller.snackbar_message("Created!")
-        self.toggle_widgets(True)
-        Controller.set_account_alias(account, self.alias)
-        self.on_account_created(account)
-        CreateNewAccount.try_unlock(account, password)
-        self.show_redirect_dialog()
-        self.controller.load_landing_page()
-        return account
-
-    def toggle_advanced(self, show):
-        """
-        Shows/hides advanced account creation widgets.
-        https://stackoverflow.com/q/23211142/185510
-        """
-        advanced = self.ids.advanced_id
-        alpha = 1 if show else 0
-        for widget in advanced.children:
-            widget.canvas.opacity = alpha
-            widget.disabled = not show
 
 
 class AddressButton(MDFlatButton):
@@ -725,14 +402,6 @@ class ScrollableLabel(ScrollView):
     https://github.com/kivy/kivy/wiki/Scrollable-Label
     """
     text = StringProperty('')
-
-
-class SwitchAccountScreen(Screen):
-    pass
-
-
-class ManageKeystoreScreen(Screen):
-    pass
 
 
 class DebugRavenClient(object):

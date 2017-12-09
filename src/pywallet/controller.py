@@ -1,20 +1,15 @@
 import os
-import threading
 
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.logger import Logger
-from kivy.metrics import dp
 from kivy.properties import DictProperty, ObjectProperty
 from kivy.storage.jsonstore import JsonStore
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
 from kivymd.bottomsheet import MDListBottomSheet
-from kivymd.dialog import MDDialog
-from kivymd.label import MDLabel
-from kivymd.snackbar import Snackbar
 from requests.exceptions import ConnectionError
 
 from pywalib import PyWalib, UnknownEtherscanException
@@ -43,9 +38,6 @@ class Controller(FloatLayout):
     accounts_balance = DictProperty({})
     # accounts_history[account_0xaddress]
     accounts_history = DictProperty({})
-    # keeps track of all dialogs alive
-    dialogs = []
-    __lock = threading.Lock()
 
     def __init__(self, **kwargs):
         super(Controller, self).__init__(**kwargs)
@@ -186,13 +178,6 @@ class Controller(FloatLayout):
         self.screen_manager_current(
             previous_screen, direction='right', history=False)
 
-    @classmethod
-    def show_invalid_form_dialog(cls):
-        title = "Invalid form"
-        body = "Please check form fields."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
     @staticmethod
     def patch_keystore_path():
         """
@@ -290,101 +275,6 @@ class Controller(FloatLayout):
     def src_dir():
         return os.path.dirname(os.path.abspath(__file__))
 
-    @classmethod
-    def on_dialog_dismiss(cls, dialog):
-        """
-        Removes it from the dialogs track list.
-        """
-        with cls.__lock:
-            try:
-                cls.dialogs.remove(dialog)
-            except ValueError:
-                # fails silently if the dialog was dismissed twice, refs:
-                # https://github.com/AndreMiras/PyWallet/issues/89
-                pass
-
-    @classmethod
-    def dismiss_all_dialogs(cls):
-        """
-        Dispatches dismiss event for all dialogs.
-        """
-        # keeps a local copy since we're altering them as we iterate
-        dialogs = cls.dialogs[:]
-        for dialog in dialogs:
-            dialog.dispatch('on_dismiss')
-
-    @classmethod
-    def create_dialog_helper(cls, title, body):
-        """
-        Creates a dialog from given title and body.
-        Adds it to the dialogs track list.
-        """
-        content = MDLabel(
-                    font_style='Body1',
-                    theme_text_color='Secondary',
-                    text=body,
-                    size_hint_y=None,
-                    valign='top')
-        content.bind(texture_size=content.setter('size'))
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.8, None),
-                        height=dp(250),
-                        auto_dismiss=False)
-        dialog.bind(on_dismiss=cls.on_dialog_dismiss)
-        with cls.__lock:
-            cls.dialogs.append(dialog)
-        return dialog
-
-    @classmethod
-    def create_dialog(cls, title, body):
-        """
-        Creates a dialog from given title and body.
-        Adds it to the dialogs track list.
-        Appends dismiss action.
-        """
-        dialog = cls.create_dialog_helper(title, body)
-        dialog.add_action_button(
-                "Dismiss",
-                action=lambda *x: dialog.dismiss())
-        return dialog
-
-    @classmethod
-    def on_balance_connection_error(cls):
-        title = "Network error"
-        body = "Couldn't load balance, no network access."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
-    @classmethod
-    def on_balance_value_error(cls):
-        title = "Decode error"
-        body = "Couldn't not decode balance data."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
-    @classmethod
-    def on_balance_unknown_error(cls):
-        title = "Unknown error"
-        body = "Unknown error while fetching balance."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
-    @classmethod
-    def on_history_connection_error(cls):
-        title = "Network error"
-        body = "Couldn't load history, no network access."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
-    @classmethod
-    def on_history_value_error(cls):
-        title = "Decode error"
-        body = "Couldn't not decode history data."
-        dialog = cls.create_dialog(title, body)
-        dialog.open()
-
     @mainthread
     def update_toolbar_title_balance(self, instance=None, value=None):
         if self.current_account is None:
@@ -396,11 +286,6 @@ class Controller(FloatLayout):
             balance = 0
         title = "%s ETH" % (balance)
         self.set_toolbar_title(title)
-
-    @staticmethod
-    @mainthread
-    def snackbar_message(text):
-        Snackbar(text=text).show()
 
     def load_landing_page(self):
         """
@@ -457,27 +342,6 @@ class Controller(FloatLayout):
     def on_alias_updated(self, *args):
         pass
 
-    def prompt_alias_dialog(self):
-        """
-        Prompts the update alias dialog.
-        """
-        account = self.current_account
-        title = "Update your alias"
-        content = AliasForm(account)
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.8, None),
-                        height=dp(250),
-                        auto_dismiss=False)
-        # workaround for MDDialog container size (too small by default)
-        dialog.ids.container.size_hint_y = 1
-        dialog.add_action_button(
-                "Update",
-                action=lambda *x: self.on_update_alias_clicked(
-                    dialog, content.alias))
-        dialog.open()
-
     def copy_address_clipboard(self):
         """
         Copies the current account address to the clipboard.
@@ -485,6 +349,15 @@ class Controller(FloatLayout):
         account = self.current_account
         address = "0x" + account.address.encode("hex")
         Clipboard.copy(address)
+
+    def prompt_alias_dialog(self):
+        account = self.current_account
+        dialog = AliasForm.create_alias_dialog(account)
+        dialog.add_action_button(
+            "Update",
+            action=lambda *x: self.on_update_alias_clicked(
+                dialog, dialog.content.alias))
+        dialog.open()
 
     def open_address_options(self):
         """
