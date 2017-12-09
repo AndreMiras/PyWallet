@@ -22,7 +22,7 @@ from pywallet.about import AboutScreen
 from pywallet.aliasform import AliasForm
 from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
-from pywallet.overviewscreen import OverviewScreen
+from pywallet.overview import OverviewScreen
 from pywallet.switchaccount import SwitchAccountScreen
 from pywallet.utils import load_kv_from_py, run_in_thread
 
