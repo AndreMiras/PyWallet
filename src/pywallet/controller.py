@@ -19,7 +19,7 @@ from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
 from pywallet.switchaccount import SwitchAccountScreen
-from pywallet.utils import load_kv_from_py, run_in_thread
+from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 # Time before loading the next screen.
 # The idea is to let the application render before trying to add child widget,
@@ -314,19 +314,19 @@ class Controller(FloatLayout):
         try:
             balance = PyWalib.get_balance(address)
         except ConnectionError:
-            Controller.on_balance_connection_error()
+            Dialog.on_balance_connection_error()
             Logger.warning('ConnectionError', exc_info=True)
             return
         except ValueError:
             # most likely the JSON object could not be decoded, refs #91
             # currently logged as an error, because we want more insight
             # in order to eventually handle it more specifically
-            Controller.on_balance_value_error()
+            Dialog.on_balance_value_error()
             Logger.error('ValueError', exc_info=True)
             return
         except UnknownEtherscanException:
             # also handles uknown errors, refs #112
-            Controller.on_balance_unknown_error()
+            Dialog.on_balance_unknown_error()
             Logger.error('UnknownEtherscanException', exc_info=True)
             return
         # triggers accounts_balance observers update

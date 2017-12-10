@@ -2,6 +2,7 @@ import os
 import threading
 from io import StringIO
 
+from kivy.clock import mainthread
 from kivy.lang import Builder
 from kivy.metrics import dp
 
@@ -80,6 +81,7 @@ class Dialog(object):
     __lock = threading.Lock()
 
     @staticmethod
+    @mainthread
     def snackbar_message(text):
         Snackbar(text=text).show()
 
