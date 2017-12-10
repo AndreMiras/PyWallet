@@ -111,6 +111,13 @@ class Controller(FloatLayout):
         return manage_keystores_bnavigation_id
 
     @property
+    def about(self):
+        screen_manager = self.screen_manager
+        about_screen = screen_manager.get_screen('about')
+        about_id = about_screen.ids.about_id
+        return about_id
+
+    @property
     def manage_existing(self):
         manage_keystores = self.manage_keystores
         return manage_keystores.ids.manage_existing_id

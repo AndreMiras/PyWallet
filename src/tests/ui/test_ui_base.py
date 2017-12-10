@@ -126,7 +126,8 @@ class Test(unittest.TestCase):
             create_account_thread = threading.enumerate()[1]
             self.assertEqual(type(create_account_thread), threading.Thread)
             self.assertEqual(
-                create_account_thread._Thread__target.func_name, "create_account")
+                create_account_thread._Thread__target.func_name,
+                "create_account")
             # waits for the end of the thread
             create_account_thread.join()
             # thread has ended and the main thread is running alone again
@@ -594,6 +595,18 @@ class Test(unittest.TestCase):
         controller.history.current_account = None
         self.advance_frames(1)
 
+    def helper_test_about(self, app):
+        """
+        Verifies the about screen loads properly, refs #126
+        refs #120.
+        """
+        controller = app.controller
+        controller.load_about_screen()
+        self.advance_frames(60)
+        # simply checking the about class loads
+        self.assertEqual(
+            str(controller.about.__class__), "<class 'kivy.factory.About'>")
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -610,6 +623,7 @@ class Test(unittest.TestCase):
         self.helper_test_dismiss_dialog_twice(app)
         self.helper_test_controller_fetch_balance(app)
         self.helper_test_delete_last_account(app)
+        self.helper_test_about(app)
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()
