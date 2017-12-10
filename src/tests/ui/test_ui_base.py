@@ -272,8 +272,18 @@ class Test(unittest.TestCase):
         dialogs = Dialog.dialogs
         # we should be asked for the password
         self.assertEqual(len(dialogs), 1)
-        self.assertEqual(dialogs[0].title, 'Enter your password')
+        dialog = dialogs[0]
+        self.assertEqual(dialog.title, 'Enter your password')
+        # TODO: also perform the test with invalid password
+        dialog.password = 'password'
+        unlock_button = dialog._action_buttons[0]
+        self.assertEqual(unlock_button.text, 'Unlock')
+        unlock_button.dispatch('on_release')
         Dialog.dismiss_all_dialogs()
+        dialogs = Dialog.dialogs
+        self.assertEqual(len(dialogs), 0)
+        # TODO: check snackbar
+        # TODO: check unlock_send_transaction() thread
 
     def helper_load_switch_account(self, app):
         """
