@@ -278,12 +278,30 @@ class Test(unittest.TestCase):
         dialog.password = 'password'
         unlock_button = dialog._action_buttons[0]
         self.assertEqual(unlock_button.text, 'Unlock')
-        unlock_button.dispatch('on_release')
-        Dialog.dismiss_all_dialogs()
-        dialogs = Dialog.dialogs
-        self.assertEqual(len(dialogs), 0)
-        # TODO: check snackbar
-        # TODO: check unlock_send_transaction() thread
+        with mock.patch('pywallet.utils.Dialog.snackbar_message') \
+                as mock_snackbar_message:
+            unlock_button.dispatch('on_release')
+            # for some reason we need to trigger on_password manually in tests
+            send.on_password(None, None)
+            # password form got closed
+            dialogs = Dialog.dialogs
+            self.assertEqual(len(dialogs), 0)
+            # unlock_send_transaction() thread should be running
+            self.assertEqual(len(threading.enumerate()), 2)
+            thread = threading.enumerate()[1]
+            self.assertEqual(
+                thread._Thread__target.func_name, 'unlock_send_transaction')
+            thread.join()
+            # checks snackbar messages
+            self.assertEqual(
+                mock_snackbar_message.call_args_list,
+                [
+                    mock.call('Unlocking account...'),
+                    mock.call('Unlocked! Sending transaction...'),
+                    mock.call('Insufficient funds'),
+                ]
+            )
+        # TODO: also perform the test with enough funds (mocking the response)
 
     def helper_load_switch_account(self, app):
         """

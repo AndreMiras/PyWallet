@@ -87,6 +87,7 @@ class Send(BoxLayout):
         address = normalize_address(self.send_to_address)
         amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
+        # TODO: not the main account, but the current account
         account = controller.pywalib.get_main_account()
         Dialog.snackbar_message("Unlocking account...")
         try:
