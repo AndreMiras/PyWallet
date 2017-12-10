@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen
-
 from kivymd.list import OneLineListItem
 
 from pywallet.utils import load_kv_from_py

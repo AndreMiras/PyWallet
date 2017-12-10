@@ -3,17 +3,15 @@
 from __future__ import print_function, unicode_literals
 
 import kivy
-from ethereum.utils import normalize_address
 from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.logger import LOG_LEVELS, Logger
 from kivy.metrics import dp
-from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.button import MDFlatButton
-from kivymd.dialog import MDDialog
 from kivymd.list import TwoLineIconListItem
 from kivymd.theming import ThemeManager
 from kivymd.toolbar import Toolbar
@@ -23,12 +21,9 @@ from raven.conf import setup_logging
 from raven.handlers.logging import SentryHandler
 from requests.exceptions import ConnectionError
 
-from pywalib import (ROUND_DIGITS, InsufficientFundsException,
-                     NoTransactionFoundException, PyWalib,
-                     UnknownEtherscanException)
+from pywalib import NoTransactionFoundException, PyWalib
 from pywallet.controller import Controller
 from pywallet.list import IconLeftWidget
-from pywallet.passwordform import PasswordForm
 from pywallet.utils import Dialog, run_in_thread
 from version import __version__
 
@@ -46,110 +41,6 @@ except AttributeError:
     PILImage.Image.tobytes = PILImage.Image.tostring
 
 kivy.require('1.10.0')
-
-
-class Send(BoxLayout):
-
-    password = StringProperty("")
-    send_to_address = StringProperty("")
-    send_amount = NumericProperty(0)
-
-    def __init__(self, **kwargs):
-        super(Send, self).__init__(**kwargs)
-
-    def verify_to_address_field(self):
-        title = "Input error"
-        body = "Invalid address field"
-        try:
-            normalize_address(self.send_to_address)
-        except Exception:
-            dialog = Dialog.create_dialog(title, body)
-            dialog.open()
-            return False
-        return True
-
-    def verify_amount_field(self):
-        title = "Input error"
-        body = "Invalid amount field"
-        if self.send_amount == 0:
-            dialog = Dialog.create_dialog(title, body)
-            dialog.open()
-            return False
-        return True
-
-    def verify_fields(self):
-        """
-        Verifies address and amount fields are valid.
-        """
-        return self.verify_to_address_field() \
-            and self.verify_amount_field()
-
-    def on_unlock_clicked(self, dialog, password):
-        self.password = password
-        dialog.dismiss()
-
-    def prompt_password_dialog(self):
-        """
-        Prompt the password dialog.
-        """
-        title = "Enter your password"
-        content = PasswordForm()
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.8, None),
-                        height=dp(250),
-                        auto_dismiss=False)
-        # workaround for MDDialog container size (too small by default)
-        dialog.ids.container.size_hint_y = 1
-        dialog.add_action_button(
-                "Unlock",
-                action=lambda *x: self.on_unlock_clicked(
-                    dialog, content.password))
-        return dialog
-
-    def on_send_click(self):
-        if not self.verify_fields():
-            Dialog.show_invalid_form_dialog()
-            return
-        dialog = self.prompt_password_dialog()
-        dialog.open()
-
-    @run_in_thread
-    def unlock_send_transaction(self):
-        """
-        Unlocks the account with password in order to sign and publish the
-        transaction.
-        """
-        controller = App.get_running_app().controller
-        pywalib = controller.pywalib
-        address = normalize_address(self.send_to_address)
-        amount_eth = round(self.send_amount, ROUND_DIGITS)
-        amount_wei = int(amount_eth * pow(10, 18))
-        account = controller.pywalib.get_main_account()
-        Controller.snackbar_message("Unlocking account...")
-        try:
-            account.unlock(self.password)
-        except ValueError:
-            Controller.snackbar_message("Could not unlock account")
-            return
-
-        Controller.snackbar_message("Unlocked! Sending transaction...")
-        sender = account.address
-        try:
-            pywalib.transact(address, value=amount_wei, data='', sender=sender)
-        except InsufficientFundsException:
-            Controller.snackbar_message("Insufficient funds")
-            return
-        except UnknownEtherscanException:
-            Controller.snackbar_message("Unknown error")
-            Logger.error('UnknownEtherscanException', exc_info=True)
-            return
-        # TODO: handle ConnectionError
-        Controller.snackbar_message("Sent!")
-
-    def on_password(self, instance, password):
-        self.unlock_send_transaction()
 
 
 class Receive(BoxLayout):

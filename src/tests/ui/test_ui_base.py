@@ -19,6 +19,9 @@ import pywalib
 from pywallet import switchaccount
 
 
+ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -250,6 +253,27 @@ class Test(unittest.TestCase):
         self.assertEqual(dialogs[1].title, 'Invalid form')
         Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
+
+    def helper_test_send(self, app):
+        """
+        Verifies it's possible to send some Ethers through the UI.
+        """
+        controller = app.controller
+        Dialog = main.Dialog
+        # TODO: use dispatch('on_release') on navigation drawer
+        controller.load_landing_page()
+        send = controller.send
+        send_to_id = send.ids.send_to_id
+        send_amount_id = send.ids.send_amount_id
+        send_button_id = send.ids.send_button_id
+        send_to_id.text = ADDRESS
+        send_amount_id.text = '0.1'
+        send_button_id.dispatch('on_release')
+        dialogs = Dialog.dialogs
+        # we should be asked for the password
+        self.assertEqual(len(dialogs), 1)
+        self.assertEqual(dialogs[0].title, 'Enter your password')
+        Dialog.dismiss_all_dialogs()
 
     def helper_load_switch_account(self, app):
         """
@@ -616,6 +640,7 @@ class Test(unittest.TestCase):
         self.helper_test_create_first_account(app)
         self.helper_test_create_account_form(app)
         self.helper_test_on_send_click(app)
+        self.helper_test_send(app)
         self.helper_test_address_alias(app)
         self.helper_test_delete_account(app)
         self.helper_test_delete_account_none_selected(app)

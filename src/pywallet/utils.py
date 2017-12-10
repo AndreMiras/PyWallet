@@ -5,7 +5,6 @@ from io import StringIO
 from kivy.clock import mainthread
 from kivy.lang import Builder
 from kivy.metrics import dp
-
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.snackbar import Snackbar
@@ -116,6 +115,24 @@ class Dialog(object):
             dialog.dispatch('on_dismiss')
 
     @classmethod
+    def create_dialog_content_helper(cls, title, content):
+        """
+        Creates a dialog from given title and content.
+        Adds it to the dialogs track list.
+        """
+        # TODO
+        dialog = MDDialog(
+                        title=title,
+                        content=content,
+                        size_hint=(.8, None),
+                        height=dp(250),
+                        auto_dismiss=False)
+        dialog.bind(on_dismiss=cls.on_dialog_dismiss)
+        with cls.__lock:
+            cls.dialogs.append(dialog)
+        return dialog
+
+    @classmethod
     def create_dialog_helper(cls, title, body):
         """
         Creates a dialog from given title and body.
@@ -128,15 +145,7 @@ class Dialog(object):
                     size_hint_y=None,
                     valign='top')
         content.bind(texture_size=content.setter('size'))
-        dialog = MDDialog(
-                        title=title,
-                        content=content,
-                        size_hint=(.8, None),
-                        height=dp(250),
-                        auto_dismiss=False)
-        dialog.bind(on_dismiss=cls.on_dialog_dismiss)
-        with cls.__lock:
-            cls.dialogs.append(dialog)
+        dialog = cls.create_dialog_content_helper(title, content)
         return dialog
 
     @classmethod

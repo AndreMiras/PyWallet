@@ -1,7 +1,6 @@
 from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
-
 from kivymd.dialog import MDDialog
 
 from pywallet.utils import load_kv_from_py
