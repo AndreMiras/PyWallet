@@ -116,38 +116,39 @@ class Test(unittest.TestCase):
         self.assertEqual(len(threading.enumerate()), 1)
         main_thread = threading.enumerate()[0]
         self.assertEqual(type(main_thread), threading._MainThread)
-        # click the create account button
-        create_account_button_id.dispatch('on_release')
-        # after submitting the account creation thread should run
-        self.assertEqual(len(threading.enumerate()), 2)
-        create_account_thread = threading.enumerate()[1]
-        self.assertEqual(type(create_account_thread), threading.Thread)
-        self.assertEqual(
-            create_account_thread._Thread__target.func_name, "create_account")
-        # waits for the end of the thread
-        create_account_thread.join()
-        # thread has ended and the main thread is running alone again
-        self.assertEqual(len(threading.enumerate()), 1)
-        main_thread = threading.enumerate()[0]
-        self.assertEqual(type(main_thread), threading._MainThread)
-        # and verifies the account was created
-        self.assertEqual(len(pywalib.get_account_list()), 1)
-        # TODO verify the form fields were voided
-        # self.assertEqual(new_password1_id.text, '')
-        # self.assertEqual(new_password2_id.text, '')
-        # we should get redirected to the overview page
-        self.advance_frames(1)
-        # TODO: broken in #124
-        # self.assertEqual(controller.screen_manager.current, 'overview')
-        # the new account should be loaded in the controller
-        self.assertEqual(
-            controller.current_account,
-            pywalib.get_account_list()[0])
-        # TODO: also verify the Toolbar title was updated correctly
-        # self.assertEqual('TODO', app.controller.toolbar.title)
         # let's not hit the network (speed up testing)
         with mock.patch('pywalib.PyWalib.get_balance'), \
                 mock.patch('pywalib.PyWalib.get_transaction_history'):
+            # click the create account button
+            create_account_button_id.dispatch('on_release')
+            # after submitting the account creation thread should run
+            self.assertEqual(len(threading.enumerate()), 2)
+            create_account_thread = threading.enumerate()[1]
+            self.assertEqual(type(create_account_thread), threading.Thread)
+            self.assertEqual(
+                create_account_thread._Thread__target.func_name, "create_account")
+            # waits for the end of the thread
+            create_account_thread.join()
+            # thread has ended and the main thread is running alone again
+            self.assertEqual(len(threading.enumerate()), 1)
+            main_thread = threading.enumerate()[0]
+            self.assertEqual(type(main_thread), threading._MainThread)
+            # and verifies the account was created
+            self.assertEqual(len(pywalib.get_account_list()), 1)
+            # TODO verify the form fields were voided
+            # self.assertEqual(new_password1_id.text, '')
+            # self.assertEqual(new_password2_id.text, '')
+            # we should get redirected to the overview page
+            # TODO: broken in #124
+            # self.advance_frames(1)
+            self.advance_frames(30)
+            self.assertEqual(controller.screen_manager.current, 'overview')
+            # the new account should be loaded in the controller
+            self.assertEqual(
+                controller.current_account,
+                pywalib.get_account_list()[0])
+            # TODO: also verify the Toolbar title was updated correctly
+            # self.assertEqual('TODO', app.controller.toolbar.title)
             # joins ongoing threads
             [t.join() for t in threading.enumerate()[1:]]
         # check the redirect dialog
@@ -257,7 +258,9 @@ class Test(unittest.TestCase):
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_switch_account()
-        self.advance_frames(1)
+        # TODO: broken in #124
+        # self.advance_frames(1)
+        self.advance_frames(10)
         switch_account = controller.switch_account
         self.assertEqual(switch_account.__class__, switchaccount.SwitchAccount)
         return switch_account
