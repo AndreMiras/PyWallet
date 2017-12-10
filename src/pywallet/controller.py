@@ -273,7 +273,8 @@ class Controller(FloatLayout):
 
     @staticmethod
     def src_dir():
-        return os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), '..')
 
     @mainthread
     def update_toolbar_title_balance(self, instance=None, value=None):
