@@ -3,11 +3,11 @@
 #:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import NavigationDrawerTwoLineListItem pywallet.navigationdrawer.NavigationDrawerTwoLineListItem
 #:import CustomMDSwitch pywallet.selectioncontrols.CustomMDSwitch
+#:import Receive pywallet.receive.Receive
 #:import FloatInput pywallet.textfields.FloatInput
 #:import MDList kivymd.list.MDList
 #:import MDSlider kivymd.slider.MDSlider
 #:import MDTextField kivymd.textfields.MDTextField
-#:import QRCodeWidget kivy.garden.qrcode
 #:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
 #:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
 
@@ -44,15 +44,6 @@
         do_scroll_x: False
         MDList:
             id: address_list_id
-
-
-<Receive>:
-    orientation: 'vertical'
-    AddressButton:
-        address_property: root.address_property
-        on_release: app.controller.open_address_options()
-    QRCodeWidget:
-        id: qr_code_id
 
 
 # transactions history

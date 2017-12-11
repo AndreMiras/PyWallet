@@ -1,0 +1,10 @@
+#:import QRCodeWidget kivy.garden.qrcode
+
+
+<Receive>:
+    orientation: 'vertical'
+    AddressButton:
+        address_property: root.address_property
+        on_release: app.controller.open_address_options()
+    QRCodeWidget:
+        id: qr_code_id
