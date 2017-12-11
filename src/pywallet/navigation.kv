@@ -1,0 +1,19 @@
+<Navigation@NavigationLayout>:
+    MDNavigationDrawer:
+        id: navigation_drawer
+        NavigationDrawerTwoLineListItem:
+            text: "Account"
+            secondary_text: self.address_property
+            on_release: app.controller.load_switch_account()
+        NavigationDrawerIconButton:
+            icon: "home"
+            text: "Home"
+            on_release: app.controller.load_landing_page()
+        NavigationDrawerIconButton:
+            icon: "key"
+            text: "Account"
+            on_release: app.controller.load_manage_keystores()
+        NavigationDrawerIconButton:
+            icon: "help"
+            text: "About"
+            on_release: app.controller.load_about_screen()

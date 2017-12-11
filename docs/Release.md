@@ -19,6 +19,7 @@ git flow release finish
 Push everything, make sure tags are also pushed:
 ```
 git push
+git push origin master:master
 git push --tags
 ```
 

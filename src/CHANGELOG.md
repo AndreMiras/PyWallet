@@ -1,5 +1,11 @@
 # Change Log
 
+## [Unreleased]
+
+  - One file per class refactoring, refs #124
+  - Unit test about screen, refs #126
+
+
 ## [v20171206]
 
   - Fix back to home on empty account, refs #115
