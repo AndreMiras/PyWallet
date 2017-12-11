@@ -38,25 +38,6 @@ except AttributeError:
 kivy.require('1.10.0')
 
 
-class PWSelectList(BoxLayout):
-
-    selected_item = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        self._items = kwargs.pop('items')
-        super(PWSelectList, self).__init__(**kwargs)
-        self._setup()
-
-    def on_release(self, item):
-        self.selected_item = item
-
-    def _setup(self):
-        address_list = self.ids.address_list_id
-        for item in self._items:
-            item.bind(on_release=lambda x: self.on_release(x))
-            address_list.add_widget(item)
-
-
 class AddressButton(MDFlatButton):
     """
     Overrides MDFlatButton, makes the font slightly smaller on mobile
