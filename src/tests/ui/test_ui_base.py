@@ -16,7 +16,8 @@ from kivy.clock import Clock
 
 import main
 import pywalib
-from pywallet import switchaccount
+from pywallet.switchaccount import SwitchAccount
+from pywallet.utils import Dialog
 
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
@@ -58,7 +59,6 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
-        Dialog = main.Dialog
         # loading the app with empty account directory
         self.assertEqual(len(pywalib.get_account_list()), 0)
         # should trigger the "Create new account" view to be open
@@ -95,7 +95,6 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
-        Dialog = main.Dialog
         # makes sure no account are loaded
         self.assertEqual(len(pywalib.get_account_list()), 0)
         controller.load_create_new_account()
@@ -170,7 +169,6 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
-        Dialog = main.Dialog
         # number of existing accounts before the test
         account_count_before = len(pywalib.get_account_list())
         # TODO: use dispatch('on_release') on navigation drawer
@@ -239,7 +237,6 @@ class Test(unittest.TestCase):
         as expected, refs #63.
         """
         controller = app.controller
-        Dialog = main.Dialog
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_landing_page()
         send = controller.send
@@ -259,7 +256,6 @@ class Test(unittest.TestCase):
         Verifies it's possible to send some Ethers through the UI.
         """
         controller = app.controller
-        Dialog = main.Dialog
         # TODO: use dispatch('on_release') on navigation drawer
         controller.load_landing_page()
         send = controller.send
@@ -315,7 +311,7 @@ class Test(unittest.TestCase):
         # self.advance_frames(1)
         self.advance_frames(10)
         switch_account = controller.switch_account
-        self.assertEqual(switch_account.__class__, switchaccount.SwitchAccount)
+        self.assertEqual(switch_account.__class__, SwitchAccount)
         return switch_account
 
     def helper_test_address_alias(self, app):
@@ -382,7 +378,6 @@ class Test(unittest.TestCase):
         Deletes account from the UI.
         """
         controller = app.controller
-        Dialog = main.Dialog
         pywalib = controller.pywalib
         # makes sure we have an account to play with
         self.assertEqual(len(pywalib.get_account_list()), 1)
@@ -439,7 +434,6 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
-        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # makes sure an account is selected
         pywalib.new_account(password="password", security_ratio=1)
@@ -466,7 +460,6 @@ class Test(unittest.TestCase):
         Helper method for confirming account deletion popups.
         """
         controller = app.controller
-        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # a confirmation popup should show
         dialogs = Dialog.dialogs
@@ -490,7 +483,6 @@ class Test(unittest.TestCase):
         refs #51.
         """
         controller = app.controller
-        Dialog = main.Dialog
         pywalib = controller.pywalib
         manage_existing = controller.manage_existing
         # makes sure an account is selected
@@ -529,7 +521,6 @@ class Test(unittest.TestCase):
         Controller.create_dialog_helper() is fired twice, it should be
         handled gracefully, refs #89.
         """
-        Dialog = main.Dialog
         title = "title"
         body = "body"
         # makes sure the controller has no dialog
@@ -553,7 +544,6 @@ class Test(unittest.TestCase):
         4) UnknownEtherscanException should be handled
         """
         controller = app.controller
-        Dialog = main.Dialog
         account = controller.current_account
         balance = 42
         # 1) simple case, library PyWalib.get_balance() gets called
@@ -618,7 +608,6 @@ class Test(unittest.TestCase):
         """
         controller = app.controller
         pywalib = controller.pywalib
-        Dialog = main.Dialog
         manage_existing = controller.manage_existing
         # makes sure there's only one account left
         self.assertEqual(

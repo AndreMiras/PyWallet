@@ -3,6 +3,7 @@
 #:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import NavigationDrawerTwoLineListItem pywallet.navigationdrawer.NavigationDrawerTwoLineListItem
 #:import CustomMDSwitch pywallet.selectioncontrols.CustomMDSwitch
+#:import History pywallet.history.History
 #:import Receive pywallet.receive.Receive
 #:import FloatInput pywallet.textfields.FloatInput
 #:import MDList kivymd.list.MDList
@@ -44,14 +45,6 @@
         do_scroll_x: False
         MDList:
             id: address_list_id
-
-
-# transactions history
-<History>:
-    orientation: 'vertical'
-    ScrollView:
-        MDList:
-            id: history_list_id
 
 
 <ScrollableLabel>:
