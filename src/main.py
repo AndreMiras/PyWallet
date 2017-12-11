@@ -5,8 +5,6 @@ from __future__ import print_function, unicode_literals
 import kivy
 from kivy.app import App
 from kivy.logger import LOG_LEVELS, Logger
-from kivy.properties import StringProperty
-from kivy.uix.scrollview import ScrollView
 from kivy.utils import platform
 from kivymd.theming import ThemeManager
 from PIL import Image as PILImage
@@ -31,13 +29,6 @@ except AttributeError:
     PILImage.Image.tobytes = PILImage.Image.tostring
 
 kivy.require('1.10.0')
-
-
-class ScrollableLabel(ScrollView):
-    """
-    https://github.com/kivy/kivy/wiki/Scrollable-Label
-    """
-    text = StringProperty('')
 
 
 class DebugRavenClient(object):

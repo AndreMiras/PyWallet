@@ -1,14 +1,6 @@
 #:kivy 1.10.0
 
-#:import ROUND_DIGITS pywalib.ROUND_DIGITS
 #:import NavigationDrawerTwoLineListItem pywallet.navigationdrawer.NavigationDrawerTwoLineListItem
-#:import CustomMDSwitch pywallet.selectioncontrols.CustomMDSwitch
-#:import History pywallet.history.History
-#:import Receive pywallet.receive.Receive
-#:import FloatInput pywallet.textfields.FloatInput
-#:import MDList kivymd.list.MDList
-#:import MDSlider kivymd.slider.MDSlider
-#:import MDTextField kivymd.textfields.MDTextField
 #:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
 #:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
 
@@ -37,11 +29,3 @@
             icon: "help"
             text: "About"
             on_release: app.controller.load_about_screen()
-
-
-<ScrollableLabel>:
-    MDLabel:
-        size_hint_y: None
-        height: self.texture_size[1]
-        text_size: self.width, None
-        text: root.text
