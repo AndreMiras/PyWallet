@@ -1,4 +1,5 @@
 #:import PWToolbar pywallet.toolbar.PWToolbar
+#:import Navigation pywallet.navigation
 
 
 <Controller>:
@@ -10,3 +11,7 @@
                 id: toolbar_id
             ScreenManager:
                 id: screen_manager_id
+
+
+# need this hack to push widgets up
+<PushUp@BoxLayout>:
