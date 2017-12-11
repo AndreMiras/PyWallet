@@ -7,9 +7,8 @@ from kivymd.list import TwoLineIconListItem
 from requests.exceptions import ConnectionError
 
 from pywalib import NoTransactionFoundException, PyWalib
-from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 from pywallet.list import IconLeftWidget
-
+from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 load_kv_from_py(__file__)
 

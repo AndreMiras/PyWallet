@@ -19,7 +19,6 @@ import pywalib
 from pywallet.switchaccount import SwitchAccount
 from pywallet.utils import Dialog
 
-
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 
 

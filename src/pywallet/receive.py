@@ -5,7 +5,6 @@ from kivy.uix.boxlayout import BoxLayout
 
 from pywallet.utils import load_kv_from_py
 
-
 load_kv_from_py(__file__)
 
 
