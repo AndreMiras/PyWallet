@@ -157,7 +157,7 @@ class PyWalib(object):
         error = response_json.get("error")
         if error is not None:
             code = error.get("code")
-            if code == -32010:
+            if code in [-32000, -32010]:
                 raise InsufficientFundsException()
             else:
                 raise UnknownEtherscanException(response_json)
