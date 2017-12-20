@@ -160,7 +160,7 @@ class PyWalib(object):
             if code == -32010:
                 raise InsufficientFundsException()
             else:
-                raise UnknownEtherscanException()
+                raise UnknownEtherscanException(response_json)
 
     @staticmethod
     def add_transaction(tx):

@@ -166,8 +166,9 @@ class PywalibTestCase(unittest.TestCase):
         response_json = {
             'message': 'Unknown error', 'result': [], 'status': '0'
         }
-        with self.assertRaises(UnknownEtherscanException):
+        with self.assertRaises(UnknownEtherscanException) as e:
             PyWalib.handle_etherscan_error(response_json)
+        self.assertEqual(e.exception.message, response_json)
         # no error
         response_json = {
             'message': 'OK', 'result': [], 'status': '1'
@@ -317,17 +318,18 @@ class PywalibTestCase(unittest.TestCase):
                     'code': 0, 'data': None
                 }
         }
-        with self.assertRaises(UnknownEtherscanException):
+        with self.assertRaises(UnknownEtherscanException) as e:
             PyWalib.handle_etherscan_tx_error(response_json)
+        self.assertEqual(e.exception.message, response_json)
         # no error
         response_json = {'jsonrpc': '2.0', 'id': 1}
         self.assertEqual(
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
 
-    def test_transact_no_found(self):
+    def test_transact_no_funds(self):
         """
-        Tries to send a transaction from an address with no found.
+        Tries to send a transaction from an address with no funds.
         """
         pywalib = self.pywalib
         account = self.helper_new_account()
