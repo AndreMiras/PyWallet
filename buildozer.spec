@@ -68,7 +68,7 @@ requirements =
     libzbar,
     zbar,
     pil,
-    https://github.com/AndreMiras/garden.zbarcam/archive/20171102.zip
+    https://github.com/AndreMiras/garden.zbarcam/archive/20171220.zip
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes

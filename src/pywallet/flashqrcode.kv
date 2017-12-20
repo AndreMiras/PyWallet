@@ -10,12 +10,3 @@
         self.unbind_on_symbols()
     ZBarCam:
         id: zbarcam_id
-        # Android camera rotation workaround, refs:
-        # https://github.com/AndreMiras/garden.zbarcam/issues/3
-        canvas.before:
-            PushMatrix
-            Rotate:
-                angle: -90 if platform == 'android' else 0
-                origin: self.center
-        canvas.after:
-            PopMatrix

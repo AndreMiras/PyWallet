@@ -4,6 +4,7 @@
 
   - One file per class refactoring, refs #124
   - Unit test about screen, refs #126
+  - Better QRCode flash screen fit
 
 
 ## [v20171206]
