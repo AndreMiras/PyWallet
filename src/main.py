@@ -97,7 +97,7 @@ if __name__ == '__main__':
     client = configure_sentry(in_debug)
     try:
         PyWalletApp().run()
-    except:
+    except Exception:
         if type(client) == Client:
             Logger.info(
                 'Errors will be sent to Sentry, run with "--debug" if you '

@@ -1,18 +1,23 @@
-Cython==0.25.2
 # 2017/06/08 develop
-https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip
+https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip#egg=pyethereum
 # 2017/06/10 develop
-https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip
+https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip#egg=pydevp2p
 # 2017/06/10 develop
-https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip
+https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip#egg=pyethapp
+# https://github.com/ethereum/pyethapp/issues/274
+https://github.com/mfranciszkiewicz/pyelliptic/archive/1.5.10.tar.gz#egg=pyelliptic
+eth-hash==0.1.1
 pyethash==0.1.27
+rlp==0.6.0
 # on Ubuntu 16.04 Xenial, the error:
 # x11 - ImportError: No module named window_x11
 # is fixed by installing kivy master
-# https://github.com/kivy/kivy/archive/27e3b90eae2a0155b22a435f1b6f65c913519db6.zip
-Kivy==1.10.0
+# https://github.com/kivy/kivy/archive/27e3b90eae2a0155b22a435f1b6f65c913519db6.zip#egg=kivy
+# on Ubuntu 18.04 Bionic, the compile error related to `MIX_INIT_MOD` is fixed by installing:
+https://github.com/kivy/kivy/archive/d8ef8c2834293098bc404c0432049b2761f9b721.zip#egg=kivy
+# Kivy==1.10.0
 Kivy-Garden==0.1.4
-https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1
+https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1#egg=kivymd
 Pillow==4.1.1
 raven==6.1.0
 https://github.com/AndreMiras/garden.zbarcam/archive/20171220.zip

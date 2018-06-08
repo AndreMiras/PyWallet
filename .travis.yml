@@ -1,40 +1,21 @@
-dist: trusty
 sudo: required
 
 language: generic
 
-before_script:
-    - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
-    - sleep 3 # give xvfb some time to start
+# before_script:
+#     - "export DISPLAY=:99.0"
+#     - "sh -e /etc/init.d/xvfb start"
+#     - sleep 3 # give xvfb some time to start
 
-before_install:
-    # Required by Buildozer Android
-    # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-12-04-64bit
-    - sudo apt-get update -q
-    - sudo apt-get install build-essential ccache git lib32z1 lib32bz2-1.0 libncurses5:i386 libstdc++6:i386 python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev zlib1g:i386
-    # Required by Kivy
-    # https://kivy.org/docs/installation/installation-linux.html#dependencies-with-sdl2
-    - sudo apt-get install python-pip build-essential git python-dev
-    - sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
-    # Optional dependency for the cut and multitouch support
-    - sudo apt-get install xclip libmtdev1
-    # Required for the project
-    - sudo apt-get install libzbar-dev
-
-install:
-    - sudo pip install coveralls
+services:
+  - docker
 
 env:
-    global:
-        - COVERALLS_PARALLEL=true
-    matrix:
-        - SCRIPT_COMMAND="./travis/script_linux.sh"
-        - SCRIPT_COMMAND="./travis/script_android.sh"
+  - TAG=pywallet-linux DOCKERFILE=dockerfiles/Dockerfile-linux COMMAND='make test'
+  # - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
+
+install:
+    - docker build --tag=$TAG --file=$DOCKERFILE .
 
 script:
-    # runs in parallel
-    - (eval "$SCRIPT_COMMAND")
-
-after_success:
-    - coveralls
+    - travis_wait docker run $TAG $COMMAND
