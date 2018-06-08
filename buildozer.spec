@@ -48,7 +48,7 @@ requirements =
     ethash,
     scrypt,
     bitcoin,
-    rlp,
+    rlp==0.6.0,
     repoze.lru,
     PyYAML,
     https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip,
