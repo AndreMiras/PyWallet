@@ -12,7 +12,7 @@ services:
 
 env:
   - TAG=pywallet-linux DOCKERFILE=dockerfiles/Dockerfile-linux COMMAND='make test'
-  # - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
+  - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
 
 install:
     - docker build --tag=$TAG --file=$DOCKERFILE .
