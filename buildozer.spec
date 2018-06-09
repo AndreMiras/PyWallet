@@ -61,7 +61,7 @@ requirements =
     eth-hash==0.1.1,
     pyelliptic==1.5.7,
     cffi,
-    secp256k1,
+    secp256k1==b0452e6,
     qrcode,
     contextlib2,
     raven,
