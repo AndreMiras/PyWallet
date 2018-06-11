@@ -21,7 +21,7 @@ Before installing additional dependencies.
 ```
 sudo apt install zlib1g-dev default-jdk
 ```
-Check [script_android.sh](/travis/script_android.sh) or [Dockerfile](https://github.com/AndreMiras/PyWallet/blob/feature/ticket37_travis_docker/Dockerfile) to see two different ways to do it in Travis.
+Check [.travis.yml](.travis.yml) or [dockerfiles/Dockerfile-android](dockerfiles/Dockerfile-android) to see Travis automated build in Docker.
 
 ## Gentoo 64 host, Android target
 Build zlib in 32-bit:

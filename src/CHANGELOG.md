@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-  - Linux Travis build on Docker, refs #36
+  - Linux & Android Travis build on Docker, refs #36
   - One file per class refactoring, refs #124
   - Unit test about screen, refs #126
   - Better QRCode flash screen fit

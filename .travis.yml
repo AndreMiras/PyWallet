@@ -12,7 +12,11 @@ services:
 
 env:
   - TAG=pywallet-linux DOCKERFILE=dockerfiles/Dockerfile-linux COMMAND='make test'
-  # - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
+  # running the build twice since first cffi build fails, not the second, see
+  # https://github.com/AndreMiras/PyWallet/issues/136
+  # also buildozer exit code is 0 even though the build fails, so can't use `||`, see:
+  # https://github.com/kivy/buildozer/issues/674
+  - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug; buildozer android debug'
 
 install:
     - docker build --tag=$TAG --file=$DOCKERFILE .
