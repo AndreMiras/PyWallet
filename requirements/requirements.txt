@@ -1,5 +1,5 @@
 # 2017/06/08 develop
-https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip#egg=pyethereum
+https://github.com/ethereum/pyethereum/archive/2e53bf3.zip#egg=pyethereum
 devp2p==0.9.3
 # 2017/06/10 develop
 https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip#egg=pyethapp

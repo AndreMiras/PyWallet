@@ -51,7 +51,7 @@ requirements =
     rlp==0.6.0,
     repoze.lru,
     PyYAML,
-    https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip,
+    https://github.com/ethereum/pyethereum/archive/2e53bf3.zip,
     devp2p==0.9.3,
     coincurve==7.1.0,
     gevent,
