@@ -10,7 +10,7 @@ class CoincurveRecipe(CompiledComponentsPythonRecipe):
         'libffi', 'cffi', 'libsecp256k1']
     patches = [
         "cross_compile.patch", "drop_setup_requires.patch",
-        "find_lib.patch", "no-download.patch"]
+        "find_lib.patch", "no-download.patch", "setup.py.patch"]
 
     def get_recipe_env(self, arch=None, with_flags_in_cc=True):
         env = super(CoincurveRecipe, self).get_recipe_env(arch, with_flags_in_cc)
