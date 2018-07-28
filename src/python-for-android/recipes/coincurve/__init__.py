@@ -1,5 +1,5 @@
 import os
-from pythonforandroid.recipe import PythonRecipe, CompiledComponentsPythonRecipe, CythonRecipe
+from pythonforandroid.recipe import PythonRecipe, CompiledComponentsPythonRecipe
 
 
 class CoincurveRecipe(CompiledComponentsPythonRecipe):
@@ -16,15 +16,9 @@ class CoincurveRecipe(CompiledComponentsPythonRecipe):
         env = super(CoincurveRecipe, self).get_recipe_env(arch, with_flags_in_cc)
         # sets linker to use the correct gcc (cross compiler)
         env['LDSHARED'] = env['CC'] + ' -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions'
-        # -Wl,-rpath -Wl,
         libsecp256k1 = self.get_recipe('libsecp256k1', self.ctx)
         libsecp256k1_dir = libsecp256k1.get_build_dir(arch.arch)
-        # env['LDSHARED'] = (
-        #     env['CC'] +
-        #     ' -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-rpath -Wl,' +
-        #     os.path.join(libsecp256k1_dir, '.libs'))
         env['LDFLAGS'] += ' -L{}'.format(os.path.join(libsecp256k1_dir, '.libs'))
-        # assert False, env['LDSHARED']
         env['CFLAGS'] += ' -I' + os.path.join(libsecp256k1_dir, 'include')
         # only keeps major.minor (discards patch)
         python_version = self.ctx.python_recipe.version[0:3]
