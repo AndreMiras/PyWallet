@@ -4,18 +4,18 @@ from pythonforandroid.recipe import CompiledComponentsPythonRecipe
 
 class CffiRecipe(CompiledComponentsPythonRecipe):
     name = 'cffi'
-    version = '1.4.2'
+    version = '1.11.5'
     url = 'https://pypi.python.org/packages/source/c/cffi/cffi-{version}.tar.gz'
 
     depends = [('python2', 'python3crystax'), 'setuptools', 'pycparser', 'libffi']
 
     patches = ['disable-pkg-config.patch']
 
-    # call_hostpython_via_targetpython = False
+    call_hostpython_via_targetpython = False
     install_in_hostpython = True
 
-    def get_recipe_env(self, arch=None):
-        env = super(CffiRecipe, self).get_recipe_env(arch)
+    def get_recipe_env(self, arch=None, with_flags_in_cc=True):
+        env = super(CffiRecipe, self).get_recipe_env(arch, with_flags_in_cc)
         # sets linker to use the correct gcc (cross compiler)
         env['LDSHARED'] = env['CC'] + ' -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions'
         libffi = self.get_recipe('libffi', self.ctx)
@@ -33,15 +33,19 @@ class CffiRecipe(CompiledComponentsPythonRecipe):
             self.ctx.get_site_packages_dir(),
             env['BUILDLIB_PATH'],
         ])
+        python_version = self.ctx.python_recipe.version[0:3]
         if self.ctx.ndk == 'crystax':
             # only keeps major.minor (discards patch)
-            python_version = self.ctx.python_recipe.version[0:3]
             ndk_dir_python = os.path.join(self.ctx.ndk_dir, 'sources/python/', python_version)
             env['LDFLAGS'] += ' -L{}'.format(os.path.join(ndk_dir_python, 'libs', arch.arch))
             env['LDFLAGS'] += ' -lpython{}m'.format(python_version)
             # until `pythonforandroid/archs.py` gets merged upstream:
             # https://github.com/kivy/python-for-android/pull/1250/files#diff-569e13021e33ced8b54385f55b49cbe6
             env['CFLAGS'] += ' -I{}/include/python/'.format(ndk_dir_python)
+        else:
+            env['PYTHON_ROOT'] = self.ctx.get_python_install_dir()
+            env['CFLAGS'] += ' -I' + env['PYTHON_ROOT'] + '/include/python{}'.format(python_version)
+            env['LDFLAGS'] += " -lpython{}".format(python_version)
         return env
 
 

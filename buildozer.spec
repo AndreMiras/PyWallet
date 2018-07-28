@@ -61,7 +61,7 @@ requirements =
     requests,
     eth-hash==0.1.1,
     pyelliptic==1.5.7,
-    cffi,
+    cffi==1.11.5,
     libsecp256k1==355a38f,
     asn1crypto==0.24.0,
     coincurve==7.1.0,
