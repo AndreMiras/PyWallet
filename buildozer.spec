@@ -10,7 +10,7 @@ package.name = pywallet
 package.domain = com.github.andremiras
 
 # (str) Source code where the main.py live
-source.dir = src/
+source.dir = src
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,md
@@ -63,6 +63,8 @@ requirements =
     pyelliptic==1.5.7,
     cffi,
     libsecp256k1==355a38f,
+    asn1crypto==0.24.0,
+    coincurve==7.1.0,
     qrcode,
     contextlib2,
     raven,
@@ -71,6 +73,7 @@ requirements =
     zbar,
     pil,
     https://github.com/AndreMiras/garden.zbarcam/archive/20171220.zip
+
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -235,7 +238,7 @@ android.arch = armeabi-v7a
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
 #p4a.local_recipes =
-p4a.local_recipes = ./src/python-for-android/recipes/
+p4a.local_recipes = %(source.dir)s/python-for-android/recipes/
 
 # (str) Filename to the hook for p4a
 #p4a.hook =
