@@ -109,7 +109,11 @@ class PyWalib(object):
             value_eth = value_wei / float(pow(10, 18))
             value_eth = round(value_eth, ROUND_DIGITS)
             from_address = PyWalib.address_hex(transaction['from'])
-            to_address = PyWalib.address_hex(transaction['to'])
+            to_address = transaction['to']
+            # on contract creation, "to" is replaced by the "contractAddress"
+            if not to_address:
+                to_address = transaction['contractAddress']
+            to_address = PyWalib.address_hex(to_address)
             sent = from_address == address
             received = not sent
             extra_dict = {
