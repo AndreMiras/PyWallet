@@ -58,3 +58,7 @@ clean:
 
 test:
 	$(TOX)
+
+uitest:
+	. $(ACTIVATE_PATH) && \
+	$(PYTHON) -m kivyunittest --folder src/tests/ui/ --pythonpath src/
