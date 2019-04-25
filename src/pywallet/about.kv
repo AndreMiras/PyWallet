@@ -1,0 +1,67 @@
+#:import webbrowser webbrowser
+#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import ScrollableLabel pywallet.scrollablelabel.ScrollableLabel
+
+
+<AboutOverview>:
+    orientation: 'vertical'
+    MDLabel:
+        markup: True
+        text: root.about_text_property
+        theme_text_color: 'Primary'
+        on_ref_press: webbrowser.open(root.project_page_property)
+
+
+<AboutChangelog>:
+    orientation: 'vertical'
+    ScrollableLabel:
+        text: root.changelog_text_property
+
+
+<AboutDiagnostic>:
+    orientation: 'vertical'
+    ScrollView:
+        MDTextField:
+            multiline: True
+            readonly: True
+            text: root.stream_property
+    AnchorLayout:
+        size_hint_y: None
+        MDRaisedButton:
+            text: "Run diagnostic"
+            on_release: root.run_tests()
+
+
+<About@MDBottomNavigation>:
+    MDBottomNavigationItem:
+        name: "about_overview"
+        text: "Overview"
+        icon: 'github-circle'
+        on_tab_press:
+            app.controller.set_toolbar_title("Overview")
+        AboutOverview:
+    MDBottomNavigationItem:
+        name: "about_changelog"
+        text: "Changelog"
+        icon: 'format-list-bulleted'
+        on_tab_press:
+            app.controller.set_toolbar_title("Changelog")
+        AboutChangelog:
+    MDBottomNavigationItem:
+        name: "about_diagnostic"
+        text: "Diagnostic"
+        icon: 'bug'
+        on_tab_press:
+            app.controller.set_toolbar_title("Diagnostic")
+        AboutDiagnostic:
+
+
+<AboutScreen>:
+    name: 'about'
+    on_pre_enter:
+        app.controller.set_toolbar_title("About PyWallet")
+        # workaround for broken MDBottomNavigation, refs
+        # https://github.com/AndreMiras/PyWallet/issues/38
+        Window.dispatch('on_resize', *Window.size)
+    About:
+        id: about_id

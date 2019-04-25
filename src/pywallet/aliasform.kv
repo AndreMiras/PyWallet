@@ -1,0 +1,15 @@
+#:import MDTextField kivymd.textfields.MDTextField
+
+
+<AliasForm>:
+    orientation: 'vertical'
+    MDLabel:
+        halign: 'center'
+        text: root.address
+    MDTextField:
+        id: alias_id
+        hint_text: "Alias"
+        helper_text: "Enter your new alias"
+        helper_text_mode: "on_focus"
+        text: root.alias
+        on_text: root.alias = args[1]

@@ -10,7 +10,7 @@ package.name = pywallet
 package.domain = com.github.andremiras
 
 # (str) Source code where the main.py live
-source.dir = src/
+source.dir = src
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,md
@@ -48,19 +48,23 @@ requirements =
     ethash,
     scrypt,
     bitcoin,
-    rlp,
+    rlp==0.6.0,
     repoze.lru,
     PyYAML,
-    https://github.com/ethereum/pyethereum/archive/0ae64823d1bccba9c8148adb462060cb83c08f06.zip,
-    https://github.com/ethereum/pydevp2p/archive/cc68f6d69fa88ffaac6f8483392c37eb9f19d712.zip,
+    https://github.com/ethereum/pyethereum/archive/2e53bf3.zip,
+    devp2p==0.9.3,
+    coincurve==7.1.0,
     gevent,
     pbkdf2,
     https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip,
     https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1,
     requests,
+    eth-hash==0.1.1,
     pyelliptic==1.5.7,
-    cffi,
-    secp256k1,
+    cffi==1.11.5,
+    libsecp256k1==355a38f,
+    asn1crypto==0.24.0,
+    coincurve==7.1.0,
     qrcode,
     contextlib2,
     raven,
@@ -68,7 +72,8 @@ requirements =
     libzbar,
     zbar,
     pil,
-    https://github.com/AndreMiras/garden.zbarcam/archive/20171102.zip
+    https://github.com/AndreMiras/garden.zbarcam/archive/20171220.zip
+
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -186,6 +191,7 @@ android.blacklist_src = blacklist.txt
 
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = stable
+p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
@@ -232,7 +238,7 @@ android.arch = armeabi-v7a
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
 #p4a.local_recipes =
-p4a.local_recipes = ./src/python-for-android/recipes/
+p4a.local_recipes = %(source.dir)s/python-for-android/recipes/
 
 # (str) Filename to the hook for p4a
 #p4a.hook =
@@ -259,7 +265,7 @@ p4a.local_recipes = ./src/python-for-android/recipes/
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 2
+log_level = 1
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1

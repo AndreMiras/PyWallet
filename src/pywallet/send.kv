@@ -1,0 +1,34 @@
+#:import ROUND_DIGITS pywalib.ROUND_DIGITS
+#:import FloatInput pywallet.textfields.FloatInput
+
+
+<Send>:
+    orientation: 'vertical'
+    # TODO: handle from address
+    MDTextField:
+        id: send_to_id
+        hint_text: "To"
+        helper_text: "Receiver Ethereum address"
+        helper_text_mode: "persistent"
+        required: True
+        write_tab: False
+        text: root.send_to_address
+        on_text: root.send_to_address = args[1]
+    MDRaisedButton:
+        text: "Flash QR Code"
+        on_release: app.controller.load_flash_qr_code()
+    FloatInput:
+        id: send_amount_id
+        hint_text: "Amount ETH (e.g. 1.10)"
+        required: True
+        write_tab: False
+        text: str(round(root.send_amount, ROUND_DIGITS))
+        on_text: root.send_amount = args[1]
+    AnchorLayout:
+        MDRaisedButton:
+            id: send_button_id
+            text: "Send"
+            on_release: root.on_send_click()
+    PushUp:
+
+

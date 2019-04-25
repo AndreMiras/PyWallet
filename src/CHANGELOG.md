@@ -1,5 +1,14 @@
 # Change Log
 
+## [v20180729]
+
+  - Linux & Android Travis build on Docker, refs #37
+  - One file per class refactoring, refs #124
+  - Unit test about screen, refs #126
+  - Better QRCode flash screen fit
+  - Cffi & secp256k1 compilation fixes, refs #136, #139, #140
+  - Handle contract creation tx, refs #142
+
 ## [v20171206]
 
   - Fix back to home on empty account, refs #115

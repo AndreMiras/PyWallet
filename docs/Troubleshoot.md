@@ -65,6 +65,10 @@ c/_cffi_backend.c:13:17: fatal error: ffi.h: No such file or directory
 ```
 See upstream ticket: https://github.com/kivy/python-for-android/issues/1148
 
+### Build subset of recipes with p4a
+```
+buildozer android p4a -- apk --private $PWD/src/ --local-recipes $PWD/src/python-for-android/recipes/ --package=com.github.andremiras --name PyWallet --version 0.1 --bootstrap=sdl2 --requirements=python2,kivy
+```
 
 ## Kivy
 
