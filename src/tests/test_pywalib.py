@@ -168,7 +168,7 @@ class PywalibTestCase(unittest.TestCase):
         }
         with self.assertRaises(UnknownEtherscanException) as e:
             PyWalib.handle_etherscan_error(response_json)
-        self.assertEqual(e.exception.message, response_json)
+        self.assertEqual(e.exception.args[0], response_json)
         # no error
         response_json = {
             'message': 'OK', 'result': [], 'status': '1'
