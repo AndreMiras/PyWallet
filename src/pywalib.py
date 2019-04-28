@@ -409,7 +409,8 @@ class PyWalib(object):
         """
         The current_password is optional if the account is already unlocked.
         """
-        raise NotImplementedError('refs #19')
+        self.account_utils.update_account_password(
+            account, new_password, current_password)
 
     def update_account_password_old(
             self, account, new_password, current_password=None):
