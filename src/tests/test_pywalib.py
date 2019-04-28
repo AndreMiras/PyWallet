@@ -196,7 +196,7 @@ class PywalibTestCase(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             PyWalib.address_hex(address)
         self.assertEqual(
-            context.exception.message,
+            context.exception.args[0],
             "Invalid address format: '%s'" % (address))
 
     def test_get_balance(self):
