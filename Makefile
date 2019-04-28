@@ -19,7 +19,7 @@ NPROC=`grep -c '^processor' /proc/cpuinfo`
 all: system_dependencies opencv virtualenv
 
 virtualenv:
-	test -d venv || virtualenv -p python2 venv
+	test -d venv || virtualenv -p python3 venv
 	. venv/bin/activate
 	$(PIP) install Cython==0.26.1
 	$(PIP) install -r requirements/requirements.txt
