@@ -320,7 +320,7 @@ class PywalibTestCase(unittest.TestCase):
         }
         with self.assertRaises(UnknownEtherscanException) as e:
             PyWalib.handle_etherscan_tx_error(response_json)
-        self.assertEqual(e.exception.message, response_json)
+        self.assertEqual(e.exception.args[0], response_json)
         # no error
         response_json = {'jsonrpc': '2.0', 'id': 1}
         self.assertEqual(
