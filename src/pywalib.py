@@ -440,7 +440,7 @@ class PyWalib(object):
         """
         Returns the Account list.
         """
-        accounts = self.app.services.accounts
+        accounts = self.account_utils.get_account_list()
         return accounts
 
     def get_main_account(self):
