@@ -79,7 +79,7 @@ class PyWalib(object):
         Normalizes address.
         """
         prefix = "0x"
-        address_hex = prefix + normalize_address(address).encode("hex")
+        address_hex = prefix + normalize_address(address).hex()
         return address_hex
 
     @staticmethod
