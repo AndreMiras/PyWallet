@@ -33,7 +33,8 @@ class AccountUtils:
         Creates an account on the disk and returns it.
         :param key: the private key, or `None` to generate a random one
         """
-        account = Account.new(password, key=key, uuid=None, iterations=iterations)
+        account = Account.new(
+            password, key=key, uuid=None, iterations=iterations)
         account.path = os.path.join(self.keystore_dir, account.address.hex())
         self.add_account(account)
         return account
@@ -87,20 +88,23 @@ class AccountUtils:
         self._accounts.remove(account)
 
     def get_by_address(self, address):
-        """Get an account by its address.
-
-        Note that even if an account with the given address exists, it might not be found if it is
-        locked. Also, multiple accounts with the same address may exist, in which case the first
-        one is returned (and a warning is logged).
-
+        """
+        Get an account by its address.
+        Note that even if an account with the given address exists, it might
+        not be found if it is locked.
+        Also, multiple accounts with the same address may exist, in which case
+        the first one is returned (and a warning is logged).
         :raises: `KeyError` if no matching account can be found
         """
         assert len(address) == 20
-        accounts = [account for account in self._accounts if account.address == address]
+        accounts = [acc for acc in self._accounts if acc.address == address]
         if len(accounts) == 0:
-            raise KeyError('account not found by address', address=address.encode('hex'))
+            raise KeyError(
+                'account not found by address', address=address.encode('hex'))
         elif len(accounts) > 1:
-            log.warning('multiple accounts with same address found', address=address.encode('hex'))
+            log.warning(
+                'multiple accounts with same address found',
+                address=address.encode('hex'))
         return accounts[0]
 
     def sign_tx(self, address, tx):

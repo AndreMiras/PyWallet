@@ -3,7 +3,6 @@
 from __future__ import print_function, unicode_literals
 
 import os
-import shutil
 from os.path import expanduser
 from enum import Enum
 
@@ -12,12 +11,10 @@ import rlp
 from devp2p.app import BaseApp
 from eth_utils import to_checksum_address
 from ethereum.tools.keys import PBKDF2_CONSTANTS
-from ethereum.transactions import Transaction
 from ethereum.utils import denoms, normalize_address
 # from pyethapp.accounts import Account, AccountsService
 from web3 import HTTPProvider, Web3
 from pyethapp_accounts import Account
-from eth_account import Account as EthAccount
 from ethereum_utils import AccountUtils
 
 ETHERSCAN_API_KEY = None
@@ -231,15 +228,6 @@ class PyWalib(object):
         Signs and broadcasts a transaction.
         Returns transaction hash.
         """
-        """
-        # TODO:
-        # sender -> wallet_path
-        wallet_path = wallet_info[sender]['path']
-        # wallet_info[sender]['password']
-        wallet_path = 'TODO'
-        wallet_encrypted = load_keyfile(wallet_path)
-        address = wallet_encrypted['address']
-        """
         sender = sender or web3.eth.coinbase
         address = sender
         from_address_normalized = to_checksum_address(address)
@@ -251,72 +239,16 @@ class PyWalib(object):
             'nonce': nonce,
             'value': value,
         }
-        # TODO
-        # private_key = EthAccount.decrypt(wallet_encrypted, wallet_password)
         account = self.account_utils.get_by_address(address)
         private_key = account.privkey
         signed_tx = self.web3.eth.account.signTransaction(
             transaction, private_key)
         try:
-            tx_hash = self.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+            tx_hash = self.web3.eth.sendRawTransaction(
+                signed_tx.rawTransaction)
         except ValueError as e:
             self.handle_web3_exception(e)
-        """
-        sender = sender or web3.eth.coinbase
-        transaction = {
-            'to': to,
-            'value': value,
-            'data': data,
-            'from': sender,
-            'gas': gas,
-            'gasPrice': gasprice,
-        }
-        tx_hash = web3.eth.sendTransaction(transaction)
-        """
         return tx_hash
-
-
-    def transact_old(self, to, value=0, data='', sender=None, gas=25000,
-                 gasprice=60 * denoms.shannon):
-        """
-        Inspired from pyethapp/console_service.py except that we use
-        Etherscan for retrieving the nonce as we as for broadcasting the
-        transaction.
-        Arg value is in Wei.
-        """
-        # account.unlock(password)
-        sender = normalize_address(sender or self.get_main_account().address)
-        to = normalize_address(to, allow_blank=True)
-        nonce = PyWalib.get_nonce(sender)
-        # creates the transaction
-        tx = Transaction(nonce, gasprice, gas, to, value, data)
-
-
-        signed_tx = self.web3.eth.account.signTransaction(
-            transaction, private_key)
-        tx_hash = self.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
-        return tx_hash
-
-        # TODO: migration to web3
-        # then signs it
-        self.app.services.accounts.sign_tx(sender, tx)
-        # TODO: not needed anymore after web3
-        assert tx.sender == sender
-        PyWalib.add_transaction(tx)
-        return tx
-
-    # TODO: AccountUtils.new_account()
-    # TODO: update security_ratio param
-    @staticmethod
-    def new_account_helper(password, security_ratio=None):
-        """
-        Helper method for creating an account in memory.
-        Returns the created account.
-        security_ratio is a ratio of the default PBKDF2 iterations.
-        Ranging from 1 to 100 means 100% of the iterations.
-        """
-        account = self.account_utils.new_account(password=password)
-        return account
 
     @staticmethod
     def new_account_helper_old(password, security_ratio=None):
@@ -367,19 +299,6 @@ class PyWalib(object):
         Ranging from 1 to 100 means 100% of the iterations.
         """
         account = self.account_utils.new_account(password=password)
-        return account
-
-    def new_account_old(self, password, security_ratio=None):
-        """
-        Creates an account on the disk and returns it.
-        security_ratio is a ratio of the default PBKDF2 iterations.
-        Ranging from 1 to 100 means 100% of the iterations.
-        """
-        account = PyWalib.new_account_helper(password, security_ratio)
-        app = self.app
-        account.path = os.path.join(
-            app.services.accounts.keystore_dir, account.address.encode('hex'))
-        self.app.services.accounts.add_account(account)
         return account
 
     def delete_account(self, account):
