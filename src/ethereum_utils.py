@@ -39,8 +39,7 @@ class AccountUtils:
         return account
 
     def add_account(self, account):
-        with open(account.path, 'w') as f:
-            f.write(account.dump())
+        account.dump_to_disk()
         if self._accounts is None:
             self._accounts = []
         self._accounts.append(account)
@@ -110,10 +109,15 @@ class AccountUtils:
     def update_account_password(
             self, account, new_password, current_password=None):
         """
+        Updates the current account instance.
         The current_password is optional if the account is already unlocked.
         """
         if current_password is not None:
             account.unlock(current_password)
-        key = account.privkey
-        self.delete_account(account)
-        self.new_account(new_password, key=key, iterations=None)
+        new_account = Account.new(
+            password=new_password,
+            key=account.privkey,
+            uuid=account.uuid,
+            path=account.path)
+        account.keystore = new_account.keystore
+        account.dump_to_disk()

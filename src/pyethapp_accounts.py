@@ -98,6 +98,10 @@ class Account:
             d['id'] = str(self.uuid)
         return json.dumps(d)
 
+    def dump_to_disk(self, include_address=True, include_id=True):
+        with open(self.path, 'w') as f:
+            f.write(self.dump(include_address, include_id))
+
     def unlock(self, password: bytes):
         """
         Unlock the account with a password.
