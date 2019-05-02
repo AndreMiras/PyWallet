@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 from tempfile import mkdtemp
+from unittest import mock
 
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
@@ -326,6 +327,20 @@ class PywalibTestCase(unittest.TestCase):
         self.assertEqual(
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
+
+    def test_transact(self):
+        """
+        Basic transact() test, makes sure web3 sendRawTransaction gets called.
+        """
+        pywalib = self.pywalib
+        account = self.helper_new_account()
+        to = ADDRESS
+        sender = account.address
+        value_wei = 100
+        with mock.patch('web3.eth.Eth.sendRawTransaction') \
+                as m_sendRawTransaction:
+            pywalib.transact(to=to, value=value_wei, sender=sender)
+        self.assertTrue(m_sendRawTransaction.called)
 
     def test_transact_no_funds(self):
         """
