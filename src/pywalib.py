@@ -7,7 +7,6 @@ from enum import Enum
 from os.path import expanduser
 
 import requests
-import rlp
 from eth_utils import to_checksum_address
 from ethereum.utils import normalize_address
 from web3 import HTTPProvider, Web3
