@@ -342,6 +342,32 @@ class PywalibTestCase(unittest.TestCase):
             pywalib.transact(to=to, value=value_wei, sender=sender)
         self.assertTrue(m_sendRawTransaction.called)
 
+    def test_transact_no_sender(self):
+        """
+        The sender parameter should default to the main account.
+        Makes sure the transaction is being signed by the available account.
+        """
+        pywalib = self.pywalib
+        account = self.helper_new_account()
+        to = ADDRESS
+        value_wei = 100
+        with mock.patch('web3.eth.Eth.sendRawTransaction') \
+                as m_sendRawTransaction, \
+                mock.patch('web3.eth.Eth.account.signTransaction') \
+                as m_signTransaction:
+            pywalib.transact(to=to, value=value_wei)
+        self.assertTrue(m_sendRawTransaction.called)
+        m_signTransaction.call_args_list
+        transaction = {
+            'chainId': 1,
+            'gas': 25000,
+            'gasPrice': 5000000000,
+            'nonce': 0,
+            'value': value_wei,
+        }
+        expected_call = mock.call(transaction, account.privkey)
+        self.assertEqual(m_signTransaction.call_args_list, [expected_call])
+
     def test_transact_no_funds(self):
         """
         Tries to send a transaction from an address with no funds.

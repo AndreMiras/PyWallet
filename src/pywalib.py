@@ -222,8 +222,7 @@ class PyWalib(object):
         Signs and broadcasts a transaction.
         Returns transaction hash.
         """
-        sender = sender or web3.eth.coinbase
-        address = sender
+        address = sender or self.get_main_account().address
         from_address_normalized = to_checksum_address(address)
         nonce = self.web3.eth.getTransactionCount(from_address_normalized)
         transaction = {
