@@ -8,11 +8,8 @@ from enum import Enum
 
 import requests
 import rlp
-from devp2p.app import BaseApp
 from eth_utils import to_checksum_address
-from ethereum.tools.keys import PBKDF2_CONSTANTS
-from ethereum.utils import denoms, normalize_address
-# from pyethapp.accounts import Account, AccountsService
+from ethereum.utils import normalize_address
 from web3 import HTTPProvider, Web3
 from pyethapp_accounts import Account
 from ethereum_utils import AccountUtils
@@ -51,10 +48,6 @@ class PyWalib(object):
         self.chain_id = ChainID.MAINNET
         self.provider = HTTPProvider('https://mainnet.infura.io')
         self.web3 = Web3(self.provider)
-        # TODO: not needed anymore
-        self.app = BaseApp(
-            config=dict(accounts=dict(keystore_dir=keystore_dir)))
-        # AccountsService.register_with_app(self.app)
 
     @staticmethod
     def handle_etherscan_error(response_json):
@@ -223,7 +216,7 @@ class PyWalib(object):
         return tx_hash
 
     def transact(self, to, value=0, data='', sender=None, gas=25000,
-                 gasprice=60 * denoms.shannon):
+                 gasprice=60 * (10 ** 9)):
         """
         Signs and broadcasts a transaction.
         Returns transaction hash.
@@ -249,26 +242,6 @@ class PyWalib(object):
         except ValueError as e:
             self.handle_web3_exception(e)
         return tx_hash
-
-    @staticmethod
-    def new_account_helper_old(password, security_ratio=None):
-        """
-        Helper method for creating an account in memory.
-        Returns the created account.
-        security_ratio is a ratio of the default PBKDF2 iterations.
-        Ranging from 1 to 100 means 100% of the iterations.
-        """
-        # TODO: perform validation on security_ratio (within allowed range)
-        if security_ratio:
-            default_iterations = PBKDF2_CONSTANTS["c"]
-            new_iterations = int((default_iterations * security_ratio) / 100)
-            PBKDF2_CONSTANTS["c"] = new_iterations
-        uuid = None
-        account = Account.new(password, uuid=uuid)
-        # reverts to previous iterations
-        if security_ratio:
-            PBKDF2_CONSTANTS["c"] = default_iterations
-        return account
 
     @staticmethod
     def deleted_account_dir(keystore_dir):
@@ -316,21 +289,6 @@ class PyWalib(object):
         """
         self.account_utils.update_account_password(
             account, new_password, current_password)
-
-    def update_account_password_old(
-            self, account, new_password, current_password=None):
-        """
-        The current_password is optional if the account is already unlocked.
-        """
-        if current_password is not None:
-            account.unlock(current_password)
-        # make sure the PBKDF2 param stays the same
-        default_iterations = PBKDF2_CONSTANTS["c"]
-        account_iterations = account.keystore["crypto"]["kdfparams"]["c"]
-        PBKDF2_CONSTANTS["c"] = account_iterations
-        self.app.services.accounts.update_account(account, new_password)
-        # reverts to previous iterations
-        PBKDF2_CONSTANTS["c"] = default_iterations
 
     @staticmethod
     def get_default_keystore_path():
