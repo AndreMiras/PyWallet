@@ -8,6 +8,7 @@ class AccountUtils:
     def __init__(self, keystore_dir):
         self.keystore_dir = keystore_dir
         self._accounts = None
+        os.makedirs(keystore_dir, exist_ok=True)
 
     def get_account_list(self):
         """
