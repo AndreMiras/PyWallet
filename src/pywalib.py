@@ -13,7 +13,6 @@ from ethereum.utils import normalize_address
 from web3 import HTTPProvider, Web3
 
 from ethereum_utils import AccountUtils
-from pyethapp_accounts import Account
 
 ETHERSCAN_API_KEY = None
 ROUND_DIGITS = 3
@@ -176,19 +175,17 @@ class PyWalib(object):
             else:
                 raise UnknownEtherscanException(response_json)
 
-    # TODO: is this still used after web3 migration?
     @staticmethod
-    def handle_web3_exception(exception):
+    def handle_web3_exception(exception: ValueError):
         """
-        TODO
+        Raises the appropriated typed exception on web3 ValueError exception.
         """
         error = exception.args[0]
-        if error is not None:
-            code = error.get("code")
-            if code in [-32000, -32010]:
-                raise InsufficientFundsException()
-            else:
-                raise UnknownEtherscanException(response_json)
+        code = error.get("code")
+        if code in [-32000, -32010]:
+            raise InsufficientFundsException(error)
+        else:
+            raise UnknownEtherscanException(error)
 
     @staticmethod
     def add_transaction(tx):

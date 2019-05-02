@@ -298,7 +298,7 @@ class PywalibTestCase(unittest.TestCase):
         """
         Checks handle_etherscan_tx_error() error handling.
         """
-        # no transaction found
+        # insufficient funds
         response_json = {
             'jsonrpc': '2.0', 'id': 1, 'error': {
                 'message':
@@ -327,6 +327,34 @@ class PywalibTestCase(unittest.TestCase):
         self.assertEqual(
             PyWalib.handle_etherscan_tx_error(response_json),
             None)
+
+    def test_handle_web3_exception(self):
+        """
+        Checks handle_web3_exception() error handling.
+        """
+        # insufficient funds
+        exception = ValueError({
+            'code': -32000,
+            'message': 'insufficient funds for gas * price + value'
+        })
+        with self.assertRaises(InsufficientFundsException) as e:
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
+        # unknown error code
+        exception = ValueError({
+            'code': 0,
+            'message': 'Unknown error'
+        })
+        with self.assertRaises(UnknownEtherscanException) as e:
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
+        # no code
+        exception = ValueError({
+            'message': 'Unknown error'
+        })
+        with self.assertRaises(UnknownEtherscanException) as e:
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
 
     def test_transact(self):
         """
