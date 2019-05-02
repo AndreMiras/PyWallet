@@ -3,16 +3,17 @@
 from __future__ import print_function, unicode_literals
 
 import os
-from os.path import expanduser
 from enum import Enum
+from os.path import expanduser
 
 import requests
 import rlp
 from eth_utils import to_checksum_address
 from ethereum.utils import normalize_address
 from web3 import HTTPProvider, Web3
-from pyethapp_accounts import Account
+
 from ethereum_utils import AccountUtils
+from pyethapp_accounts import Account
 
 ETHERSCAN_API_KEY = None
 ROUND_DIGITS = 3

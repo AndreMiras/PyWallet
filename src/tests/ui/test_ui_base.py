@@ -10,11 +10,11 @@ from functools import partial
 from tempfile import mkdtemp
 
 import kivymd
-import mock
 import requests
 from kivy.clock import Clock
 
 import main
+import mock
 import pywalib
 from pywallet.switchaccount import SwitchAccount
 from pywallet.utils import Dialog
