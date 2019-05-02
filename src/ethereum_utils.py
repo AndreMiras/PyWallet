@@ -1,6 +1,17 @@
+import logging
 import os
 
 from pyethapp_accounts import Account
+
+
+def get_logger(name):
+    logger = logging.getLogger(name)
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+
+log = get_logger(__name__)
 
 
 class AccountUtils:
