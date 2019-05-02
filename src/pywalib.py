@@ -161,20 +161,6 @@ class PyWalib(object):
         nonce = len(out_transactions)
         return nonce
 
-    # TODO: is this still used after web3 migration?
-    @staticmethod
-    def handle_etherscan_tx_error(response_json):
-        """
-        Raises an exception on unexpected response.
-        """
-        error = response_json.get("error")
-        if error is not None:
-            code = error.get("code")
-            if code in [-32000, -32010]:
-                raise InsufficientFundsException()
-            else:
-                raise UnknownEtherscanException(response_json)
-
     @staticmethod
     def handle_web3_exception(exception: ValueError):
         """
@@ -186,32 +172,6 @@ class PyWalib(object):
             raise InsufficientFundsException(error)
         else:
             raise UnknownEtherscanException(error)
-
-    @staticmethod
-    def add_transaction(tx):
-        """
-        POST transaction to etherscan.io.
-        """
-        tx_hex = rlp.encode(tx).encode("hex")
-        # use https://etherscan.io/pushTx to debug
-        print("tx_hex:", tx_hex)
-        url = 'https://api.etherscan.io/api'
-        url += '?module=proxy&action=eth_sendRawTransaction'
-        if ETHERSCAN_API_KEY:
-            '&apikey=%' % ETHERSCAN_API_KEY
-        # TODO: handle 504 timeout, 403 and other errors from etherscan
-        response = requests.post(url, data={'hex': tx_hex})
-        # response is like:
-        # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
-        # or on error like this:
-        # {'jsonrpc': '2.0', 'id': 1, 'error': {
-        #   'message': 'Insufficient funds...', 'code': -32010, 'data': None}}
-        response_json = response.json()
-        print("response_json:", response_json)
-        PyWalib.handle_etherscan_tx_error(response_json)
-        tx_hash = response_json['result']
-        # the response differs from the other responses
-        return tx_hash
 
     def transact(self, to, value=0, data='', sender=None, gas=25000,
                  gasprice=5 * (10 ** 9)):
