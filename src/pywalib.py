@@ -216,7 +216,7 @@ class PyWalib(object):
         return tx_hash
 
     def transact(self, to, value=0, data='', sender=None, gas=25000,
-                 gasprice=60 * (10 ** 9)):
+                 gasprice=5 * (10 ** 9)):
         """
         Signs and broadcasts a transaction.
         Returns transaction hash.
