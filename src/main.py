@@ -46,7 +46,7 @@ class PyWalletApp(App):
 
     def build(self):
         self.icon = "docs/images/icon.png"
-        return Controller(info='PyWallet')
+        return Controller()
 
     @property
     def controller(self):
