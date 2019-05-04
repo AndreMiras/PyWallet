@@ -2,7 +2,7 @@ VENV_NAME=venv
 ACTIVATE_PATH=$(VENV_NAME)/bin/activate
 PIP=`. $(ACTIVATE_PATH); which pip`
 TOX=`which tox`
-GARDEN=`. $(ACTIVATE_PATH); which garden`
+GARDEN=$(VENV_NAME)/bin/garden
 PYTHON=$(VENV_NAME)/bin/python
 SYSTEM_DEPENDENCIES=virtualenv build-essential libpython2.7-dev \
     libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
