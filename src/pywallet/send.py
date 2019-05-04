@@ -84,7 +84,7 @@ class Send(BoxLayout):
         """
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
-        address = normalize_address(self.send_to_address)
+        address = to_checksum_address(self.send_to_address)
         amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
         # TODO: not the main account, but the current account

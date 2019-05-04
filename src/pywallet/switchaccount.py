@@ -30,7 +30,7 @@ class SwitchAccount(BoxLayout):
         """
         # circular ref
         from pywallet.controller import Controller
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         # gets the alias if exists
         try:
             text = Controller.get_address_alias(address)

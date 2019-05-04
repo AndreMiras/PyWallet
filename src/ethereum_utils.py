@@ -112,11 +112,11 @@ class AccountUtils:
         accounts = [acc for acc in self._accounts if acc.address == address]
         if len(accounts) == 0:
             raise KeyError(
-                'account not found by address', address=address.encode('hex'))
+                'account not found by address', address=address.hex())
         elif len(accounts) > 1:
             log.warning(
                 'multiple accounts with same address found',
-                address=address.encode('hex'))
+                address=address.hex())
         return accounts[0]
 
     def sign_tx(self, address, tx):

@@ -231,7 +231,7 @@ class Controller(FloatLayout):
         """
         Deletes the alias for the given account.
         """
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         store = cls.get_store()
         alias_dict = store['alias']
         alias_dict.pop(address)
@@ -251,7 +251,7 @@ class Controller(FloatLayout):
             except KeyError:
                 pass
             return
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         store = cls.get_store()
         try:
             alias_dict = store['alias']
@@ -275,7 +275,7 @@ class Controller(FloatLayout):
         """
         Returns the alias of the given Account object.
         """
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         return cls.get_address_alias(address)
 
     @staticmethod
@@ -287,7 +287,7 @@ class Controller(FloatLayout):
     def update_toolbar_title_balance(self, instance=None, value=None):
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             balance = self.accounts_balance[address]
         except KeyError:
@@ -318,7 +318,7 @@ class Controller(FloatLayout):
         """
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             balance = PyWalib.get_balance(address)
         except ConnectionError:
@@ -355,7 +355,7 @@ class Controller(FloatLayout):
         Copies the current account address to the clipboard.
         """
         account = self.current_account
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         Clipboard.copy(address)
 
     def prompt_alias_dialog(self):

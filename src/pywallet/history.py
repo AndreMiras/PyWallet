@@ -74,7 +74,7 @@ class History(BoxLayout):
         """
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             transactions = self.controller.accounts_history[address]
         except KeyError:
@@ -91,7 +91,7 @@ class History(BoxLayout):
     def fetch_history(self):
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             transactions = PyWalib.get_transaction_history(address)
         except ConnectionError:

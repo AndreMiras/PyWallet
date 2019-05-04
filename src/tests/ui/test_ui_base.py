@@ -8,13 +8,13 @@ import time
 import unittest
 from functools import partial
 from tempfile import mkdtemp
+from unittest import mock
 
 import kivymd
 import requests
 from kivy.clock import Clock
 
 import main
-import mock
 import pywalib
 from pywallet.switchaccount import SwitchAccount
 from pywallet.utils import Dialog
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
             create_account_thread = threading.enumerate()[1]
             self.assertEqual(type(create_account_thread), threading.Thread)
             self.assertEqual(
-                create_account_thread._Thread__target.func_name,
+                create_account_thread._target.__name__,
                 "create_account")
             # waits for the end of the thread
             create_account_thread.join()
@@ -214,7 +214,7 @@ class Test(unittest.TestCase):
                 self.assertEqual(
                     type(create_account_thread), threading.Thread)
                 self.assertEqual(
-                    create_account_thread._Thread__target.func_name,
+                    create_account_thread._target.__name__,
                     "create_account")
                 # waits for the end of the thread
                 create_account_thread.join()
@@ -284,8 +284,9 @@ class Test(unittest.TestCase):
             # unlock_send_transaction() thread should be running
             self.assertEqual(len(threading.enumerate()), 2)
             thread = threading.enumerate()[1]
+            self.assertEqual(type(thread), threading.Thread)
             self.assertEqual(
-                thread._Thread__target.func_name, 'unlock_send_transaction')
+                thread._target.__name__, 'unlock_send_transaction')
             thread.join()
             # checks snackbar messages
             self.assertEqual(
@@ -322,8 +323,8 @@ class Test(unittest.TestCase):
         account1 = pywalib.get_account_list()[0]
         # creates a second account
         account2 = pywalib.new_account(password="password", security_ratio=1)
-        address1 = '0x' + account1.address.encode("hex")
-        address2 = '0x' + account2.address.encode("hex")
+        address1 = '0x' + account1.address.hex()
+        address2 = '0x' + account2.address.hex()
         Controller = main.Controller
 
         @staticmethod
@@ -399,7 +400,7 @@ class Test(unittest.TestCase):
         manage_existing = controller.manage_existing
         account_address_id = manage_existing.ids.account_address_id
         account = pywalib.get_account_list()[0]
-        account_address = '0x' + account.address.encode("hex")
+        account_address = '0x' + account.address.hex()
         self.assertEqual(account_address_id.text, account_address)
         # clicks delete
         delete_button_id = manage_existing.ids.delete_button_id
@@ -550,7 +551,7 @@ class Test(unittest.TestCase):
             mock_get_balance.return_value = balance
             thread = controller.fetch_balance()
             thread.join()
-        address = '0x' + account.address.encode("hex")
+        address = '0x' + account.address.hex()
         mock_get_balance.assert_called_with(address)
         # and the balance updated
         self.assertEqual(
