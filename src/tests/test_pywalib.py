@@ -178,34 +178,22 @@ class PywalibTestCase(unittest.TestCase):
             PyWalib.handle_etherscan_error(response_json),
             None)
 
-    def test_address_hex(self):
-        """
-        Checks handle_etherscan_error() error handling.
-        """
-        expected_addresss = ADDRESS
-        # no 0x prefix
-        address_no_prefix = ADDRESS.lower().strip("0x")
-        address = address_no_prefix
-        normalized = PyWalib.address_hex(address)
-        self.assertEqual(normalized, expected_addresss)
-        # uppercase
-        address = "0x" + address_no_prefix.upper()
-        normalized = PyWalib.address_hex(address)
-        self.assertEqual(normalized, expected_addresss)
-        # prefix cannot be uppercase
-        address = "0X" + address_no_prefix.upper()
-        with self.assertRaises(Exception) as context:
-            PyWalib.address_hex(address)
-        self.assertEqual(
-            context.exception.args[0],
-            "Invalid address format: '%s'" % (address))
-
     def test_get_balance(self):
         """
         Checks get_balance() returns a float.
         """
+        pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = PyWalib.get_balance(address)
+        balance_eth = pywalib.get_balance(address)
+        self.assertTrue(type(balance_eth), float)
+
+    def test_get_balance_web3(self):
+        """
+        Checks get_balance() returns a float.
+        """
+        pywalib = self.pywalib
+        address = ADDRESS
+        balance_eth = pywalib.get_balance_web3(address)
         self.assertTrue(type(balance_eth), float)
 
     def helper_get_history(self, transactions):

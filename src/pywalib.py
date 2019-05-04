@@ -8,7 +8,6 @@ from os.path import expanduser
 
 import requests
 from eth_utils import to_checksum_address
-from ethereum.utils import normalize_address
 from web3 import HTTPProvider, Web3
 
 from ethereum_utils import AccountUtils
@@ -38,7 +37,7 @@ class ChainID(Enum):
     ROPSTEN = 3
 
 
-class PyWalib(object):
+class PyWalib:
 
     def __init__(self, keystore_dir=None):
         if keystore_dir is None:
@@ -63,21 +62,12 @@ class PyWalib(object):
         assert message == "OK"
 
     @staticmethod
-    def address_hex(address):
-        """
-        Normalizes address.
-        """
-        prefix = "0x"
-        address_hex = prefix + normalize_address(address).hex()
-        return address_hex
-
-    @staticmethod
     def get_balance(address):
         """
         Retrieves the balance from etherscan.io.
         The balance is returned in ETH rounded to the second decimal.
         """
-        address = PyWalib.address_hex(address)
+        address = to_checksum_address(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=balance'
         url += '&address=%s' % address
@@ -93,12 +83,22 @@ class PyWalib(object):
         balance_eth = round(balance_eth, ROUND_DIGITS)
         return balance_eth
 
+    def get_balance_web3(self, address):
+        """
+        The balance is returned in ETH rounded to the second decimal.
+        """
+        address = to_checksum_address(address)
+        balance_wei = self.web3.eth.getBalance(address)
+        balance_eth = balance_wei / float(pow(10, 18))
+        balance_eth = round(balance_eth, ROUND_DIGITS)
+        return balance_eth
+
     @staticmethod
     def get_transaction_history(address):
         """
         Retrieves the transaction history from etherscan.io.
         """
-        address = PyWalib.address_hex(address)
+        address = to_checksum_address(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=txlist'
         url += '&sort=asc'
@@ -114,12 +114,12 @@ class PyWalib(object):
             value_wei = int(transaction['value'])
             value_eth = value_wei / float(pow(10, 18))
             value_eth = round(value_eth, ROUND_DIGITS)
-            from_address = PyWalib.address_hex(transaction['from'])
+            from_address = to_checksum_address(transaction['from'])
             to_address = transaction['to']
             # on contract creation, "to" is replaced by the "contractAddress"
             if not to_address:
                 to_address = transaction['contractAddress']
-            to_address = PyWalib.address_hex(to_address)
+            to_address = to_checksum_address(to_address)
             sent = from_address == address
             received = not sent
             extra_dict = {
