@@ -1,8 +1,7 @@
 eth-hash==0.1.1
 eth-utils==1.4.1
 web3==4.8.1
-# Kivy==1.10.1
-# Kivy-Garden==0.1.4
+Kivy==1.10.1
 https://github.com/AndreMiras/KivyMD/archive/69f3e88.tar.gz#egg=kivymd
 Pillow==4.1.1
 raven==6.1.0
