@@ -3,16 +3,14 @@
 from __future__ import print_function, unicode_literals
 
 import os
-import shutil
+from enum import Enum
 from os.path import expanduser
 
 import requests
-import rlp
-from devp2p.app import BaseApp
-from ethereum.tools.keys import PBKDF2_CONSTANTS
-from ethereum.transactions import Transaction
-from ethereum.utils import denoms, normalize_address
-from pyethapp.accounts import Account, AccountsService
+from eth_utils import to_checksum_address
+from web3 import HTTPProvider, Web3
+
+from ethereum_utils import AccountUtils
 
 ETHERSCAN_API_KEY = None
 ROUND_DIGITS = 3
@@ -33,14 +31,21 @@ class NoTransactionFoundException(UnknownEtherscanException):
     pass
 
 
-class PyWalib(object):
+class ChainID(Enum):
+    MAINNET = 1
+    MORDEN = 2
+    ROPSTEN = 3
+
+
+class PyWalib:
 
     def __init__(self, keystore_dir=None):
         if keystore_dir is None:
             keystore_dir = PyWalib.get_default_keystore_path()
-        self.app = BaseApp(
-            config=dict(accounts=dict(keystore_dir=keystore_dir)))
-        AccountsService.register_with_app(self.app)
+        self.account_utils = AccountUtils(keystore_dir=keystore_dir)
+        self.chain_id = ChainID.MAINNET
+        self.provider = HTTPProvider('https://mainnet.infura.io')
+        self.web3 = Web3(self.provider)
 
     @staticmethod
     def handle_etherscan_error(response_json):
@@ -57,21 +62,12 @@ class PyWalib(object):
         assert message == "OK"
 
     @staticmethod
-    def address_hex(address):
-        """
-        Normalizes address.
-        """
-        prefix = "0x"
-        address_hex = prefix + normalize_address(address).encode("hex")
-        return address_hex
-
-    @staticmethod
     def get_balance(address):
         """
         Retrieves the balance from etherscan.io.
         The balance is returned in ETH rounded to the second decimal.
         """
-        address = PyWalib.address_hex(address)
+        address = to_checksum_address(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=balance'
         url += '&address=%s' % address
@@ -87,12 +83,22 @@ class PyWalib(object):
         balance_eth = round(balance_eth, ROUND_DIGITS)
         return balance_eth
 
+    def get_balance_web3(self, address):
+        """
+        The balance is returned in ETH rounded to the second decimal.
+        """
+        address = to_checksum_address(address)
+        balance_wei = self.web3.eth.getBalance(address)
+        balance_eth = balance_wei / float(pow(10, 18))
+        balance_eth = round(balance_eth, ROUND_DIGITS)
+        return balance_eth
+
     @staticmethod
     def get_transaction_history(address):
         """
         Retrieves the transaction history from etherscan.io.
         """
-        address = PyWalib.address_hex(address)
+        address = to_checksum_address(address)
         url = 'https://api.etherscan.io/api'
         url += '?module=account&action=txlist'
         url += '&sort=asc'
@@ -108,12 +114,12 @@ class PyWalib(object):
             value_wei = int(transaction['value'])
             value_eth = value_wei / float(pow(10, 18))
             value_eth = round(value_eth, ROUND_DIGITS)
-            from_address = PyWalib.address_hex(transaction['from'])
+            from_address = to_checksum_address(transaction['from'])
             to_address = transaction['to']
             # on contract creation, "to" is replaced by the "contractAddress"
             if not to_address:
                 to_address = transaction['contractAddress']
-            to_address = PyWalib.address_hex(to_address)
+            to_address = to_checksum_address(to_address)
             sent = from_address == address
             received = not sent
             extra_dict = {
@@ -140,6 +146,7 @@ class PyWalib(object):
                 out_transactions.append(transaction)
         return out_transactions
 
+    # TODO: can be removed since the migration to web3
     @staticmethod
     def get_nonce(address):
         """
@@ -154,83 +161,43 @@ class PyWalib(object):
         return nonce
 
     @staticmethod
-    def handle_etherscan_tx_error(response_json):
+    def handle_web3_exception(exception: ValueError):
         """
-        Raises an exception on unexpected response.
+        Raises the appropriated typed exception on web3 ValueError exception.
         """
-        error = response_json.get("error")
-        if error is not None:
-            code = error.get("code")
-            if code in [-32000, -32010]:
-                raise InsufficientFundsException()
-            else:
-                raise UnknownEtherscanException(response_json)
+        error = exception.args[0]
+        code = error.get("code")
+        if code in [-32000, -32010]:
+            raise InsufficientFundsException(error)
+        else:
+            raise UnknownEtherscanException(error)
 
-    @staticmethod
-    def add_transaction(tx):
+    def transact(self, to, value=0, data='', sender=None, gas=25000,
+                 gasprice=5 * (10 ** 9)):
         """
-        POST transaction to etherscan.io.
+        Signs and broadcasts a transaction.
+        Returns transaction hash.
         """
-        tx_hex = rlp.encode(tx).encode("hex")
-        # use https://etherscan.io/pushTx to debug
-        print("tx_hex:", tx_hex)
-        url = 'https://api.etherscan.io/api'
-        url += '?module=proxy&action=eth_sendRawTransaction'
-        if ETHERSCAN_API_KEY:
-            '&apikey=%' % ETHERSCAN_API_KEY
-        # TODO: handle 504 timeout, 403 and other errors from etherscan
-        response = requests.post(url, data={'hex': tx_hex})
-        # response is like:
-        # {'jsonrpc': '2.0', 'result': '0x24a8...14ea', 'id': 1}
-        # or on error like this:
-        # {'jsonrpc': '2.0', 'id': 1, 'error': {
-        #   'message': 'Insufficient funds...', 'code': -32010, 'data': None}}
-        response_json = response.json()
-        print("response_json:", response_json)
-        PyWalib.handle_etherscan_tx_error(response_json)
-        tx_hash = response_json['result']
-        # the response differs from the other responses
+        address = sender or self.get_main_account().address
+        from_address_normalized = to_checksum_address(address)
+        nonce = self.web3.eth.getTransactionCount(from_address_normalized)
+        transaction = {
+            'chainId': self.chain_id.value,
+            'gas': gas,
+            'gasPrice': gasprice,
+            'nonce': nonce,
+            'value': value,
+        }
+        account = self.account_utils.get_by_address(address)
+        private_key = account.privkey
+        signed_tx = self.web3.eth.account.signTransaction(
+            transaction, private_key)
+        try:
+            tx_hash = self.web3.eth.sendRawTransaction(
+                signed_tx.rawTransaction)
+        except ValueError as e:
+            self.handle_web3_exception(e)
         return tx_hash
-
-    def transact(self, to, value=0, data='', sender=None, startgas=25000,
-                 gasprice=60 * denoms.shannon):
-        """
-        Inspired from pyethapp/console_service.py except that we use
-        Etherscan for retrieving the nonce as we as for broadcasting the
-        transaction.
-        Arg value is in Wei.
-        """
-        # account.unlock(password)
-        sender = normalize_address(sender or self.get_main_account().address)
-        to = normalize_address(to, allow_blank=True)
-        nonce = PyWalib.get_nonce(sender)
-        # creates the transaction
-        tx = Transaction(nonce, gasprice, startgas, to, value, data)
-        # then signs it
-        self.app.services.accounts.sign_tx(sender, tx)
-        assert tx.sender == sender
-        PyWalib.add_transaction(tx)
-        return tx
-
-    @staticmethod
-    def new_account_helper(password, security_ratio=None):
-        """
-        Helper method for creating an account in memory.
-        Returns the created account.
-        security_ratio is a ratio of the default PBKDF2 iterations.
-        Ranging from 1 to 100 means 100% of the iterations.
-        """
-        # TODO: perform validation on security_ratio (within allowed range)
-        if security_ratio:
-            default_iterations = PBKDF2_CONSTANTS["c"]
-            new_iterations = int((default_iterations * security_ratio) / 100)
-            PBKDF2_CONSTANTS["c"] = new_iterations
-        uuid = None
-        account = Account.new(password, uuid=uuid)
-        # reverts to previous iterations
-        if security_ratio:
-            PBKDF2_CONSTANTS["c"] = default_iterations
-        return account
 
     @staticmethod
     def deleted_account_dir(keystore_dir):
@@ -252,55 +219,32 @@ class PyWalib(object):
             deleted_keystore_dir_name)
         return deleted_keystore_dir
 
+    # TODO: update docstring
+    # TODO: update security_ratio
     def new_account(self, password, security_ratio=None):
         """
         Creates an account on the disk and returns it.
         security_ratio is a ratio of the default PBKDF2 iterations.
         Ranging from 1 to 100 means 100% of the iterations.
         """
-        account = PyWalib.new_account_helper(password, security_ratio)
-        app = self.app
-        account.path = os.path.join(
-            app.services.accounts.keystore_dir, account.address.encode('hex'))
-        self.app.services.accounts.add_account(account)
+        account = self.account_utils.new_account(password=password)
         return account
 
     def delete_account(self, account):
         """
         Deletes the given `account` from the `keystore_dir` directory.
-        Then deletes it from the `AccountsService` account manager instance.
         In fact, moves it to another location; another directory at the same
         level.
         """
-        app = self.app
-        keystore_dir = app.services.accounts.keystore_dir
-        deleted_keystore_dir = PyWalib.deleted_account_dir(keystore_dir)
-        # create the deleted account dir if required
-        if not os.path.exists(deleted_keystore_dir):
-            os.makedirs(deleted_keystore_dir)
-        # "removes" it from the file system
-        account_filename = os.path.basename(account.path)
-        deleted_account_path = os.path.join(
-            deleted_keystore_dir, account_filename)
-        shutil.move(account.path, deleted_account_path)
-        # deletes it from the `AccountsService` account manager instance
-        account_service = self.get_account_list()
-        account_service.accounts.remove(account)
+        self.account_utils.delete_account(account)
 
     def update_account_password(
             self, account, new_password, current_password=None):
         """
         The current_password is optional if the account is already unlocked.
         """
-        if current_password is not None:
-            account.unlock(current_password)
-        # make sure the PBKDF2 param stays the same
-        default_iterations = PBKDF2_CONSTANTS["c"]
-        account_iterations = account.keystore["crypto"]["kdfparams"]["c"]
-        PBKDF2_CONSTANTS["c"] = account_iterations
-        self.app.services.accounts.update_account(account, new_password)
-        # reverts to previous iterations
-        PBKDF2_CONSTANTS["c"] = default_iterations
+        self.account_utils.update_account_password(
+            account, new_password, current_password)
 
     @staticmethod
     def get_default_keystore_path():
@@ -315,7 +259,7 @@ class PyWalib(object):
         """
         Returns the Account list.
         """
-        accounts = self.app.services.accounts
+        accounts = self.account_utils.get_account_list()
         return accounts
 
     def get_main_account(self):

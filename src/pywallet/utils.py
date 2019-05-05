@@ -68,11 +68,9 @@ class StringIOCBWrite(StringIO):
         Calls the StringIO.write() method then the callback_write with
         given string parameter.
         """
-        # io.StringIO expects unicode
-        s_unicode = s.decode('utf-8')
-        super(StringIOCBWrite, self).write(s_unicode)
+        super(StringIOCBWrite, self).write(s)
         if self.callback_write is not None:
-            self.callback_write(s_unicode)
+            self.callback_write(s)
 
 
 class Dialog(object):

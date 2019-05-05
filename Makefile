@@ -2,7 +2,7 @@ VENV_NAME=venv
 ACTIVATE_PATH=$(VENV_NAME)/bin/activate
 PIP=`. $(ACTIVATE_PATH); which pip`
 TOX=`which tox`
-GARDEN=`. $(ACTIVATE_PATH); which garden`
+GARDEN=$(VENV_NAME)/bin/garden
 PYTHON=$(VENV_NAME)/bin/python
 SYSTEM_DEPENDENCIES=virtualenv build-essential libpython2.7-dev \
     libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
@@ -19,7 +19,7 @@ NPROC=`grep -c '^processor' /proc/cpuinfo`
 all: system_dependencies opencv virtualenv
 
 virtualenv:
-	test -d venv || virtualenv -p python2 venv
+	test -d venv || virtualenv -p python3 venv
 	. venv/bin/activate
 	$(PIP) install Cython==0.26.1
 	$(PIP) install -r requirements/requirements.txt

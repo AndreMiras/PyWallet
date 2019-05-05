@@ -41,7 +41,7 @@ class Receive(BoxLayout):
         Updates address_property from current_account.
         """
         account = self.current_account
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         self.address_property = address
 
     def on_current_account(self, instance, account):

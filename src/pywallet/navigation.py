@@ -7,7 +7,6 @@ from kivymd.navigationdrawer import NavigationDrawerHeaderBase
 
 from pywallet.utils import load_kv_from_py
 
-
 load_kv_from_py(__file__)
 
 
@@ -33,7 +32,7 @@ class NavigationDrawerTwoLineListItem(
         # Controller.current_account to None
         if account is None:
             return
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         self.address_property = address
 
     def _update_specific_text_color(self, instance, value):

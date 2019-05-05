@@ -1,4 +1,4 @@
-from ethereum.utils import normalize_address
+from eth_utils import to_checksum_address
 from kivy.app import App
 from kivy.logger import Logger
 from kivy.properties import NumericProperty, StringProperty
@@ -25,8 +25,8 @@ class Send(BoxLayout):
         title = "Input error"
         body = "Invalid address field"
         try:
-            normalize_address(self.send_to_address)
-        except Exception:
+            to_checksum_address(self.send_to_address)
+        except ValueError:
             dialog = Dialog.create_dialog(title, body)
             dialog.open()
             return False
@@ -84,7 +84,7 @@ class Send(BoxLayout):
         """
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
-        address = normalize_address(self.send_to_address)
+        address = to_checksum_address(self.send_to_address)
         amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
         # TODO: not the main account, but the current account

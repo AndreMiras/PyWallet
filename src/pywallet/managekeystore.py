@@ -141,7 +141,7 @@ class ManageExisting(BoxLayout):
         # Controller.current_account to None
         if account is None:
             return
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         self.address_property = address
 
 

@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Migration to Python3, refs #19
+
 ## [v20180729]
 
   - Linux & Android Travis build on Docker, refs #37

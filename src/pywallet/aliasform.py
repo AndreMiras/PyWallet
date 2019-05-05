@@ -20,7 +20,7 @@ class AliasForm(BoxLayout):
         # circular ref
         from pywallet.controller import Controller
         super(AliasForm, self).__init__(**kwargs)
-        self.address = "0x" + account.address.encode("hex")
+        self.address = "0x" + account.address.hex()
         try:
             self.alias = Controller.get_address_alias(self.address)
         except KeyError:
