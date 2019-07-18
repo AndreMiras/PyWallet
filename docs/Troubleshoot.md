@@ -70,6 +70,12 @@ See upstream ticket: https://github.com/kivy/python-for-android/issues/1148
 buildozer android p4a -- apk --private $PWD/src/ --local-recipes $PWD/src/python-for-android/recipes/ --package=com.github.andremiras --name PyWallet --version 0.1 --bootstrap=sdl2 --requirements=python2,kivy
 ```
 
+
+### Uninstaling the app using adb
+```
+buildozer android adb -- uninstall com.github.andremiras.pywallet
+```
+
 ## Kivy
 
 ### Debugging widget sizes
