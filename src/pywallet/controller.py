@@ -17,6 +17,7 @@ from pywallet.aliasform import AliasForm
 from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
+from pywallet.settings import Settings
 from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
@@ -140,7 +141,7 @@ class Controller(FloatLayout):
         Gets or creates the PyWalib object.
         Also recreates the object if the keystore_path changed.
         """
-        keystore_path = Controller.get_keystore_path()
+        keystore_path = Settings.get_keystore_path()
         if self._pywalib is None or \
                 self._pywalib.keystore_dir != keystore_path:
             self._pywalib = PyWalib(keystore_path)
@@ -207,17 +208,6 @@ class Controller(FloatLayout):
         import pywalib
         # uses kivy user_data_dir (/sdcard/<app_name>)
         pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
-
-    @classmethod
-    def get_keystore_path(cls):
-        """
-        This is the Kivy default keystore path.
-        """
-        keystore_path = os.environ.get('KEYSTORE_PATH')
-        if keystore_path is None:
-            Controller.patch_keystore_path()
-            keystore_path = PyWalib.get_default_keystore_path()
-        return keystore_path
 
     @classmethod
     def delete_account_alias(cls, account):
