@@ -17,6 +17,8 @@ from pywallet.aliasform import AliasForm
 from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
+from pywallet.settings import Settings
+from pywallet.settings_screen import SettingsScreen
 from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
@@ -40,9 +42,8 @@ class Controller(FloatLayout):
     accounts_history = DictProperty({})
 
     def __init__(self, **kwargs):
-        super(Controller, self).__init__(**kwargs)
-        keystore_path = Controller.get_keystore_path()
-        self.pywalib = PyWalib(keystore_path)
+        super().__init__(**kwargs)
+        self._pywalib = None
         self.screen_history = []
         self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
@@ -135,6 +136,18 @@ class Controller(FloatLayout):
     def screen_manager(self):
         return self.ids.screen_manager_id
 
+    @property
+    def pywalib(self):
+        """
+        Gets or creates the PyWalib object.
+        Also recreates the object if the keystore_path changed.
+        """
+        keystore_path = Settings.get_keystore_path()
+        if self._pywalib is None or \
+                self._pywalib.keystore_dir != keystore_path:
+            self._pywalib = PyWalib(keystore_path)
+        return self._pywalib
+
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
 
@@ -156,6 +169,7 @@ class Controller(FloatLayout):
             'switch_account': SwitchAccountScreen,
             'manage_keystores': ManageKeystoreScreen,
             'flashqrcode': FlashQrCodeScreen,
+            'settings_screen': SettingsScreen,
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
@@ -196,17 +210,6 @@ class Controller(FloatLayout):
         import pywalib
         # uses kivy user_data_dir (/sdcard/<app_name>)
         pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
-
-    @classmethod
-    def get_keystore_path(cls):
-        """
-        This is the Kivy default keystore path.
-        """
-        keystore_path = os.environ.get('KEYSTORE_PATH')
-        if keystore_path is None:
-            Controller.patch_keystore_path()
-            keystore_path = PyWalib.get_default_keystore_path()
-        return keystore_path
 
     @classmethod
     def delete_account_alias(cls, account):
@@ -431,6 +434,19 @@ class Controller(FloatLayout):
         from zbarcam import ZBarCam  # noqa
         # loads the flash QR Code screen
         self.screen_manager_current('flashqrcode', direction='left')
+
+    def load_settings_screen(self):
+        """
+        Loads the settings screen.
+        """
+        if SCREEN_SWITCH_DELAY:
+            Clock.schedule_once(
+                lambda dt: self.screen_manager_current(
+                    'settings_screen', direction='left'),
+                SCREEN_SWITCH_DELAY)
+        else:
+            self.screen_manager_current(
+                'settings_screen', direction='left')
 
     def load_about_screen(self):
         """

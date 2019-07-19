@@ -17,6 +17,7 @@ ROUND_DIGITS = 3
 KEYSTORE_DIR_PREFIX = expanduser("~")
 # default pyethapp keystore path
 KEYSTORE_DIR_SUFFIX = ".config/pyethapp/keystore/"
+DEFAULT_GAS_PRICE_GWEI = 4
 
 
 class UnknownEtherscanException(Exception):
@@ -42,7 +43,8 @@ class PyWalib:
     def __init__(self, keystore_dir=None):
         if keystore_dir is None:
             keystore_dir = PyWalib.get_default_keystore_path()
-        self.account_utils = AccountUtils(keystore_dir=keystore_dir)
+        self.keystore_dir = keystore_dir
+        self.account_utils = AccountUtils(keystore_dir=self.keystore_dir)
         self.chain_id = ChainID.MAINNET
         self.provider = HTTPProvider('https://mainnet.infura.io')
         self.web3 = Web3(self.provider)
@@ -173,7 +175,7 @@ class PyWalib:
             raise UnknownEtherscanException(error)
 
     def transact(self, to, value=0, data='', sender=None, gas=25000,
-                 gasprice=5 * (10 ** 9)):
+                 gasprice=DEFAULT_GAS_PRICE_GWEI * (10 ** 9)):
         """
         Signs and broadcasts a transaction.
         Returns transaction hash.

@@ -1,0 +1,84 @@
+#:import MDCheckbox kivymd.selectioncontrols.MDCheckbox
+#:import MDSlider kivymd.slider.MDSlider
+
+
+<SettingsScreen>:
+    on_pre_enter:
+        root.load_settings()
+    on_pre_leave:
+        root.store_settings()
+    name: 'settings_screen'
+    BoxLayoutMarginLayout:
+        BoxLayoutAddMargin:
+            orientation: 'vertical'
+            margin: 30, 10, 30, 10
+            MDLabel:
+                text: 'Network'
+                font_style: 'Title'
+                theme_text_color: 'Primary'
+            BoxLayout:
+                orientation: 'horizontal'
+                MDCheckbox:
+                    id: mainnet_checkbox_id
+                    group: 'network'
+                    size_hint: None, None
+                    size: dp(48), dp(48)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    active: root.is_stored_mainnet
+                MDLabel:
+                    text: 'Mainnet'
+                    theme_text_color: 'Primary'
+            BoxLayout:
+                orientation: 'horizontal'
+                MDCheckbox:
+                    id: testnet_checkbox_id
+                    group: 'network'
+                    size_hint: None, None
+                    size: dp(48), dp(48)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    active: root.is_stored_testnet
+                MDLabel:
+                    text: 'Testnet'
+                    theme_text_color: 'Primary'
+            PushUp:
+            BoxLayout:
+                orientation: 'vertical'
+                MDLabel:
+                    text: 'Gas price (gwei)'
+                    font_style: 'Title'
+                    theme_text_color: 'Primary'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    MDLabel:
+                        id: gas_price_label_id
+                        text: "{}".format(int(gas_price_slider_id.value))
+                        font_size: dp(20)
+                        width: dp(40)
+                        size_hint_x: None
+                        theme_text_color: 'Primary'
+                    MDSlider:
+                        id: gas_price_slider_id
+                        range: 0, 50
+                        value: root.stored_gas_price
+                        step: 1
+            PushUp:
+            BoxLayout:
+                orientation: 'vertical'
+                MDLabel:
+                    text: 'Persist keystore'
+                    font_style: 'Title'
+                    theme_text_color: 'Primary'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    MDSwitch:
+                        id: persist_keystore_switch_id
+                        size_hint: None, None
+                        size: dp(36), dp(48)
+                        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+                        on_active: root.check_request_write_permission()
+                    MDLabel:
+                        halign: 'right'
+                        text: 'Keeps accounts even if the app is uninstalled'
+                        theme_text_color: 'Primary'
+
+            PushUp:

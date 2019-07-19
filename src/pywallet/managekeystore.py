@@ -4,6 +4,7 @@ from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen
 
+from pywallet.settings import Settings
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 load_kv_from_py(__file__)
@@ -287,7 +288,7 @@ class ImportKeystore(BoxLayout):
 
     def setup(self):
         self.controller = App.get_running_app().controller
-        self.keystore_path = self.controller.get_keystore_path()
+        self.keystore_path = Settings.get_keystore_path()
         accounts = self.controller.pywalib.get_account_list()
         if len(accounts) == 0:
             title = "No keystore found."

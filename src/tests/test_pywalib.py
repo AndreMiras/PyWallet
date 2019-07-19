@@ -343,7 +343,7 @@ class PywalibTestCase(unittest.TestCase):
         transaction = {
             'chainId': 1,
             'gas': 25000,
-            'gasPrice': 5000000000,
+            'gasPrice': 4000000000,
             'nonce': 0,
             'value': value_wei,
         }

@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      UnknownEtherscanException)
 from pywallet.passwordform import PasswordForm
+from pywallet.settings import Settings
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 load_kv_from_py(__file__)
@@ -87,6 +88,8 @@ class Send(BoxLayout):
         address = to_checksum_address(self.send_to_address)
         amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
+        gas_price_gwei = Settings.get_stored_gas_price()
+        gas_price_wei = int(gas_price_gwei * (10 ** 9))
         # TODO: not the main account, but the current account
         account = controller.pywalib.get_main_account()
         Dialog.snackbar_message("Unlocking account...")
@@ -99,7 +102,9 @@ class Send(BoxLayout):
         Dialog.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
         try:
-            pywalib.transact(address, value=amount_wei, data='', sender=sender)
+            pywalib.transact(
+                address, value=amount_wei, data='', sender=sender,
+                gasprice=gas_price_wei)
         except InsufficientFundsException:
             Dialog.snackbar_message("Insufficient funds")
             return
