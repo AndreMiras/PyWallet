@@ -54,6 +54,7 @@ requirements =
     eth-typing==2.0.0,
     gevent,
     hexbytes==0.1.0,
+    https://github.com/AndreMiras/garden.layoutmargin/archive/20180517.tar.gz,
     https://github.com/AndreMiras/garden.zbarcam/archive/20190303.zip,
     https://github.com/AndreMiras/KivyMD/archive/20181106.tar.gz,
     idna==2.7,

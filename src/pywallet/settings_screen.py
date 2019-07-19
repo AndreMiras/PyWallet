@@ -2,18 +2,17 @@ import os
 import shutil
 
 from kivy.properties import BooleanProperty, NumericProperty
-from pyetheroll.constants import ChainID
+from kivy.uix.screenmanager import Screen
 
-from etheroll.constants import KEYSTORE_DIR_SUFFIX
-from etheroll.settings import Settings
-from etheroll.ui_utils import SubScreen, load_kv_from_py
-from etheroll.utils import (check_request_write_permission,
-                            check_write_permission)
+from pywalib import KEYSTORE_DIR_SUFFIX, ChainID
+from pywallet.settings import Settings
+from pywallet.utils import (check_request_write_permission,
+                            check_write_permission, load_kv_from_py)
 
 load_kv_from_py(__file__)
 
 
-class SettingsScreen(SubScreen):
+class SettingsScreen(Screen):
     """
     Screen for configuring network, gas price...
     """
@@ -21,9 +20,6 @@ class SettingsScreen(SubScreen):
     is_stored_mainnet = BooleanProperty()
     is_stored_testnet = BooleanProperty()
     stored_gas_price = NumericProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def store_network(self):
         """

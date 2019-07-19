@@ -7,9 +7,12 @@ from io import StringIO
 from kivy.clock import mainthread
 from kivy.lang import Builder
 from kivy.metrics import dp
+from kivy.uix.boxlayout import BoxLayout
+from kivy.utils import platform
 from kivymd.dialog import MDDialog
 from kivymd.label import MDLabel
 from kivymd.snackbar import Snackbar
+from layoutmargin import AddMargin, MarginLayout
 
 
 def run_in_thread(fn):
@@ -48,6 +51,29 @@ def load_kv_from_py(f):
             filename + '.kv'
         )
     )
+
+
+def check_write_permission():
+    """
+    Android runtime storage permission check.
+    """
+    if platform != "android":
+        return True
+    from android.permissions import Permission, check_permission
+    permission = Permission.WRITE_EXTERNAL_STORAGE
+    return check_permission(permission)
+
+
+def check_request_write_permission():
+    """
+    Android runtime storage permission check & request.
+    """
+    had_permission = check_write_permission()
+    if not had_permission:
+        from android.permissions import Permission, request_permission
+        permission = Permission.WRITE_EXTERNAL_STORAGE
+        request_permission(permission)
+    return had_permission
 
 
 class StringIOCBWrite(StringIO):
@@ -195,3 +221,11 @@ class Dialog(object):
         body = "Couldn't not decode history data."
         dialog = cls.create_dialog(title, body)
         dialog.open()
+
+
+class BoxLayoutMarginLayout(MarginLayout, BoxLayout):
+    pass
+
+
+class BoxLayoutAddMargin(AddMargin, BoxLayout):
+    pass
