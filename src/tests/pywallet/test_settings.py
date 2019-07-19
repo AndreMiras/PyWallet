@@ -4,9 +4,9 @@ from tempfile import mkdtemp
 from unittest import mock
 
 from kivy.app import App
-from pyetheroll.constants import ChainID
 
-from etheroll.settings import Settings
+from pywalib import ChainID
+from pywallet.settings import Settings
 from service.main import EtherollApp
 
 
@@ -22,7 +22,7 @@ class TestSettings(unittest.TestCase):
         """
         Creates a temporary user data dir for storing the user config.
         """
-        self.temp_path = mkdtemp(prefix='etheroll')
+        self.temp_path = mkdtemp(prefix='pywallet')
         self.app = App.get_running_app()
         self.app._user_data_dir = self.temp_path
 
@@ -85,4 +85,4 @@ class TestSettings(unittest.TestCase):
         with mock.patch.object(
                 Settings, 'is_persistent_keystore', return_value=True):
             prefix = Settings._get_android_keystore_prefix()
-        assert prefix == '/sdcard/etheroll'
+        assert prefix == '/sdcard/pywallet'

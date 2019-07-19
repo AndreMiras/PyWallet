@@ -2,10 +2,9 @@ import os
 
 from kivy.app import App
 from kivy.utils import platform
-from pyetheroll.constants import DEFAULT_GAS_PRICE_GWEI, ChainID
 
-from etheroll.constants import KEYSTORE_DIR_SUFFIX
 from etheroll.store import Store
+from pywalib import DEFAULT_GAS_PRICE_GWEI, KEYSTORE_DIR_SUFFIX, ChainID
 
 NETWORK_SETTINGS = 'network'
 GAS_PRICE_SETTINGS = 'gas_price'
