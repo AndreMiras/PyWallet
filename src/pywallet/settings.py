@@ -3,7 +3,7 @@ import os
 from kivy.app import App
 from kivy.utils import platform
 
-from etheroll.store import Store
+from pywallet.store import Store
 from pywalib import DEFAULT_GAS_PRICE_GWEI, KEYSTORE_DIR_SUFFIX, ChainID
 
 NETWORK_SETTINGS = 'network'

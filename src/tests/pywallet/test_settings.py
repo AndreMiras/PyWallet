@@ -7,7 +7,7 @@ from kivy.app import App
 
 from pywalib import ChainID
 from pywallet.settings import Settings
-from service.main import EtherollApp
+from main import PyWalletApp
 
 
 class TestSettings(unittest.TestCase):
@@ -16,7 +16,10 @@ class TestSettings(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        EtherollApp()
+        """
+        Makes sure the `App.get_running_app` singleton gets created.
+        """
+        PyWalletApp()
 
     def setUp(self):
         """

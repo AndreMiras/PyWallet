@@ -17,7 +17,7 @@ ROUND_DIGITS = 3
 KEYSTORE_DIR_PREFIX = expanduser("~")
 # default pyethapp keystore path
 KEYSTORE_DIR_SUFFIX = ".config/pyethapp/keystore/"
-DEFAULT_GAS_PRICE_GWEI = 5
+DEFAULT_GAS_PRICE_GWEI = 4
 
 
 class UnknownEtherscanException(Exception):
