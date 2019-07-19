@@ -43,7 +43,8 @@ class PyWalib:
     def __init__(self, keystore_dir=None):
         if keystore_dir is None:
             keystore_dir = PyWalib.get_default_keystore_path()
-        self.account_utils = AccountUtils(keystore_dir=keystore_dir)
+        self.keystore_dir = keystore_dir
+        self.account_utils = AccountUtils(keystore_dir=self.keystore_dir)
         self.chain_id = ChainID.MAINNET
         self.provider = HTTPProvider('https://mainnet.infura.io')
         self.web3 = Web3(self.provider)

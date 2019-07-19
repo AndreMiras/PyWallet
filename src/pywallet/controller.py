@@ -40,9 +40,8 @@ class Controller(FloatLayout):
     accounts_history = DictProperty({})
 
     def __init__(self, **kwargs):
-        super(Controller, self).__init__(**kwargs)
-        keystore_path = Controller.get_keystore_path()
-        self.pywalib = PyWalib(keystore_path)
+        super().__init__(**kwargs)
+        self._pywalib = None
         self.screen_history = []
         self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
@@ -134,6 +133,18 @@ class Controller(FloatLayout):
     @property
     def screen_manager(self):
         return self.ids.screen_manager_id
+
+    @property
+    def pywalib(self):
+        """
+        Gets or creates the PyWalib object.
+        Also recreates the object if the keystore_path changed.
+        """
+        keystore_path = Controller.get_keystore_path()
+        if self._pywalib is None or \
+                self._pywalib.keystore_dir != keystore_path:
+            self._pywalib = PyWalib(keystore_path)
+        return self._pywalib
 
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
