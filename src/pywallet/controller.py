@@ -6,7 +6,6 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.properties import DictProperty, ObjectProperty
-from kivy.storage.jsonstore import JsonStore
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
 from kivymd.bottomsheet import MDListBottomSheet
@@ -18,6 +17,7 @@ from pywallet.aliasform import AliasForm
 from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
+from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
@@ -208,31 +208,13 @@ class Controller(FloatLayout):
             keystore_path = PyWalib.get_default_keystore_path()
         return keystore_path
 
-    @staticmethod
-    def get_store_path():
-        """
-        Returns the full user store path.
-        """
-        user_data_dir = App.get_running_app().user_data_dir
-        store_path = os.path.join(user_data_dir, 'store.json')
-        return store_path
-
-    @classmethod
-    def get_store(cls):
-        """
-        Returns the full user Store object instance.
-        """
-        store_path = cls.get_store_path()
-        store = JsonStore(store_path)
-        return store
-
     @classmethod
     def delete_account_alias(cls, account):
         """
         Deletes the alias for the given account.
         """
         address = "0x" + account.address.hex()
-        store = cls.get_store()
+        store = Store.get_store()
         alias_dict = store['alias']
         alias_dict.pop(address)
         store['alias'] = alias_dict
@@ -252,7 +234,7 @@ class Controller(FloatLayout):
                 pass
             return
         address = "0x" + account.address.hex()
-        store = cls.get_store()
+        store = Store.get_store()
         try:
             alias_dict = store['alias']
         except KeyError:
@@ -267,7 +249,7 @@ class Controller(FloatLayout):
         """
         Returns the alias of the given address string.
         """
-        store = cls.get_store()
+        store = Store.get_store()
         return store.get('alias')[address]
 
     @classmethod
