@@ -64,15 +64,17 @@ def check_write_permission():
     return check_permission(permission)
 
 
-def check_request_write_permission():
+def check_request_write_permission(callback=None):
     """
     Android runtime storage permission check & request.
     """
     had_permission = check_write_permission()
     if not had_permission:
-        from android.permissions import Permission, request_permission
-        permission = Permission.WRITE_EXTERNAL_STORAGE
-        request_permission(permission)
+        from android.permissions import Permission, request_permissions
+        permissions = [Permission.WRITE_EXTERNAL_STORAGE]
+        # TODO: add callback support refs:
+        # https://github.com/kivy/python-for-android/pull/1818
+        request_permissions(permissions)
     return had_permission
 
 

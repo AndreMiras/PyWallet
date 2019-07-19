@@ -21,7 +21,9 @@ from pywallet.settings import Settings
 from pywallet.settings_screen import SettingsScreen
 from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
-from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
+from pywallet.utils import (Dialog, check_request_write_permission,
+                            check_write_permission, load_kv_from_py,
+                            run_in_thread)
 
 # Time before loading the next screen.
 # The idea is to let the application render before trying to add child widget,
@@ -280,9 +282,32 @@ class Controller(FloatLayout):
         title = "%s ETH" % (balance)
         self.set_toolbar_title(title)
 
-    def load_landing_page(self):
+    def show_storage_permissions_required_dialog(self):
+        title = "External storage permissions required"
+        body = ""
+        body += "In order to save your keystore, PyWallet requires access "
+        body += "to your device storage. "
+        body += "Please allow PyWallet to access it when prompted."
+        dialog = Dialog.create_dialog(title, body)
+        dialog.open()
+        return dialog
+
+    def check_external_storage_permission(self, on_permission=None):
         """
-        Loads the landing page.
+        Checks for external storage permissions and pops a dialog to ask for it
+        if needed.
+        """
+        if check_write_permission():
+            return
+        dialog = self.show_storage_permissions_required_dialog()
+        # TODO: on permission callback update settings and reload accounts
+        dialog.bind(
+            on_dismiss=lambda *x: check_request_write_permission(
+                on_permission))
+
+    def try_load_current_account(self):
+        """
+        Load the main account or fallback to the create account screen.
         """
         try:
             # will trigger account data fetching
@@ -295,6 +320,13 @@ class Controller(FloatLayout):
                 self.screen_manager_current('overview')
         except IndexError:
             self.load_create_new_account()
+
+    def load_landing_page(self):
+        """
+        Loads the landing page.
+        """
+        self.check_external_storage_permission(
+            on_permission=lambda *x: self.try_load_current_account())
 
     @run_in_thread
     def fetch_balance(self):
