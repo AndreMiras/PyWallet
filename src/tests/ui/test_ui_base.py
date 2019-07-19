@@ -22,6 +22,12 @@ from pywallet.utils import Dialog
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 
 
+def patch_get_store_path(temp_path):
+    store_path = os.path.join(temp_path, 'store.json')
+    return mock.patch(
+        'pywallet.controller.Store.get_store_path', lambda: store_path)
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -327,15 +333,7 @@ class Test(unittest.TestCase):
         address2 = '0x' + account2.address.hex()
         Controller = main.Controller
 
-        @staticmethod
-        def get_store_path():
-            """
-            Makes sure we don't mess up with actual store config file.
-            """
-            os.environ['KEYSTORE_PATH'] = self.temp_path
-            store_path = os.path.join(self.temp_path, 'store.json')
-            return store_path
-        with mock.patch.object(Controller, 'get_store_path', get_store_path):
+        with patch_get_store_path(self.temp_path):
             # no alias by default
             with self.assertRaises(KeyError):
                 Controller.get_account_alias(account1)
