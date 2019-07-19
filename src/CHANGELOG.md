@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-  - Migration to Python3, refs #19
+  - Migration to Python3, refs #19, #146
+  - Handle dynamic permissions, refs #149
+  - Configurable gas price
 
 ## [v20180729]
 
