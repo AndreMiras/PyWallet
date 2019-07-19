@@ -3,8 +3,8 @@ import os
 from kivy.app import App
 from kivy.utils import platform
 
-from pywallet.store import Store
 from pywalib import DEFAULT_GAS_PRICE_GWEI, KEYSTORE_DIR_SUFFIX, ChainID
+from pywallet.store import Store
 
 NETWORK_SETTINGS = 'network'
 GAS_PRICE_SETTINGS = 'gas_price'

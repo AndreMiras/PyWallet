@@ -5,9 +5,9 @@ from unittest import mock
 
 from kivy.app import App
 
+from main import PyWalletApp
 from pywalib import ChainID
 from pywallet.settings import Settings
-from main import PyWalletApp
 
 
 class TestSettings(unittest.TestCase):
