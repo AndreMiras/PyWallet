@@ -18,6 +18,7 @@ from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
 from pywallet.settings import Settings
+from pywallet.settings_screen import SettingsScreen
 from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
@@ -168,6 +169,7 @@ class Controller(FloatLayout):
             'switch_account': SwitchAccountScreen,
             'manage_keystores': ManageKeystoreScreen,
             'flashqrcode': FlashQrCodeScreen,
+            'settings_screen': SettingsScreen,
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
@@ -432,6 +434,19 @@ class Controller(FloatLayout):
         from zbarcam import ZBarCam  # noqa
         # loads the flash QR Code screen
         self.screen_manager_current('flashqrcode', direction='left')
+
+    def load_settings_screen(self):
+        """
+        Loads the settings screen.
+        """
+        if SCREEN_SWITCH_DELAY:
+            Clock.schedule_once(
+                lambda dt: self.screen_manager_current(
+                    'settings_screen', direction='left'),
+                SCREEN_SWITCH_DELAY)
+        else:
+            self.screen_manager_current(
+                'settings_screen', direction='left')
 
     def load_about_screen(self):
         """
