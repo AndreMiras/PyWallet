@@ -292,18 +292,18 @@ class Controller(FloatLayout):
         dialog.open()
         return dialog
 
-    def check_external_storage_permission(self, on_permission=None):
+    def check_external_storage_permission(self, callback):
         """
         Checks for external storage permissions and pops a dialog to ask for it
         if needed.
         """
         if check_write_permission():
-            return
+            return callback()
         dialog = self.show_storage_permissions_required_dialog()
         # TODO: on permission callback update settings and reload accounts
         dialog.bind(
             on_dismiss=lambda *x: check_request_write_permission(
-                on_permission))
+                callback))
 
     def try_load_current_account(self):
         """
@@ -326,7 +326,7 @@ class Controller(FloatLayout):
         Loads the landing page.
         """
         self.check_external_storage_permission(
-            on_permission=lambda *x: self.try_load_current_account())
+            callback=lambda *x: self.try_load_current_account())
 
     @run_in_thread
     def fetch_balance(self):
