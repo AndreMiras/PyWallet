@@ -38,15 +38,38 @@ class ChainID(Enum):
     ROPSTEN = 3
 
 
+class HTTPProviderFactory:
+
+    PROVIDER_URLS = {
+        # ChainID.MAINNET: 'https://api.myetherapi.com/eth',
+        ChainID.MAINNET: 'https://mainnet.infura.io',
+        # ChainID.ROPSTEN: 'https://api.myetherapi.com/rop',
+        ChainID.ROPSTEN: 'https://ropsten.infura.io',
+    }
+
+    @classmethod
+    def create(cls, chain_id=ChainID.MAINNET) -> HTTPProvider:
+        url = cls.PROVIDER_URLS[chain_id]
+        return HTTPProvider(url)
+
+
+def get_etherscan_prefix(chain_id=ChainID.MAINNET) -> str:
+    PREFIXES = {
+        ChainID.MAINNET: 'https://api.etherscan.io/api',
+        ChainID.ROPSTEN: 'https://api-ropsten.etherscan.io/api',
+    }
+    return PREFIXES[chain_id]
+
+
 class PyWalib:
 
-    def __init__(self, keystore_dir=None):
+    def __init__(self, keystore_dir=None, chain_id=ChainID.MAINNET):
         if keystore_dir is None:
             keystore_dir = PyWalib.get_default_keystore_path()
         self.keystore_dir = keystore_dir
         self.account_utils = AccountUtils(keystore_dir=self.keystore_dir)
-        self.chain_id = ChainID.MAINNET
-        self.provider = HTTPProvider('https://mainnet.infura.io')
+        self.chain_id = chain_id
+        self.provider = HTTPProviderFactory.create(self.chain_id)
         self.web3 = Web3(self.provider)
 
     @staticmethod
@@ -64,13 +87,13 @@ class PyWalib:
         assert message == "OK"
 
     @staticmethod
-    def get_balance(address):
+    def get_balance(address, chain_id=ChainID.MAINNET):
         """
         Retrieves the balance from etherscan.io.
         The balance is returned in ETH rounded to the second decimal.
         """
         address = to_checksum_address(address)
-        url = 'https://api.etherscan.io/api'
+        url = get_etherscan_prefix(chain_id)
         url += '?module=account&action=balance'
         url += '&address=%s' % address
         url += '&tag=latest'
@@ -96,12 +119,12 @@ class PyWalib:
         return balance_eth
 
     @staticmethod
-    def get_transaction_history(address):
+    def get_transaction_history(address, chain_id=ChainID.MAINNET):
         """
         Retrieves the transaction history from etherscan.io.
         """
         address = to_checksum_address(address)
-        url = 'https://api.etherscan.io/api'
+        url = get_etherscan_prefix(chain_id)
         url += '?module=account&action=txlist'
         url += '&sort=asc'
         url += '&address=%s' % address
@@ -137,11 +160,11 @@ class PyWalib:
         return transactions
 
     @staticmethod
-    def get_out_transaction_history(address):
+    def get_out_transaction_history(address, chain_id=ChainID.MAINNET):
         """
         Retrieves the outbound transaction history from Etherscan.
         """
-        transactions = PyWalib.get_transaction_history(address)
+        transactions = PyWalib.get_transaction_history(address, chain_id)
         out_transactions = []
         for transaction in transactions:
             if transaction['extra_dict']['sent']:
@@ -150,13 +173,14 @@ class PyWalib:
 
     # TODO: can be removed since the migration to web3
     @staticmethod
-    def get_nonce(address):
+    def get_nonce(address, chain_id=ChainID.MAINNET):
         """
         Gets the nonce by counting the list of outbound transactions from
         Etherscan.
         """
         try:
-            out_transactions = PyWalib.get_out_transaction_history(address)
+            out_transactions = PyWalib.get_out_transaction_history(
+                address, chain_id)
         except NoTransactionFoundException:
             out_transactions = []
         nonce = len(out_transactions)

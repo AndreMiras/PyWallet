@@ -145,9 +145,12 @@ class Controller(FloatLayout):
         Also recreates the object if the keystore_path changed.
         """
         keystore_path = Settings.get_keystore_path()
+        chain_id = Settings.get_stored_network()
         if self._pywalib is None or \
-                self._pywalib.keystore_dir != keystore_path:
-            self._pywalib = PyWalib(keystore_path)
+                self._pywalib.keystore_dir != keystore_path or \
+                self._pywalib.chain_id != chain_id:
+            self._pywalib = PyWalib(
+                keystore_dir=keystore_path, chain_id=chain_id)
         return self._pywalib
 
     def set_toolbar_title(self, title):
@@ -336,8 +339,9 @@ class Controller(FloatLayout):
         if self.current_account is None:
             return
         address = '0x' + self.current_account.address.hex()
+        chain_id = Settings.get_stored_network()
         try:
-            balance = PyWalib.get_balance(address)
+            balance = PyWalib.get_balance(address, chain_id)
         except ConnectionError:
             Dialog.on_balance_connection_error()
             Logger.warning('ConnectionError', exc_info=True)

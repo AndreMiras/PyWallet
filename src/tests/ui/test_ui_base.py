@@ -550,7 +550,7 @@ class Test(unittest.TestCase):
             thread = controller.fetch_balance()
             thread.join()
         address = '0x' + account.address.hex()
-        mock_get_balance.assert_called_with(address)
+        mock_get_balance.assert_called_with(address, pywalib.ChainID.MAINNET)
         # and the balance updated
         self.assertEqual(
             controller.accounts_balance[address], balance)
