@@ -545,7 +545,8 @@ class Test(unittest.TestCase):
         account = controller.current_account
         balance = 42
         # 1) simple case, library PyWalib.get_balance() gets called
-        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
+                patch_get_store_path(self.temp_path):
             mock_get_balance.return_value = balance
             thread = controller.fetch_balance()
             thread.join()
