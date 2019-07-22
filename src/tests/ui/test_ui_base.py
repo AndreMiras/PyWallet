@@ -238,8 +238,8 @@ class Test(unittest.TestCase):
 
     def helper_test_on_send_click(self, app):
         """
-        This is a regression test for #63, verify clicking "Send" Ethers works
-        as expected, refs #63.
+        Verifies clicking "Send" Ethers works as expected, refs #63.
+        Also checks for the amount field, refs #152.
         """
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
@@ -255,6 +255,14 @@ class Test(unittest.TestCase):
         self.assertEqual(dialogs[1].title, 'Invalid form')
         Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
+        # also checks for the amount field, refs #152
+        send_amount_id = send.ids.send_amount_id
+        send_amount_id.text = '0.1'
+        # the send_amount property should get updated from the input
+        self.assertEqual(send.send_amount, 0.1)
+        # blank amount shouldn't crash the app, just get ignored
+        send_amount_id.text = ''
+        self.assertEqual(send.send_amount, 0.1)
 
     def helper_test_send(self, app):
         """

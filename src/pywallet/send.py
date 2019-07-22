@@ -70,6 +70,13 @@ class Send(BoxLayout):
                 dialog, content.password))
         return dialog
 
+    def on_send_amount_text(self, instance, value):
+        try:
+            self.send_amount = float(value)
+        except ValueError:
+            # e.g. value is empty, refs #152
+            pass
+
     def on_send_click(self):
         if not self.verify_fields():
             Dialog.show_invalid_form_dialog()
