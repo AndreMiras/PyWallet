@@ -6,6 +6,7 @@
   - Handle dynamic permissions, refs #149, #151
   - Configurable gas price
   - Configurable network/chainID, refs #1
+  - Fix broken Travis build, refs #148
 
 ## [v20180729]
 
