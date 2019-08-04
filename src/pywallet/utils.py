@@ -4,7 +4,7 @@ import os
 import threading
 from io import StringIO
 
-from kivy.clock import Clock, mainthread
+from kivy.clock import mainthread
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
@@ -72,11 +72,7 @@ def check_request_write_permission(callback=None):
     if not had_permission:
         from android.permissions import Permission, request_permissions
         permissions = [Permission.WRITE_EXTERNAL_STORAGE]
-        # TODO: add callback support refs:
-        # https://github.com/kivy/python-for-android/pull/1818
-        request_permissions(permissions)
-        # for now the callback is simulated
-        Clock.schedule_once(lambda dt: callback(), 2)
+        request_permissions(permissions, callback)
     return had_permission
 
 

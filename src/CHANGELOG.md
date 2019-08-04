@@ -3,7 +3,7 @@
 ## [Unreleased]
 
   - Migration to Python3, refs #19, #146
-  - Handle dynamic permissions, refs #149
+  - Handle dynamic permissions, refs #149, #151
   - Configurable gas price
   - Configurable network/chainID, refs #1
 

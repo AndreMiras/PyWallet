@@ -299,14 +299,16 @@ class Controller(FloatLayout):
         """
         Checks for external storage permissions and pops a dialog to ask for it
         if needed.
+        Returns True if the permission was already granted, otherwise prompts
+        for permissions dialog (async) and returns False.
         """
         if check_write_permission():
-            return callback()
+            return True
         dialog = self.show_storage_permissions_required_dialog()
-        # TODO: on permission callback update settings and reload accounts
         dialog.bind(
             on_dismiss=lambda *x: check_request_write_permission(
                 callback))
+        return False
 
     def try_load_current_account(self):
         """
@@ -328,8 +330,24 @@ class Controller(FloatLayout):
         """
         Loads the landing page.
         """
-        self.check_external_storage_permission(
-            callback=lambda *x: self.try_load_current_account())
+        @mainthread
+        def on_permissions_callback(permissions, grant_results):
+            """
+            On write permission callback, toggles loading account from
+            persistent keystore if granted.
+            Also loads the current account to the app.
+            This is called from the Java thread, hence the `@mainthread`.
+            Find out more on the p4a permissions callback in:
+            https://github.com/kivy/python-for-android/pull/1818
+            """
+            if all(grant_results):
+                Settings.set_is_persistent_keystore(True)
+            self.try_load_current_account()
+        # if no permission yet, the try_load_current_account() call will be
+        # async from the callback
+        if self.check_external_storage_permission(
+                callback=on_permissions_callback):
+            self.try_load_current_account()
 
     @run_in_thread
     def fetch_balance(self):
