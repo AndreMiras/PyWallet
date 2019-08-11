@@ -19,9 +19,6 @@ class Send(BoxLayout):
     send_to_address = StringProperty("")
     send_amount = NumericProperty(0)
 
-    def __init__(self, **kwargs):
-        super(Send, self).__init__(**kwargs)
-
     def verify_to_address_field(self):
         title = "Input error"
         body = "Invalid address field"
@@ -98,7 +95,7 @@ class Send(BoxLayout):
         gas_price_gwei = Settings.get_stored_gas_price()
         gas_price_wei = int(gas_price_gwei * (10 ** 9))
         # TODO: not the main account, but the current account
-        account = controller.pywalib.get_main_account()
+        account = controller.current_account
         Dialog.snackbar_message("Unlocking account...")
         try:
             account.unlock(self.password)

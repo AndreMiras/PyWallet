@@ -7,6 +7,7 @@
   - Configurable gas price
   - Configurable network/chainID, refs #1
   - Fix broken Travis build, refs #148
+  - Send from different accounts, refs #147
 
 ## [v20180729]
 
