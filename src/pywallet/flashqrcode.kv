@@ -1,4 +1,5 @@
 #:import platform kivy.utils.platform
+#:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
 
 
 <FlashQrCodeScreen>:
@@ -10,3 +11,4 @@
         self.unbind_on_symbols()
     ZBarCam:
         id: zbarcam_id
+        code_types: ZBarSymbol.QRCODE,

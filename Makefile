@@ -34,7 +34,10 @@ ifeq ($(OS), Ubuntu)
 	sudo apt install --yes --no-install-recommends $(SYSTEM_DEPENDENCIES)
 endif
 
-opencv_build:
+$(DOWNLOAD_DIR):
+	mkdir --parents $(DOWNLOAD_DIR)
+
+opencv_build: $(DOWNLOAD_DIR)
 	curl --location --progress-bar $(OPENCV_MAKEFILE_URL) \
 		--output $(DOWNLOAD_DIR)/$(OPENCV_MAKEFILE_NAME)
 	make --file $(DOWNLOAD_DIR)/$(OPENCV_MAKEFILE_NAME) VENV_NAME=$(VENV_NAME)

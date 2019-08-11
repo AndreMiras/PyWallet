@@ -22,24 +22,9 @@ except AttributeError:
 
 class FlashQrCodeScreen(Screen):
 
-    def __init__(self, **kwargs):
-        super(FlashQrCodeScreen, self).__init__(**kwargs)
-        self.setup()
-
-    def setup(self):
-        """
-        Configures scanner to handle only QRCodes.
-        """
-        self.controller = App.get_running_app().controller
-        self.zbarcam = self.ids.zbarcam_id
-        # loads ZBarCam only when needed, refs:
-        # https://github.com/AndreMiras/PyWallet/issues/94
-        import zbar
-        # enables QRCode scanning only
-        self.zbarcam.scanner.set_config(
-            zbar.Symbol.NONE, zbar.Config.ENABLE, 0)
-        self.zbarcam.scanner.set_config(
-            zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1)
+    @property
+    def zbarcam(self):
+        return self.ids.zbarcam_id
 
     def bind_on_symbols(self):
         """
@@ -62,6 +47,7 @@ class FlashQrCodeScreen(Screen):
             return
         symbol = symbols[0]
         # update Send screen address
-        self.controller.send.send_to_address = symbol.data
+        controller = App.get_running_app().controller
+        controller.send.send_to_address = symbol.data.decode('utf-8')
         self.zbarcam.play = False
-        self.controller.load_landing_page()
+        controller.load_landing_page()

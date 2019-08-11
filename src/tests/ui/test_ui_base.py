@@ -13,6 +13,7 @@ from unittest import mock
 import kivymd
 import requests
 from kivy.clock import Clock
+from kivy.core.image import Image
 
 import main
 import pywalib
@@ -20,6 +21,8 @@ from pywallet.switchaccount import SwitchAccount
 from pywallet.utils import Dialog
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+FIXTURE_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..', 'fixtures')
 
 
 def patch_get_store_path(temp_path):
@@ -655,6 +658,24 @@ class Test(unittest.TestCase):
         self.assertEqual(
             str(controller.about.__class__), "<class 'kivy.factory.About'>")
 
+    def helper_test_flashqrcode(self, app):
+        """
+        Verifies the flash QRCode screen loads and can flash codes.
+        """
+        controller = app.controller
+        controller.load_flash_qr_code()
+        self.advance_frames(1)
+        screen_manager = controller.screen_manager
+        self.assertEqual(screen_manager.current, 'flashqrcode')
+        flashqrcode_screen = screen_manager.get_screen('flashqrcode')
+        zbarcam = flashqrcode_screen.ids.zbarcam_id
+        fixture_path = os.path.join(FIXTURE_DIR, 'one_qr_code.png')
+        texture = Image(fixture_path).texture
+        camera = mock.Mock(texture=texture)
+        zbarcam._on_texture(camera)
+        send = controller.send
+        self.assertEqual(send.send_to_address, 'zbarlight test qr code')
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -673,6 +694,7 @@ class Test(unittest.TestCase):
         self.helper_test_controller_fetch_balance(app)
         self.helper_test_delete_last_account(app)
         self.helper_test_about(app)
+        self.helper_test_flashqrcode(app)
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()
