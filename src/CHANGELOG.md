@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20190812]
 
   - Migration to Python3, refs #19, #146, #143
   - Handle dynamic permissions, refs #149, #151
