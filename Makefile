@@ -2,59 +2,57 @@ VENV_NAME=venv
 ACTIVATE_PATH=$(VENV_NAME)/bin/activate
 PIP=`. $(ACTIVATE_PATH); which pip`
 TOX=`which tox`
-GARDEN=`. $(ACTIVATE_PATH); which garden`
+GARDEN=$(VENV_NAME)/bin/garden
 PYTHON=$(VENV_NAME)/bin/python
-SYSTEM_DEPENDENCIES=virtualenv build-essential libpython2.7-dev \
+SYSTEM_DEPENDENCIES=virtualenv build-essential libpython3.6-dev \
     libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
 	cmake python-numpy tox wget curl libssl-dev libzbar-dev \
     xclip xsel
 OS=$(shell lsb_release -si)
-OPENCV_VERSION=2.4.13.6
-OPENCV_BASENAME=opencv-$(OPENCV_VERSION)
-OPENCV_BUILD=$(OPENCV_BASENAME)/build/lib/cv2.so
-OPENCV_DEPLOY=$(VENV_NAME)/lib/python2.7/site-packages/cv2.so
-NPROC=`grep -c '^processor' /proc/cpuinfo`
+TMPDIR ?= /tmp
+DOWNLOAD_DIR = $(TMPDIR)/downloads
+KM_REPOSITORY=https://raw.githubusercontent.com/AndreMiras/km
+KM_BRANCH=develop
+OPENCV_MAKEFILE_NAME=Makefile.opencv
+OPENCV_MAKEFILE_URL=$(KM_REPOSITORY)/$(KM_BRANCH)/attachments/$(OPENCV_MAKEFILE_NAME)
 
 
-all: system_dependencies opencv virtualenv
+all: system_dependencies virtualenv
 
-virtualenv:
-	test -d venv || virtualenv -p python2 venv
-	. venv/bin/activate
+$(VENV_NAME):
+	test -d $(VENV_NAME) || virtualenv -p python3 $(VENV_NAME)
+	. $(VENV_NAME)/bin/activate
 	$(PIP) install Cython==0.26.1
 	$(PIP) install -r requirements/requirements.txt
 	$(GARDEN) install qrcode
 	$(GARDEN) install xcamera
+
+virtualenv: $(VENV_NAME)
 
 system_dependencies:
 ifeq ($(OS), Ubuntu)
 	sudo apt install --yes --no-install-recommends $(SYSTEM_DEPENDENCIES)
 endif
 
-$(OPENCV_BUILD):
-	curl --location https://github.com/opencv/opencv/archive/$(OPENCV_VERSION).tar.gz \
-		--progress-bar --output $(OPENCV_BASENAME).tar.gz
-	tar -xf $(OPENCV_BASENAME).tar.gz
-	cmake \
-		-D BUILD_DOCS=OFF -D BUILD_PACKAGE=OFF -D BUILD_PERF_TESTS=OFF \
-		-D BUILD_TESTS=OFF -D BUILD_opencv_apps=OFF \
-		-D BUILD_opencv_nonfree=OFF -D BUILD_opencv_stitching=OFF \
-		-D BUILD_opencv_superres=OFF -D BUILD_opencv_ts=OFF \
-		-D BUILD_WITH_DEBUG_INFO=OFF -D WITH_1394=OFF -D WITH_CUDA=OFF \
-		-D WITH_CUFFT=OFF -D WITH_GIGEAPI=OFF -D WITH_JASPER=OFF \
-		-D WITH_OPENEXR=OFF -D WITH_PVAPI=OFF -D WITH_GTK=OFF \
-		-D BUILD_opencv_python=ON -B$(OPENCV_BASENAME)/build -H$(OPENCV_BASENAME)
-	cmake --build $(OPENCV_BASENAME)/build -- -j$(NPROC)
+$(DOWNLOAD_DIR):
+	mkdir --parents $(DOWNLOAD_DIR)
 
-opencv_build: $(OPENCV_BUILD)
+opencv_build: $(DOWNLOAD_DIR)
+	curl --location --progress-bar $(OPENCV_MAKEFILE_URL) \
+		--output $(DOWNLOAD_DIR)/$(OPENCV_MAKEFILE_NAME)
+	make --file $(DOWNLOAD_DIR)/$(OPENCV_MAKEFILE_NAME) VENV_NAME=$(VENV_NAME)
 
-$(OPENCV_DEPLOY): opencv_build virtualenv
-	cp $(OPENCV_BUILD) $(OPENCV_DEPLOY)
+opencv_deploy: opencv_build virtualenv
+	make --file $(DOWNLOAD_DIR)/$(OPENCV_MAKEFILE_NAME) opencv_deploy VENV_NAME=$(VENV_NAME)
 
-opencv: $(OPENCV_DEPLOY)
+opencv: opencv_deploy
 
 clean:
 	rm -rf $(VENV_NAME) .tox/ $(OPENCV_BASENAME)
 
 test:
 	$(TOX)
+
+uitest:
+	. $(ACTIVATE_PATH) && \
+	$(PYTHON) -m kivyunittest --folder src/tests/ui/ --pythonpath src/

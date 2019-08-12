@@ -7,7 +7,7 @@
 <Overview>:
     orientation: 'vertical'
     AddressButton:
-        address_property: root.current_account_string
+        address_property: root.current_account_string or 'No account selected'
         on_release: app.controller.open_address_options()
     History:
         id: history_id

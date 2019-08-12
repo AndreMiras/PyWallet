@@ -3,7 +3,6 @@ from kivy.uix.scrollview import ScrollView
 
 from pywallet.utils import load_kv_from_py
 
-
 load_kv_from_py(__file__)
 
 

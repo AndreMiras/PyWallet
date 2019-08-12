@@ -8,6 +8,7 @@ from requests.exceptions import ConnectionError
 
 from pywalib import NoTransactionFoundException, PyWalib
 from pywallet.list import IconLeftWidget
+from pywallet.settings import Settings
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 load_kv_from_py(__file__)
@@ -74,7 +75,7 @@ class History(BoxLayout):
         """
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             transactions = self.controller.accounts_history[address]
         except KeyError:
@@ -91,9 +92,10 @@ class History(BoxLayout):
     def fetch_history(self):
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        chain_id = Settings.get_stored_network()
+        address = '0x' + self.current_account.address.hex()
         try:
-            transactions = PyWalib.get_transaction_history(address)
+            transactions = PyWalib.get_transaction_history(address, chain_id)
         except ConnectionError:
             Dialog.on_history_connection_error()
             Logger.warning('ConnectionError', exc_info=True)

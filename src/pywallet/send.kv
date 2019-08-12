@@ -23,12 +23,10 @@
         required: True
         write_tab: False
         text: str(round(root.send_amount, ROUND_DIGITS))
-        on_text: root.send_amount = args[1]
+        on_text: root.on_send_amount_text(*args)
     AnchorLayout:
         MDRaisedButton:
             id: send_button_id
             text: "Send"
             on_release: root.on_send_click()
     PushUp:
-
-

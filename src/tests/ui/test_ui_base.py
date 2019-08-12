@@ -8,11 +8,12 @@ import time
 import unittest
 from functools import partial
 from tempfile import mkdtemp
+from unittest import mock
 
 import kivymd
-import mock
 import requests
 from kivy.clock import Clock
+from kivy.core.image import Image
 
 import main
 import pywalib
@@ -20,6 +21,14 @@ from pywallet.switchaccount import SwitchAccount
 from pywallet.utils import Dialog
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
+FIXTURE_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..', 'fixtures')
+
+
+def patch_get_store_path(temp_path):
+    store_path = os.path.join(temp_path, 'store.json')
+    return mock.patch(
+        'pywallet.controller.Store.get_store_path', lambda: store_path)
 
 
 class Test(unittest.TestCase):
@@ -127,7 +136,7 @@ class Test(unittest.TestCase):
             create_account_thread = threading.enumerate()[1]
             self.assertEqual(type(create_account_thread), threading.Thread)
             self.assertEqual(
-                create_account_thread._Thread__target.func_name,
+                create_account_thread._target.__name__,
                 "create_account")
             # waits for the end of the thread
             create_account_thread.join()
@@ -214,7 +223,7 @@ class Test(unittest.TestCase):
                 self.assertEqual(
                     type(create_account_thread), threading.Thread)
                 self.assertEqual(
-                    create_account_thread._Thread__target.func_name,
+                    create_account_thread._target.__name__,
                     "create_account")
                 # waits for the end of the thread
                 create_account_thread.join()
@@ -232,8 +241,8 @@ class Test(unittest.TestCase):
 
     def helper_test_on_send_click(self, app):
         """
-        This is a regression test for #63, verify clicking "Send" Ethers works
-        as expected, refs #63.
+        Verifies clicking "Send" Ethers works as expected, refs #63.
+        Also checks for the amount field, refs #152.
         """
         controller = app.controller
         # TODO: use dispatch('on_release') on navigation drawer
@@ -249,6 +258,14 @@ class Test(unittest.TestCase):
         self.assertEqual(dialogs[1].title, 'Invalid form')
         Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
+        # also checks for the amount field, refs #152
+        send_amount_id = send.ids.send_amount_id
+        send_amount_id.text = '0.1'
+        # the send_amount property should get updated from the input
+        self.assertEqual(send.send_amount, 0.1)
+        # blank amount shouldn't crash the app, just get ignored
+        send_amount_id.text = ''
+        self.assertEqual(send.send_amount, 0.1)
 
     def helper_test_send(self, app):
         """
@@ -284,8 +301,9 @@ class Test(unittest.TestCase):
             # unlock_send_transaction() thread should be running
             self.assertEqual(len(threading.enumerate()), 2)
             thread = threading.enumerate()[1]
+            self.assertEqual(type(thread), threading.Thread)
             self.assertEqual(
-                thread._Thread__target.func_name, 'unlock_send_transaction')
+                thread._target.__name__, 'unlock_send_transaction')
             thread.join()
             # checks snackbar messages
             self.assertEqual(
@@ -322,19 +340,11 @@ class Test(unittest.TestCase):
         account1 = pywalib.get_account_list()[0]
         # creates a second account
         account2 = pywalib.new_account(password="password", security_ratio=1)
-        address1 = '0x' + account1.address.encode("hex")
-        address2 = '0x' + account2.address.encode("hex")
+        address1 = '0x' + account1.address.hex()
+        address2 = '0x' + account2.address.hex()
         Controller = main.Controller
 
-        @staticmethod
-        def get_store_path():
-            """
-            Makes sure we don't mess up with actual store config file.
-            """
-            os.environ['KEYSTORE_PATH'] = self.temp_path
-            store_path = os.path.join(self.temp_path, 'store.json')
-            return store_path
-        with mock.patch.object(Controller, 'get_store_path', get_store_path):
+        with patch_get_store_path(self.temp_path):
             # no alias by default
             with self.assertRaises(KeyError):
                 Controller.get_account_alias(account1)
@@ -399,7 +409,7 @@ class Test(unittest.TestCase):
         manage_existing = controller.manage_existing
         account_address_id = manage_existing.ids.account_address_id
         account = pywalib.get_account_list()[0]
-        account_address = '0x' + account.address.encode("hex")
+        account_address = '0x' + account.address.hex()
         self.assertEqual(account_address_id.text, account_address)
         # clicks delete
         delete_button_id = manage_existing.ids.delete_button_id
@@ -546,12 +556,13 @@ class Test(unittest.TestCase):
         account = controller.current_account
         balance = 42
         # 1) simple case, library PyWalib.get_balance() gets called
-        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance:
+        with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
+                patch_get_store_path(self.temp_path):
             mock_get_balance.return_value = balance
             thread = controller.fetch_balance()
             thread.join()
-        address = '0x' + account.address.encode("hex")
-        mock_get_balance.assert_called_with(address)
+        address = '0x' + account.address.hex()
+        mock_get_balance.assert_called_with(address, pywalib.ChainID.MAINNET)
         # and the balance updated
         self.assertEqual(
             controller.accounts_balance[address], balance)
@@ -647,6 +658,24 @@ class Test(unittest.TestCase):
         self.assertEqual(
             str(controller.about.__class__), "<class 'kivy.factory.About'>")
 
+    def helper_test_flashqrcode(self, app):
+        """
+        Verifies the flash QRCode screen loads and can flash codes.
+        """
+        controller = app.controller
+        controller.load_flash_qr_code()
+        self.advance_frames(1)
+        screen_manager = controller.screen_manager
+        self.assertEqual(screen_manager.current, 'flashqrcode')
+        flashqrcode_screen = screen_manager.get_screen('flashqrcode')
+        zbarcam = flashqrcode_screen.ids.zbarcam_id
+        fixture_path = os.path.join(FIXTURE_DIR, 'one_qr_code.png')
+        texture = Image(fixture_path).texture
+        camera = mock.Mock(texture=texture)
+        zbarcam._on_texture(camera)
+        send = controller.send
+        self.assertEqual(send.send_to_address, 'zbarlight test qr code')
+
     # main test function
     def run_test(self, app, *args):
         Clock.schedule_interval(self.pause, 0.000001)
@@ -665,6 +694,7 @@ class Test(unittest.TestCase):
         self.helper_test_controller_fetch_balance(app)
         self.helper_test_delete_last_account(app)
         self.helper_test_about(app)
+        self.helper_test_flashqrcode(app)
         # Comment out if you are editing the test, it'll leave the
         # Window opened.
         app.stop()

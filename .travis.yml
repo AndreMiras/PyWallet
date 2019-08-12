@@ -15,7 +15,7 @@ env:
   - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
 
 install:
-    - docker build --tag=$TAG --file=$DOCKERFILE .
+    - docker build --tag=$TAG --file=$DOCKERFILE --build-arg TRAVIS .
 
 script:
-    - travis_wait docker run $TAG $COMMAND
+    - travis_wait 30 docker run $TAG $COMMAND

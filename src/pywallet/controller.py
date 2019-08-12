@@ -6,7 +6,6 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.properties import DictProperty, ObjectProperty
-from kivy.storage.jsonstore import JsonStore
 from kivy.uix.floatlayout import FloatLayout
 from kivy.utils import platform
 from kivymd.bottomsheet import MDListBottomSheet
@@ -18,8 +17,13 @@ from pywallet.aliasform import AliasForm
 from pywallet.flashqrcode import FlashQrCodeScreen
 from pywallet.managekeystore import ManageKeystoreScreen
 from pywallet.overview import OverviewScreen
+from pywallet.settings import Settings
+from pywallet.settings_screen import SettingsScreen
+from pywallet.store import Store
 from pywallet.switchaccount import SwitchAccountScreen
-from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
+from pywallet.utils import (Dialog, check_request_write_permission,
+                            check_write_permission, load_kv_from_py,
+                            run_in_thread)
 
 # Time before loading the next screen.
 # The idea is to let the application render before trying to add child widget,
@@ -40,9 +44,8 @@ class Controller(FloatLayout):
     accounts_history = DictProperty({})
 
     def __init__(self, **kwargs):
-        super(Controller, self).__init__(**kwargs)
-        keystore_path = Controller.get_keystore_path()
-        self.pywalib = PyWalib(keystore_path)
+        super().__init__(**kwargs)
+        self._pywalib = None
         self.screen_history = []
         self.register_event_type('on_alias_updated')
         Clock.schedule_once(lambda dt: self.load_landing_page())
@@ -135,6 +138,21 @@ class Controller(FloatLayout):
     def screen_manager(self):
         return self.ids.screen_manager_id
 
+    @property
+    def pywalib(self):
+        """
+        Gets or creates the PyWalib object.
+        Also recreates the object if the keystore_path changed.
+        """
+        keystore_path = Settings.get_keystore_path()
+        chain_id = Settings.get_stored_network()
+        if self._pywalib is None or \
+                self._pywalib.keystore_dir != keystore_path or \
+                self._pywalib.chain_id != chain_id:
+            self._pywalib = PyWalib(
+                keystore_dir=keystore_path, chain_id=chain_id)
+        return self._pywalib
+
     def set_toolbar_title(self, title):
         self.toolbar.title_property = title
 
@@ -156,6 +174,7 @@ class Controller(FloatLayout):
             'switch_account': SwitchAccountScreen,
             'manage_keystores': ManageKeystoreScreen,
             'flashqrcode': FlashQrCodeScreen,
+            'settings_screen': SettingsScreen,
             'about': AboutScreen,
         }
         screen_manager = self.screen_manager
@@ -198,41 +217,12 @@ class Controller(FloatLayout):
         pywalib.KEYSTORE_DIR_PREFIX = App.get_running_app().user_data_dir
 
     @classmethod
-    def get_keystore_path(cls):
-        """
-        This is the Kivy default keystore path.
-        """
-        keystore_path = os.environ.get('KEYSTORE_PATH')
-        if keystore_path is None:
-            Controller.patch_keystore_path()
-            keystore_path = PyWalib.get_default_keystore_path()
-        return keystore_path
-
-    @staticmethod
-    def get_store_path():
-        """
-        Returns the full user store path.
-        """
-        user_data_dir = App.get_running_app().user_data_dir
-        store_path = os.path.join(user_data_dir, 'store.json')
-        return store_path
-
-    @classmethod
-    def get_store(cls):
-        """
-        Returns the full user Store object instance.
-        """
-        store_path = cls.get_store_path()
-        store = JsonStore(store_path)
-        return store
-
-    @classmethod
     def delete_account_alias(cls, account):
         """
         Deletes the alias for the given account.
         """
-        address = "0x" + account.address.encode("hex")
-        store = cls.get_store()
+        address = "0x" + account.address.hex()
+        store = Store.get_store()
         alias_dict = store['alias']
         alias_dict.pop(address)
         store['alias'] = alias_dict
@@ -251,8 +241,8 @@ class Controller(FloatLayout):
             except KeyError:
                 pass
             return
-        address = "0x" + account.address.encode("hex")
-        store = cls.get_store()
+        address = "0x" + account.address.hex()
+        store = Store.get_store()
         try:
             alias_dict = store['alias']
         except KeyError:
@@ -267,7 +257,7 @@ class Controller(FloatLayout):
         """
         Returns the alias of the given address string.
         """
-        store = cls.get_store()
+        store = Store.get_store()
         return store.get('alias')[address]
 
     @classmethod
@@ -275,7 +265,7 @@ class Controller(FloatLayout):
         """
         Returns the alias of the given Account object.
         """
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         return cls.get_address_alias(address)
 
     @staticmethod
@@ -287,7 +277,7 @@ class Controller(FloatLayout):
     def update_toolbar_title_balance(self, instance=None, value=None):
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
         try:
             balance = self.accounts_balance[address]
         except KeyError:
@@ -295,9 +285,34 @@ class Controller(FloatLayout):
         title = "%s ETH" % (balance)
         self.set_toolbar_title(title)
 
-    def load_landing_page(self):
+    def show_storage_permissions_required_dialog(self):
+        title = "External storage permissions required"
+        body = ""
+        body += "In order to save your keystore, PyWallet requires access "
+        body += "to your device storage. "
+        body += "Please allow PyWallet to access it when prompted."
+        dialog = Dialog.create_dialog(title, body)
+        dialog.open()
+        return dialog
+
+    def check_external_storage_permission(self, callback):
         """
-        Loads the landing page.
+        Checks for external storage permissions and pops a dialog to ask for it
+        if needed.
+        Returns True if the permission was already granted, otherwise prompts
+        for permissions dialog (async) and returns False.
+        """
+        if check_write_permission():
+            return True
+        dialog = self.show_storage_permissions_required_dialog()
+        dialog.bind(
+            on_dismiss=lambda *x: check_request_write_permission(
+                callback))
+        return False
+
+    def try_load_current_account(self):
+        """
+        Load the main account or fallback to the create account screen.
         """
         try:
             # will trigger account data fetching
@@ -311,6 +326,29 @@ class Controller(FloatLayout):
         except IndexError:
             self.load_create_new_account()
 
+    def load_landing_page(self):
+        """
+        Loads the landing page.
+        """
+        @mainthread
+        def on_permissions_callback(permissions, grant_results):
+            """
+            On write permission callback, toggles loading account from
+            persistent keystore if granted.
+            Also loads the current account to the app.
+            This is called from the Java thread, hence the `@mainthread`.
+            Find out more on the p4a permissions callback in:
+            https://github.com/kivy/python-for-android/pull/1818
+            """
+            if all(grant_results):
+                Settings.set_is_persistent_keystore(True)
+            self.try_load_current_account()
+        # if no permission yet, the try_load_current_account() call will be
+        # async from the callback
+        if self.check_external_storage_permission(
+                callback=on_permissions_callback):
+            self.try_load_current_account()
+
     @run_in_thread
     def fetch_balance(self):
         """
@@ -318,9 +356,10 @@ class Controller(FloatLayout):
         """
         if self.current_account is None:
             return
-        address = '0x' + self.current_account.address.encode("hex")
+        address = '0x' + self.current_account.address.hex()
+        chain_id = Settings.get_stored_network()
         try:
-            balance = PyWalib.get_balance(address)
+            balance = PyWalib.get_balance(address, chain_id)
         except ConnectionError:
             Dialog.on_balance_connection_error()
             Logger.warning('ConnectionError', exc_info=True)
@@ -355,7 +394,7 @@ class Controller(FloatLayout):
         Copies the current account address to the clipboard.
         """
         account = self.current_account
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         Clipboard.copy(address)
 
     def prompt_alias_dialog(self):
@@ -449,6 +488,19 @@ class Controller(FloatLayout):
         from zbarcam import ZBarCam  # noqa
         # loads the flash QR Code screen
         self.screen_manager_current('flashqrcode', direction='left')
+
+    def load_settings_screen(self):
+        """
+        Loads the settings screen.
+        """
+        if SCREEN_SWITCH_DELAY:
+            Clock.schedule_once(
+                lambda dt: self.screen_manager_current(
+                    'settings_screen', direction='left'),
+                SCREEN_SWITCH_DELAY)
+        else:
+            self.screen_manager_current(
+                'settings_screen', direction='left')
 
     def load_about_screen(self):
         """

@@ -43,7 +43,7 @@ class Overview(BoxLayout):
         if self.current_account is None:
             return
         account = self.current_account
-        address = "0x" + account.address.encode("hex")
+        address = "0x" + account.address.hex()
         self.current_account_string = address
 
     def on_current_account(self, instance, account):

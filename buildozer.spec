@@ -23,7 +23,7 @@ source.include_exts = py,png,jpg,kv,atlas,md
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 #source.exclude_dirs = tests, bin
-source.exclude_dirs = bin, venv, src/python-for-android
+source.exclude_dirs = python-for-android
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
@@ -38,42 +38,43 @@ version.filename = %(source.dir)s/version.py
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
 requirements =
-    hostpython2,
-    kivy,
     android,
-    setuptools,
-    openssl,
-    pycryptodome,
-    pysha3,
-    ethash,
-    scrypt,
-    bitcoin,
-    rlp==0.6.0,
-    repoze.lru,
-    PyYAML,
-    https://github.com/ethereum/pyethereum/archive/2e53bf3.zip,
-    devp2p==0.9.3,
-    coincurve==7.1.0,
-    gevent,
-    pbkdf2,
-    https://github.com/ethereum/pyethapp/archive/409331e88a397ce5276c430aff4a8866d413e45d.zip,
-    https://gitlab.com/kivymd/KivyMD/repository/archive.zip?ref=e81c02afbca915a4d71c85d3486f6710b53df2c1,
-    requests,
-    eth-hash==0.1.1,
-    pyelliptic==1.5.7,
+    attrdict==2.0.0,
+    certifi==2018.10.15,
     cffi==1.11.5,
-    libsecp256k1==355a38f,
-    asn1crypto==0.24.0,
-    coincurve==7.1.0,
-    qrcode,
-    contextlib2,
-    raven,
-    libiconv,
-    libzbar,
-    zbar,
-    pil,
-    https://github.com/AndreMiras/garden.zbarcam/archive/20171220.zip
-
+    chardet==3.0.4,
+    cytoolz==0.9.0,
+    eth-abi==1.2.2,
+    eth-account==0.3.0,
+    eth-hash==0.1.1,
+    eth-keyfile==0.5.1,
+    eth-keys==0.2.0b3,
+    eth-rlp==0.1.2,
+    eth-utils==1.4.1,
+    eth-typing==2.0.0,
+    gevent,
+    hexbytes==0.1.0,
+    https://github.com/AndreMiras/garden.layoutmargin/archive/20180517.tar.gz,
+    https://github.com/AndreMiras/garden.zbarcam/archive/20190303.zip,
+    https://github.com/AndreMiras/KivyMD/archive/20181106.tar.gz,
+    idna==2.7,
+    Kivy==1.11.1,
+    libzbar==0.10,
+    lru-dict==1.1.5,
+    openssl,
+    parsimonious==0.8.1,
+    Pillow==5.2.0,
+    pycryptodome==3.4.6,
+    python3,
+    pyzbar==0.1.8,
+    qrcode==5.3,
+    raven==6.1.0,
+    requests==2.20.0,
+    rlp==1.0.3,
+    setuptools==40.9.0,
+    toolz==0.9.0,
+    urllib3==1.24.1,
+    web3==4.8.1
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -125,20 +126,22 @@ fullscreen = 0
 #android.presplash_color = #FFFFFF
 
 # (list) Permissions
-#android.permissions = INTERNET
 android.permissions = INTERNET, CAMERA
 
-# (int) Android API to use
-#android.api = 19
+# (int) Target Android API, should be as high as possible.
+android.api = 27
 
-# (int) Minimum API required
-#android.minapi = 9
+# (int) Minimum API your APK will support.
+android.minapi = 21
 
 # (int) Android SDK version to use
-#android.sdk = 20
+android.sdk = 20
 
 # (str) Android NDK version to use
-#android.ndk = 9c
+android.ndk = 17c
+
+# (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
+android.ndk_api = 21
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
@@ -156,6 +159,12 @@ android.permissions = INTERNET, CAMERA
 # This can be useful to avoid excess Internet downloads or save time
 # when an update is due and you just want to test/build your package
 # android.skip_update = False
+
+# (bool) If True, then automatically accept SDK license
+# agreements. This is intended for automation only. If set to False,
+# the default, you will be shown the license when first running
+# buildozer.
+android.accept_sdk_license = True
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
@@ -188,10 +197,6 @@ android.blacklist_src = blacklist.txt
 # (list) Gradle dependencies to add (currently works only with sdl2_gradle
 # bootstrap)
 #android.gradle_dependencies =
-
-# (str) python-for-android branch to use, defaults to master
-#p4a.branch = stable
-p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
@@ -233,6 +238,12 @@ android.arch = armeabi-v7a
 # Python for android (p4a) specific
 #
 
+# (str) python-for-android fork to use, defaults to upstream (kivy)
+p4a.fork = kivy
+
+# (str) python-for-android branch to use, defaults to master
+p4a.branch = develop
+
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #p4a.source_dir =
 
@@ -265,7 +276,7 @@ p4a.local_recipes = %(source.dir)s/python-for-android/recipes/
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1

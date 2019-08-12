@@ -1,4 +1,4 @@
-from ethereum.utils import normalize_address
+from eth_utils import to_checksum_address
 from kivy.app import App
 from kivy.logger import Logger
 from kivy.properties import NumericProperty, StringProperty
@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from pywalib import (ROUND_DIGITS, InsufficientFundsException,
                      UnknownEtherscanException)
 from pywallet.passwordform import PasswordForm
+from pywallet.settings import Settings
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 
 load_kv_from_py(__file__)
@@ -18,15 +19,12 @@ class Send(BoxLayout):
     send_to_address = StringProperty("")
     send_amount = NumericProperty(0)
 
-    def __init__(self, **kwargs):
-        super(Send, self).__init__(**kwargs)
-
     def verify_to_address_field(self):
         title = "Input error"
         body = "Invalid address field"
         try:
-            normalize_address(self.send_to_address)
-        except Exception:
+            to_checksum_address(self.send_to_address)
+        except ValueError:
             dialog = Dialog.create_dialog(title, body)
             dialog.open()
             return False
@@ -69,6 +67,13 @@ class Send(BoxLayout):
                 dialog, content.password))
         return dialog
 
+    def on_send_amount_text(self, instance, value):
+        try:
+            self.send_amount = float(value)
+        except ValueError:
+            # e.g. value is empty, refs #152
+            pass
+
     def on_send_click(self):
         if not self.verify_fields():
             Dialog.show_invalid_form_dialog()
@@ -84,11 +89,13 @@ class Send(BoxLayout):
         """
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
-        address = normalize_address(self.send_to_address)
+        address = to_checksum_address(self.send_to_address)
         amount_eth = round(self.send_amount, ROUND_DIGITS)
         amount_wei = int(amount_eth * pow(10, 18))
+        gas_price_gwei = Settings.get_stored_gas_price()
+        gas_price_wei = int(gas_price_gwei * (10 ** 9))
         # TODO: not the main account, but the current account
-        account = controller.pywalib.get_main_account()
+        account = controller.current_account
         Dialog.snackbar_message("Unlocking account...")
         try:
             account.unlock(self.password)
@@ -99,7 +106,9 @@ class Send(BoxLayout):
         Dialog.snackbar_message("Unlocked! Sending transaction...")
         sender = account.address
         try:
-            pywalib.transact(address, value=amount_wei, data='', sender=sender)
+            pywalib.transact(
+                address, value=amount_wei, data='', sender=sender,
+                gasprice=gas_price_wei)
         except InsufficientFundsException:
             Dialog.snackbar_message("Insufficient funds")
             return

@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 from tempfile import mkdtemp
+from unittest import mock
 
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
@@ -168,7 +169,7 @@ class PywalibTestCase(unittest.TestCase):
         }
         with self.assertRaises(UnknownEtherscanException) as e:
             PyWalib.handle_etherscan_error(response_json)
-        self.assertEqual(e.exception.message, response_json)
+        self.assertEqual(e.exception.args[0], response_json)
         # no error
         response_json = {
             'message': 'OK', 'result': [], 'status': '1'
@@ -177,34 +178,22 @@ class PywalibTestCase(unittest.TestCase):
             PyWalib.handle_etherscan_error(response_json),
             None)
 
-    def test_address_hex(self):
-        """
-        Checks handle_etherscan_error() error handling.
-        """
-        expected_addresss = ADDRESS
-        # no 0x prefix
-        address_no_prefix = ADDRESS.lower().strip("0x")
-        address = address_no_prefix
-        normalized = PyWalib.address_hex(address)
-        self.assertEqual(normalized, expected_addresss)
-        # uppercase
-        address = "0x" + address_no_prefix.upper()
-        normalized = PyWalib.address_hex(address)
-        self.assertEqual(normalized, expected_addresss)
-        # prefix cannot be uppercase
-        address = "0X" + address_no_prefix.upper()
-        with self.assertRaises(Exception) as context:
-            PyWalib.address_hex(address)
-        self.assertEqual(
-            context.exception.message,
-            "Invalid address format: '%s'" % (address))
-
     def test_get_balance(self):
         """
         Checks get_balance() returns a float.
         """
+        pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = PyWalib.get_balance(address)
+        balance_eth = pywalib.get_balance(address)
+        self.assertTrue(type(balance_eth), float)
+
+    def test_get_balance_web3(self):
+        """
+        Checks get_balance() returns a float.
+        """
+        pywalib = self.pywalib
+        address = ADDRESS
+        balance_eth = pywalib.get_balance_web3(address)
         self.assertTrue(type(balance_eth), float)
 
     def helper_get_history(self, transactions):
@@ -293,39 +282,73 @@ class PywalibTestCase(unittest.TestCase):
         nonce = PyWalib.get_nonce(address)
         self.assertEqual(nonce, 0)
 
-    def test_handle_etherscan_tx_error(self):
+    def test_handle_web3_exception(self):
         """
-        Checks handle_etherscan_tx_error() error handling.
+        Checks handle_web3_exception() error handling.
         """
-        # no transaction found
-        response_json = {
-            'jsonrpc': '2.0', 'id': 1, 'error': {
-                'message':
-                    'Insufficient funds. '
-                    'The account you tried to send transaction from does not '
-                    'have enough funds. Required 10001500000000000000 and'
-                    'got: 53856999715015294.',
-                    'code': -32010, 'data': None
-                }
-        }
-        with self.assertRaises(InsufficientFundsException):
-            PyWalib.handle_etherscan_tx_error(response_json)
-        # unknown error
-        response_json = {
-            'jsonrpc': '2.0', 'id': 1, 'error': {
-                'message':
-                    'Unknown error',
-                    'code': 0, 'data': None
-                }
-        }
+        # insufficient funds
+        exception = ValueError({
+            'code': -32000,
+            'message': 'insufficient funds for gas * price + value'
+        })
+        with self.assertRaises(InsufficientFundsException) as e:
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
+        # unknown error code
+        exception = ValueError({
+            'code': 0,
+            'message': 'Unknown error'
+        })
         with self.assertRaises(UnknownEtherscanException) as e:
-            PyWalib.handle_etherscan_tx_error(response_json)
-        self.assertEqual(e.exception.message, response_json)
-        # no error
-        response_json = {'jsonrpc': '2.0', 'id': 1}
-        self.assertEqual(
-            PyWalib.handle_etherscan_tx_error(response_json),
-            None)
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
+        # no code
+        exception = ValueError({
+            'message': 'Unknown error'
+        })
+        with self.assertRaises(UnknownEtherscanException) as e:
+            PyWalib.handle_web3_exception(exception)
+        self.assertEqual(e.exception.args[0], exception.args[0])
+
+    def test_transact(self):
+        """
+        Basic transact() test, makes sure web3 sendRawTransaction gets called.
+        """
+        pywalib = self.pywalib
+        account = self.helper_new_account()
+        to = ADDRESS
+        sender = account.address
+        value_wei = 100
+        with mock.patch('web3.eth.Eth.sendRawTransaction') \
+                as m_sendRawTransaction:
+            pywalib.transact(to=to, value=value_wei, sender=sender)
+        self.assertTrue(m_sendRawTransaction.called)
+
+    def test_transact_no_sender(self):
+        """
+        The sender parameter should default to the main account.
+        Makes sure the transaction is being signed by the available account.
+        """
+        pywalib = self.pywalib
+        account = self.helper_new_account()
+        to = ADDRESS
+        value_wei = 100
+        with mock.patch('web3.eth.Eth.sendRawTransaction') \
+                as m_sendRawTransaction, \
+                mock.patch('web3.eth.Eth.account.signTransaction') \
+                as m_signTransaction:
+            pywalib.transact(to=to, value=value_wei)
+        self.assertTrue(m_sendRawTransaction.called)
+        m_signTransaction.call_args_list
+        transaction = {
+            'chainId': 1,
+            'gas': 25000,
+            'gasPrice': 4000000000,
+            'nonce': 0,
+            'value': value_wei,
+        }
+        expected_call = mock.call(transaction, account.privkey)
+        self.assertEqual(m_signTransaction.call_args_list, [expected_call])
 
     def test_transact_no_funds(self):
         """

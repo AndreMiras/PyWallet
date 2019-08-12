@@ -1,5 +1,14 @@
 # Change Log
 
+## [v20190812]
+
+  - Migration to Python3, refs #19, #146, #143
+  - Handle dynamic permissions, refs #149, #151
+  - Configurable gas price
+  - Configurable network/chainID, refs #1
+  - Fix broken Travis build, refs #148
+  - Send from different accounts, refs #147
+
 ## [v20180729]
 
   - Linux & Android Travis build on Docker, refs #37
