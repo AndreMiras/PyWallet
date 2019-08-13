@@ -130,10 +130,12 @@ class AccountUtils:
         """
         if current_password is not None:
             account.unlock(current_password)
+        iterations = account.keystore['crypto']['kdfparams']['c']
         new_account = Account.new(
             password=new_password,
             key=account.privkey,
             uuid=account.uuid,
-            path=account.path)
+            path=account.path,
+            iterations=iterations)
         account.keystore = new_account.keystore
         account.dump_to_disk()

@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
+import math
 import os
 from enum import Enum
 from os.path import expanduser
 
 import requests
+from eth_keyfile import keyfile
 from eth_utils import to_checksum_address
 from web3 import HTTPProvider, Web3
 
@@ -245,15 +247,35 @@ class PyWalib:
             deleted_keystore_dir_name)
         return deleted_keystore_dir
 
+    @staticmethod
+    def _get_pbkdf2_iterations(security_ratio=None):
+        """
+        Returns the work-factor/iterations based on the security_ratio.
+        """
+        iterations = None
+        min_security_ratio = 1
+        max_security_ratio = 100
+        if security_ratio is not None:
+            if not min_security_ratio <= security_ratio <= max_security_ratio:
+                raise ValueError(
+                    f'security_ratio must be within {min_security_ratio} and '
+                    f'{max_security_ratio}')
+            kdf = 'pbkdf2'
+            default_iterations = keyfile.get_default_work_factor_for_kdf(kdf)
+            iterations = (default_iterations * security_ratio) / 100.0
+            iterations = math.ceil(iterations)
+        return iterations
+
     # TODO: update docstring
-    # TODO: update security_ratio
     def new_account(self, password, security_ratio=None):
         """
         Creates an account on the disk and returns it.
         security_ratio is a ratio of the default PBKDF2 iterations.
         Ranging from 1 to 100 means 100% of the iterations.
         """
-        account = self.account_utils.new_account(password=password)
+        iterations = self._get_pbkdf2_iterations(security_ratio)
+        account = self.account_utils.new_account(
+            password=password, iterations=iterations)
         return account
 
     def delete_account(self, account):

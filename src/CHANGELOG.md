@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Fix configurable pbkdf2 iterations
+
 ## [v20190812]
 
   - Migration to Python3, refs #19, #146, #143

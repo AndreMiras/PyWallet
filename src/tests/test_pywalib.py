@@ -59,6 +59,53 @@ class PywalibTestCase(unittest.TestCase):
         account.unlock(password)
         self.assertFalse(account.locked)
 
+    def helper_test_new_account_security_ratio_ok(self, security_ratio):
+        """
+        Helper method to unit test `new_account()` security_ratio parameter on
+        happy scenarios.
+        """
+        pywalib = self.pywalib
+        password = PASSWORD
+        with mock.patch.object(
+                pywalib.account_utils, 'new_account') as m_new_account:
+            self.assertIsNotNone(pywalib.new_account(password, security_ratio))
+        self.assertEqual(
+            m_new_account.call_args_list,
+            [mock.call(iterations=mock.ANY, password='password')]
+        )
+
+    def helper_test_new_account_security_ratio_error(self, security_ratio):
+        """
+        Helper method to unit test `new_account()` security_ratio parameter on
+        rainy scenarios.
+        """
+        password = PASSWORD
+        with self.assertRaises(ValueError) as ex_info:
+            self.pywalib.new_account(password, security_ratio)
+        self.assertEqual(
+            ex_info.exception.args[0],
+            'security_ratio must be within 1 and 100')
+
+    def test_new_account_security_ratio(self):
+        """
+        Checks the security_ratio parameter behave as expected.
+        Possible value are:
+            - security_ratio == None
+            - security_ratio >= 1
+            - security_ratio <= 100
+        """
+        security_ratio = None
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        security_ratio = 1
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        security_ratio = 100
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        # anything else would fail
+        security_ratio = 0
+        self.helper_test_new_account_security_ratio_error(security_ratio)
+        security_ratio = 101
+        self.helper_test_new_account_security_ratio_error(security_ratio)
+
     def test_update_account_password(self):
         """
         Verifies updating account password works.
