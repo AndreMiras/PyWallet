@@ -3,6 +3,7 @@
 ## [Unreleased]
 
   - Fix configurable pbkdf2 iterations
+  - Mocks `test_get_transaction_history()`, refs #141
 
 ## [v20190812]
 
