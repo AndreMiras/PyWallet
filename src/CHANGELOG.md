@@ -4,6 +4,7 @@
 
   - Fix configurable pbkdf2 iterations
   - Mocks `test_get_transaction_history()`, refs #141
+  - Mocks `test_get_nonce_no_out_transaction()`, refs #153
 
 ## [v20190812]
 

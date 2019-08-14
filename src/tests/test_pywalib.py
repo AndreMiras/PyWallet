@@ -12,6 +12,10 @@ VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
 PASSWORD = "password"
 
 
+def patch_requests_get():
+    return mock.patch('pywalib.requests.get')
+
+
 class PywalibTestCase(unittest.TestCase):
     """
     Simple test cases, verifying pywalib works as expected.
@@ -268,53 +272,53 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_transaction_history() works as expected.
         """
         address = ADDRESS
-        with mock.patch('pywalib.requests.get') as m_get:
-            # not dumping the full payload for readability
-            transactions = [
-                {'blockHash': (
-                    '0x0e37d0025471662915d7a15ade9a13e'
-                    '75cbbcc239bdbc4ea46a01d9b268a7e60'
-                 ),
-                 'blockNumber': '207947',
-                 'confirmations': '8142357',
-                 'contractAddress': '',
-                 'cumulativeGasUsed': '21408',
-                 'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
-                 'gas': '90000',
-                 'gasPrice': '50000000000',
-                 'gasUsed': '21408',
-                 'hash': (
-                    '0xf7dbf98bcebd7b803917e00e7e329284'
-                    '3a4b7bf66016638811cea4705a32d73e'
-                 ),
-                 'input': '0x123123123123',
-                 'isError': '0',
-                 'nonce': '23',
-                 'timeStamp': '1441800674',
-                 'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-                 'transactionIndex': '0',
-                 'txreceipt_status': '',
-                 'value': '0'
-                 },
-                {'blockHash': (
-                    '0x84fcddbf660faa265e55e877490cbb8'
-                    '1cbb69e8fe14dbc8f15aaef586e9cd762'
-                 ),
-                 'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
-                 'timeStamp': '1441801055',
-                 'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-                 'value': '200000000000000000'
-                 },
-                {'blockHash': (
-                    '0xc8bc4bccc0359db2e984221cffde819'
-                    '0fb126ca911c95f041df7e7358a22e361'
-                 ),
-                 'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-                 'timeStamp': '1441801303',
-                 'to': '0x3535353535353535353535353535353535353535',
-                 'value': '100'
-                 },
-            ]
+        # not dumping the full payload for readability
+        transactions = [
+            {'blockHash': (
+                '0x0e37d0025471662915d7a15ade9a13e'
+                '75cbbcc239bdbc4ea46a01d9b268a7e60'
+             ),
+             'blockNumber': '207947',
+             'confirmations': '8142357',
+             'contractAddress': '',
+             'cumulativeGasUsed': '21408',
+             'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
+             'gas': '90000',
+             'gasPrice': '50000000000',
+             'gasUsed': '21408',
+             'hash': (
+                '0xf7dbf98bcebd7b803917e00e7e329284'
+                '3a4b7bf66016638811cea4705a32d73e'
+             ),
+             'input': '0x123123123123',
+             'isError': '0',
+             'nonce': '23',
+             'timeStamp': '1441800674',
+             'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+             'transactionIndex': '0',
+             'txreceipt_status': '',
+             'value': '0'
+             },
+            {'blockHash': (
+                '0x84fcddbf660faa265e55e877490cbb8'
+                '1cbb69e8fe14dbc8f15aaef586e9cd762'
+             ),
+             'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
+             'timeStamp': '1441801055',
+             'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+             'value': '200000000000000000'
+             },
+            {'blockHash': (
+                '0xc8bc4bccc0359db2e984221cffde819'
+                '0fb126ca911c95f041df7e7358a22e361'
+             ),
+             'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+             'timeStamp': '1441801303',
+             'to': '0x3535353535353535353535353535353535353535',
+             'value': '100'
+             },
+        ]
+        with patch_requests_get() as m_get:
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -367,7 +371,24 @@ class PywalibTestCase(unittest.TestCase):
         # the VOID_ADDRESS has a lot of in transactions,
         # but no out ones, so the nonce should be 0
         address = VOID_ADDRESS
-        nonce = PyWalib.get_nonce(address)
+        # truncated for readability
+        transactions = [
+            {'blockHash': (
+                '0x7e5a9336dd82efff0bfe8c25ccb0e8c'
+                'f44b4c6f781b25b3fc3578f004f60b872'
+             ),
+             'from': '0x22f2dcff5ad78c3eb6850b5cb951127b659522e6',
+             'timeStamp': '1438922865',
+             'to': '0x0000000000000000000000000000000000000000',
+             'value': '0'}
+        ]
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': transactions,
+            }
+            nonce = PyWalib.get_nonce(address)
         self.assertEqual(nonce, 0)
 
     def test_get_nonce_no_transaction(self):
