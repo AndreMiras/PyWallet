@@ -235,8 +235,14 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance(address)
-        self.assertTrue(type(balance_eth), float)
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': '350003576885437676061958',
+            }
+            balance_eth = pywalib.get_balance(address)
+        self.assertEqual(balance_eth, 350003.577)
 
     def test_get_balance_web3(self):
         """
