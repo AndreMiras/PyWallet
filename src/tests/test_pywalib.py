@@ -418,7 +418,15 @@ class PywalibTestCase(unittest.TestCase):
         # the newly created address has no in or out transaction history
         account = self.helper_new_account()
         address = account.address
-        nonce = PyWalib.get_nonce(address)
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '0',
+                'message': 'No transactions found',
+                'result': [],
+            }
+            nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.assertEqual(nonce, 0)
 
     def test_handle_web3_exception(self):
