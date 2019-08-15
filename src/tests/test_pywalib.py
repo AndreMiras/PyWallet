@@ -4,6 +4,7 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
+from eth_utils import to_checksum_address
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
@@ -250,8 +251,16 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance_web3(address)
+        with mock.patch('web3.eth.Eth.getBalance') as m_getBalance:
+            m_getBalance.return_value = 350003576885437676061958
+            balance_eth = pywalib.get_balance_web3(address)
+        checksum_address = to_checksum_address(address)
+        self.assertEqual(
+            m_getBalance.call_args_list,
+            [mock.call(checksum_address)]
+        )
         self.assertTrue(type(balance_eth), float)
+        self.assertEqual(balance_eth, 350003.577)
 
     def helper_test_get_history(self, transactions):
         """
