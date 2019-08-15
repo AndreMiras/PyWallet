@@ -243,6 +243,8 @@ class PywalibTestCase(unittest.TestCase):
                 'result': '350003576885437676061958',
             }
             balance_eth = pywalib.get_balance(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.assertEqual(balance_eth, 350003.577)
 
     def test_get_balance_web3(self):
@@ -256,9 +258,7 @@ class PywalibTestCase(unittest.TestCase):
             balance_eth = pywalib.get_balance_web3(address)
         checksum_address = to_checksum_address(address)
         self.assertEqual(
-            m_getBalance.call_args_list,
-            [mock.call(checksum_address)]
-        )
+            m_getBalance.call_args_list, [mock.call(checksum_address)])
         self.assertTrue(type(balance_eth), float)
         self.assertEqual(balance_eth, 350003.577)
 
@@ -340,6 +340,8 @@ class PywalibTestCase(unittest.TestCase):
                 'result': transactions,
             }
             transactions = PyWalib.get_transaction_history(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.helper_test_get_history(transactions)
         # value is stored in Wei
         self.assertEqual(transactions[1]['value'], '200000000000000000')
@@ -404,6 +406,8 @@ class PywalibTestCase(unittest.TestCase):
                 'result': transactions,
             }
             nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.assertEqual(nonce, 0)
 
     def test_get_nonce_no_transaction(self):
