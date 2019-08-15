@@ -4,12 +4,65 @@ import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
+from eth_utils import to_checksum_address
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
                      PyWalib, UnknownEtherscanException)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
 PASSWORD = "password"
+
+# not dumping the full payload for readability
+M_TRANSACTIONS = [
+    {
+     'blockHash': (
+        '0xc8bc4bccc0359db2e984221cffde819'
+        '0fb126ca911c95f041df7e7358a22e361'
+     ),
+     'blockNumber': '207985',
+     'confirmations': '8147295',
+     'contractAddress': '',
+     'cumulativeGasUsed': '21000',
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'gas': '100000',
+     'gasPrice': '60000000000',
+     'gasUsed': '21000',
+     'hash': (
+        '0x0d26b1539304a214a6517b529a027f9'
+        '87cd52e70afd8fdc4244569a93121f144'
+      ),
+     'input': '0x',
+     'isError': '0',
+     'nonce': '0',
+     'timeStamp': '1441801303',
+     'to': '0x3535353535353535353535353535353535353535',
+     'transactionIndex': '0',
+     'txreceipt_status': '',
+     'value': '100',
+    },
+    # cropped the transactions for readability
+    {
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'nonce': '1',
+     'timeStamp': '1442333072',
+     'to': '0x4646464646464646464646464646464646464646',
+     'value': '10000000000000000',
+    },
+    {
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'nonce': '2',
+     'timeStamp': '1448005935',
+     'to': '0x7272727272727272727272727272727272727272',
+     'value': '30000000000000000'},
+    # this is not an out transaction so it won't be on the list
+    {
+     'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
+     'nonce': '23',
+     'timeStamp': '1448005945',
+     'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'value': '0',
+    },
+]
 
 
 def patch_requests_get():
@@ -235,8 +288,16 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance(address)
-        self.assertTrue(type(balance_eth), float)
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': '350003576885437676061958',
+            }
+            balance_eth = pywalib.get_balance(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        self.assertEqual(balance_eth, 350003.577)
 
     def test_get_balance_web3(self):
         """
@@ -244,8 +305,14 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance_web3(address)
+        with mock.patch('web3.eth.Eth.getBalance') as m_getBalance:
+            m_getBalance.return_value = 350003576885437676061958
+            balance_eth = pywalib.get_balance_web3(address)
+        checksum_address = to_checksum_address(address)
+        self.assertEqual(
+            m_getBalance.call_args_list, [mock.call(checksum_address)])
         self.assertTrue(type(balance_eth), float)
+        self.assertEqual(balance_eth, 350003.577)
 
     def helper_test_get_history(self, transactions):
         """
@@ -272,67 +339,24 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_transaction_history() works as expected.
         """
         address = ADDRESS
-        # not dumping the full payload for readability
-        transactions = [
-            {'blockHash': (
-                '0x0e37d0025471662915d7a15ade9a13e'
-                '75cbbcc239bdbc4ea46a01d9b268a7e60'
-             ),
-             'blockNumber': '207947',
-             'confirmations': '8142357',
-             'contractAddress': '',
-             'cumulativeGasUsed': '21408',
-             'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
-             'gas': '90000',
-             'gasPrice': '50000000000',
-             'gasUsed': '21408',
-             'hash': (
-                '0xf7dbf98bcebd7b803917e00e7e329284'
-                '3a4b7bf66016638811cea4705a32d73e'
-             ),
-             'input': '0x123123123123',
-             'isError': '0',
-             'nonce': '23',
-             'timeStamp': '1441800674',
-             'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-             'transactionIndex': '0',
-             'txreceipt_status': '',
-             'value': '0'
-             },
-            {'blockHash': (
-                '0x84fcddbf660faa265e55e877490cbb8'
-                '1cbb69e8fe14dbc8f15aaef586e9cd762'
-             ),
-             'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
-             'timeStamp': '1441801055',
-             'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-             'value': '200000000000000000'
-             },
-            {'blockHash': (
-                '0xc8bc4bccc0359db2e984221cffde819'
-                '0fb126ca911c95f041df7e7358a22e361'
-             ),
-             'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
-             'timeStamp': '1441801303',
-             'to': '0x3535353535353535353535353535353535353535',
-             'value': '100'
-             },
-        ]
+        m_transactions = M_TRANSACTIONS
         with patch_requests_get() as m_get:
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
-                'result': transactions,
+                'result': m_transactions,
             }
             transactions = PyWalib.get_transaction_history(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.helper_test_get_history(transactions)
         # value is stored in Wei
-        self.assertEqual(transactions[1]['value'], '200000000000000000')
+        self.assertEqual(transactions[1]['value'], '10000000000000000')
         # but converted to Ether is also accessible
-        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
+        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.01)
         # history contains all send or received transactions
-        self.assertEqual(transactions[1]['extra_dict']['sent'], False)
-        self.assertEqual(transactions[1]['extra_dict']['received'], True)
+        self.assertEqual(transactions[1]['extra_dict']['sent'], True)
+        self.assertEqual(transactions[1]['extra_dict']['received'], False)
         self.assertEqual(transactions[2]['extra_dict']['sent'], True)
         self.assertEqual(transactions[2]['extra_dict']['received'], False)
 
@@ -341,8 +365,20 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_out_transaction_history() works as expected.
         """
         address = ADDRESS
-        transactions = PyWalib.get_out_transaction_history(address)
+        m_transactions = M_TRANSACTIONS
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': m_transactions,
+            }
+            transactions = PyWalib.get_out_transaction_history(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.helper_test_get_history(transactions)
+        # 4 transactions including 3 out transactions
+        self.assertEquals(len(m_transactions), 4)
+        self.assertEquals(len(transactions), 3)
         for i in range(len(transactions)):
             transaction = transactions[i]
             extra_dict = transaction['extra_dict']
@@ -357,8 +393,18 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_nonce() returns the next nonce, i.e. transaction count.
         """
         address = ADDRESS
-        nonce = PyWalib.get_nonce(address)
-        transactions = PyWalib.get_out_transaction_history(address)
+        m_transactions = M_TRANSACTIONS
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': m_transactions,
+            }
+            nonce = PyWalib.get_nonce(address)
+            transactions = PyWalib.get_out_transaction_history(address)
+        url = mock.ANY
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url), mock.call(url)])
         last_transaction = transactions[-1]
         last_nonce = int(last_transaction['nonce'])
         self.assertEqual(nonce, last_nonce + 1)
@@ -389,6 +435,8 @@ class PywalibTestCase(unittest.TestCase):
                 'result': transactions,
             }
             nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.assertEqual(nonce, 0)
 
     def test_get_nonce_no_transaction(self):
@@ -399,7 +447,15 @@ class PywalibTestCase(unittest.TestCase):
         # the newly created address has no in or out transaction history
         account = self.helper_new_account()
         address = account.address
-        nonce = PyWalib.get_nonce(address)
+        with patch_requests_get() as m_get:
+            m_get.return_value.json.return_value = {
+                'status': '0',
+                'message': 'No transactions found',
+                'result': [],
+            }
+            nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        self.assertEqual(m_get.call_args_list, [mock.call(url)])
         self.assertEqual(nonce, 0)
 
     def test_handle_web3_exception(self):
