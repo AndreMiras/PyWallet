@@ -65,8 +65,6 @@ WORKDIR ${WORK_DIR}
 # install buildozer and dependencies
 RUN curl --location --progress-bar ${MAKEFILES_URL}/buildozer.mk --output buildozer.mk
 RUN make -f buildozer.mk
-# enforces buildozer master (586152c) until next release
-RUN pip3 install --upgrade https://github.com/kivy/buildozer/archive/586152c.zip
 
 COPY . ${WORK_DIR}
 # limits the amount of logs for Travis
