@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
-
+import http
 import math
 import os
 from enum import Enum
@@ -63,6 +62,30 @@ def get_etherscan_prefix(chain_id=ChainID.MAINNET) -> str:
     return PREFIXES[chain_id]
 
 
+def handle_etherscan_response_json(response_json):
+    """Raises an exception on unexpected response json."""
+    status = response_json["status"]
+    message = response_json["message"]
+    if status != "1":
+        if message == "No transactions found":
+            raise NoTransactionFoundException()
+        else:
+            raise UnknownEtherscanException(response_json)
+    assert message == "OK"
+
+
+def handle_etherscan_response_status(status_code):
+    """Raises an exception on unexpected response status."""
+    if status_code != http.HTTPStatus.OK:
+        raise UnknownEtherscanException(status_code)
+
+
+def handle_etherscan_response(response):
+    """Raises an exception on unexpected response."""
+    handle_etherscan_response_status(response.status_code)
+    handle_etherscan_response_json(response.json())
+
+
 class PyWalib:
 
     def __init__(self, keystore_dir=None, chain_id=ChainID.MAINNET):
@@ -73,20 +96,6 @@ class PyWalib:
         self.chain_id = chain_id
         self.provider = HTTPProviderFactory.create(self.chain_id)
         self.web3 = Web3(self.provider)
-
-    @staticmethod
-    def handle_etherscan_error(response_json):
-        """
-        Raises an exception on unexpected response.
-        """
-        status = response_json["status"]
-        message = response_json["message"]
-        if status != "1":
-            if message == "No transactions found":
-                raise NoTransactionFoundException()
-            else:
-                raise UnknownEtherscanException(response_json)
-        assert message == "OK"
 
     @staticmethod
     def get_balance(address, chain_id=ChainID.MAINNET):
@@ -101,10 +110,9 @@ class PyWalib:
         url += '&tag=latest'
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
-        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
+        handle_etherscan_response(response)
         response_json = response.json()
-        PyWalib.handle_etherscan_error(response_json)
         balance_wei = int(response_json["result"])
         balance_eth = balance_wei / float(pow(10, 18))
         balance_eth = round(balance_eth, ROUND_DIGITS)
@@ -132,10 +140,9 @@ class PyWalib:
         url += '&address=%s' % address
         if ETHERSCAN_API_KEY:
             '&apikey=%' % ETHERSCAN_API_KEY
-        # TODO: handle 504 timeout, 403 and other errors from etherscan
         response = requests.get(url)
+        handle_etherscan_response(response)
         response_json = response.json()
-        PyWalib.handle_etherscan_error(response_json)
         transactions = response_json['result']
         for transaction in transactions:
             value_wei = int(transaction['value'])

@@ -1,3 +1,4 @@
+import http
 import os
 import shutil
 import unittest
@@ -5,8 +6,10 @@ from tempfile import mkdtemp
 from unittest import mock
 
 from eth_utils import to_checksum_address
+
 from pywalib import (InsufficientFundsException, NoTransactionFoundException,
-                     PyWalib, UnknownEtherscanException)
+                     PyWalib, UnknownEtherscanException,
+                     handle_etherscan_response_json)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -67,6 +70,32 @@ M_TRANSACTIONS = [
 
 def patch_requests_get():
     return mock.patch('pywalib.requests.get')
+
+
+class PywalibModuleTestCase(unittest.TestCase):
+    def test_handle_etherscan_response_json(self):
+        """
+        Checks handle_etherscan_response_json() error handling.
+        """
+        # no transaction found
+        response_json = {
+            'message': 'No transactions found', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(NoTransactionFoundException):
+            handle_etherscan_response_json(response_json)
+        # unknown error
+        response_json = {
+            'message': 'Unknown error', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(UnknownEtherscanException) as e:
+            handle_etherscan_response_json(response_json)
+        self.assertEqual(e.exception.args[0], response_json)
+        # no error
+        response_json = {
+            'message': 'OK', 'result': [], 'status': '1'
+        }
+        self.assertEqual(
+            handle_etherscan_response_json(response_json), None)
 
 
 class PywalibTestCase(unittest.TestCase):
@@ -257,31 +286,6 @@ class PywalibTestCase(unittest.TestCase):
         pywalib.delete_account(account)
         self.assertEqual(len(pywalib.get_account_list()), 0)
 
-    def test_handle_etherscan_error(self):
-        """
-        Checks handle_etherscan_error() error handling.
-        """
-        # no transaction found
-        response_json = {
-            'message': 'No transactions found', 'result': [], 'status': '0'
-        }
-        with self.assertRaises(NoTransactionFoundException):
-            PyWalib.handle_etherscan_error(response_json)
-        # unknown error
-        response_json = {
-            'message': 'Unknown error', 'result': [], 'status': '0'
-        }
-        with self.assertRaises(UnknownEtherscanException) as e:
-            PyWalib.handle_etherscan_error(response_json)
-        self.assertEqual(e.exception.args[0], response_json)
-        # no error
-        response_json = {
-            'message': 'OK', 'result': [], 'status': '1'
-        }
-        self.assertEqual(
-            PyWalib.handle_etherscan_error(response_json),
-            None)
-
     def test_get_balance(self):
         """
         Checks get_balance() returns a float.
@@ -289,6 +293,7 @@ class PywalibTestCase(unittest.TestCase):
         pywalib = self.pywalib
         address = ADDRESS
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -341,6 +346,7 @@ class PywalibTestCase(unittest.TestCase):
         address = ADDRESS
         m_transactions = M_TRANSACTIONS
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -367,6 +373,7 @@ class PywalibTestCase(unittest.TestCase):
         address = ADDRESS
         m_transactions = M_TRANSACTIONS
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -395,6 +402,7 @@ class PywalibTestCase(unittest.TestCase):
         address = ADDRESS
         m_transactions = M_TRANSACTIONS
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -429,6 +437,7 @@ class PywalibTestCase(unittest.TestCase):
              'value': '0'}
         ]
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '1',
                 'message': 'OK',
@@ -448,6 +457,7 @@ class PywalibTestCase(unittest.TestCase):
         account = self.helper_new_account()
         address = account.address
         with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
             m_get.return_value.json.return_value = {
                 'status': '0',
                 'message': 'No transactions found',
