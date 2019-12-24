@@ -7,9 +7,9 @@ from unittest import mock
 
 from eth_utils import to_checksum_address
 
-from pywalib import (InsufficientFundsException, NoTransactionFoundException,
-                     PyWalib, UnknownEtherscanException,
-                     handle_etherscan_response_json)
+from pywalib import (REQUESTS_HEADERS, InsufficientFundsException,
+                     NoTransactionFoundException, PyWalib,
+                     UnknownEtherscanException, handle_etherscan_response_json)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -301,7 +301,9 @@ class PywalibTestCase(unittest.TestCase):
             }
             balance_eth = pywalib.get_balance(address)
         url = mock.ANY
-        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.assertEqual(balance_eth, 350003.577)
 
     def test_get_balance_web3(self):
@@ -354,7 +356,9 @@ class PywalibTestCase(unittest.TestCase):
             }
             transactions = PyWalib.get_transaction_history(address)
         url = mock.ANY
-        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.helper_test_get_history(transactions)
         # value is stored in Wei
         self.assertEqual(transactions[1]['value'], '10000000000000000')
@@ -381,7 +385,9 @@ class PywalibTestCase(unittest.TestCase):
             }
             transactions = PyWalib.get_out_transaction_history(address)
         url = mock.ANY
-        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.helper_test_get_history(transactions)
         # 4 transactions including 3 out transactions
         self.assertEquals(len(m_transactions), 4)
@@ -411,8 +417,9 @@ class PywalibTestCase(unittest.TestCase):
             nonce = PyWalib.get_nonce(address)
             transactions = PyWalib.get_out_transaction_history(address)
         url = mock.ANY
+        headers = REQUESTS_HEADERS
         self.assertEqual(
-            m_get.call_args_list, [mock.call(url), mock.call(url)])
+            m_get.call_args_list, 2 * [mock.call(url, headers=headers)])
         last_transaction = transactions[-1]
         last_nonce = int(last_transaction['nonce'])
         self.assertEqual(nonce, last_nonce + 1)
@@ -445,7 +452,9 @@ class PywalibTestCase(unittest.TestCase):
             }
             nonce = PyWalib.get_nonce(address)
         url = mock.ANY
-        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.assertEqual(nonce, 0)
 
     def test_get_nonce_no_transaction(self):
@@ -465,7 +474,9 @@ class PywalibTestCase(unittest.TestCase):
             }
             nonce = PyWalib.get_nonce(address)
         url = mock.ANY
-        self.assertEqual(m_get.call_args_list, [mock.call(url)])
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.assertEqual(nonce, 0)
 
     def test_handle_web3_exception(self):

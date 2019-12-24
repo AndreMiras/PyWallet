@@ -13,12 +13,15 @@ from web3 import HTTPProvider, Web3
 
 from ethereum_utils import AccountUtils
 
-ETHERSCAN_API_KEY = None
+ETHERSCAN_API_KEY = "R796P9T31MEA24P8FNDZBCA88UHW8YCNVW"
 ROUND_DIGITS = 3
 KEYSTORE_DIR_PREFIX = expanduser("~")
 # default pyethapp keystore path
 KEYSTORE_DIR_SUFFIX = ".config/pyethapp/keystore/"
 DEFAULT_GAS_PRICE_GWEI = 4
+REQUESTS_HEADERS = {
+    "User-Agent": "https://github.com/AndreMiras/PyWallet",
+}
 
 
 class UnknownEtherscanException(Exception):
@@ -86,6 +89,10 @@ def handle_etherscan_response(response):
     handle_etherscan_response_json(response.json())
 
 
+def requests_get(url):
+    return requests.get(url, headers=REQUESTS_HEADERS)
+
+
 class PyWalib:
 
     def __init__(self, keystore_dir=None, chain_id=ChainID.MAINNET):
@@ -105,12 +112,13 @@ class PyWalib:
         """
         address = to_checksum_address(address)
         url = get_etherscan_prefix(chain_id)
-        url += '?module=account&action=balance'
-        url += '&address=%s' % address
-        url += '&tag=latest'
-        if ETHERSCAN_API_KEY:
-            '&apikey=%' % ETHERSCAN_API_KEY
-        response = requests.get(url)
+        url += (
+            '?module=account&action=balance'
+            '&tag=latest'
+            f'&address={address}'
+            f'&apikey={ETHERSCAN_API_KEY}'
+        )
+        response = requests_get(url)
         handle_etherscan_response(response)
         response_json = response.json()
         balance_wei = int(response_json["result"])
@@ -135,12 +143,13 @@ class PyWalib:
         """
         address = to_checksum_address(address)
         url = get_etherscan_prefix(chain_id)
-        url += '?module=account&action=txlist'
-        url += '&sort=asc'
-        url += '&address=%s' % address
-        if ETHERSCAN_API_KEY:
-            '&apikey=%' % ETHERSCAN_API_KEY
-        response = requests.get(url)
+        url += (
+            '?module=account&action=txlist'
+            '&sort=asc'
+            f'&address={address}'
+            f'&apikey={ETHERSCAN_API_KEY}'
+        )
+        response = requests_get(url)
         handle_etherscan_response(response)
         response_json = response.json()
         transactions = response_json['result']
