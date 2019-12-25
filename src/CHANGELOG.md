@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20191225]
 
   - Fix configurable pbkdf2 iterations
   - Bump buildozer and p4a releases
