@@ -1,5 +1,13 @@
 # Change Log
 
+## [v20191225]
+
+  - Fix configurable pbkdf2 iterations
+  - Bump buildozer and p4a releases
+  - Check Etherscan response status
+  - Set Etherscan API key and user agent
+  - Mock network calls in tests refs #135, #141, #153
+
 ## [v20190812]
 
   - Migration to Python3, refs #19, #146, #143

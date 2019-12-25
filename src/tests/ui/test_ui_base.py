@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import io
 import os
 import shutil
@@ -495,7 +493,7 @@ class Test(unittest.TestCase):
         pywalib = controller.pywalib
         manage_existing = controller.manage_existing
         # makes sure an account is selected
-        pywalib.new_account(password="password", security_ratio=1)
+        pywalib.new_account(password="password", security_ratio=None)
         controller.current_account = pywalib.get_account_list()[0]
         self.assertTrue(manage_existing.current_account is not None)
         account_count_before = len(pywalib.get_account_list())

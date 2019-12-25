@@ -14,7 +14,7 @@ env:
   - TAG=pywallet-linux DOCKERFILE=dockerfiles/Dockerfile-linux COMMAND='make test'
   - TAG=pywallet-android DOCKERFILE=dockerfiles/Dockerfile-android COMMAND='buildozer android debug'
 
-install:
+before_script:
     - docker build --tag=$TAG --file=$DOCKERFILE --build-arg TRAVIS .
 
 script:

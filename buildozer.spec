@@ -52,7 +52,6 @@ requirements =
     eth-rlp==0.1.2,
     eth-utils==1.4.1,
     eth-typing==2.0.0,
-    gevent,
     hexbytes==0.1.0,
     https://github.com/AndreMiras/garden.layoutmargin/archive/20180517.tar.gz,
     https://github.com/AndreMiras/garden.zbarcam/archive/20190303.zip,
@@ -138,7 +137,7 @@ android.minapi = 21
 android.sdk = 20
 
 # (str) Android NDK version to use
-android.ndk = 17c
+android.ndk = 19b
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 android.ndk_api = 21
@@ -242,7 +241,7 @@ android.arch = armeabi-v7a
 p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = develop
+p4a.branch = v2019.10.06
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #p4a.source_dir =

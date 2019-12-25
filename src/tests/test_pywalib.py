@@ -1,15 +1,101 @@
+import http
 import os
 import shutil
 import unittest
 from tempfile import mkdtemp
 from unittest import mock
 
-from pywalib import (InsufficientFundsException, NoTransactionFoundException,
-                     PyWalib, UnknownEtherscanException)
+from eth_utils import to_checksum_address
+
+from pywalib import (REQUESTS_HEADERS, InsufficientFundsException,
+                     NoTransactionFoundException, PyWalib,
+                     UnknownEtherscanException, handle_etherscan_response_json)
 
 ADDRESS = "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
 VOID_ADDRESS = "0x0000000000000000000000000000000000000000"
 PASSWORD = "password"
+
+# not dumping the full payload for readability
+M_TRANSACTIONS = [
+    {
+     'blockHash': (
+        '0xc8bc4bccc0359db2e984221cffde819'
+        '0fb126ca911c95f041df7e7358a22e361'
+     ),
+     'blockNumber': '207985',
+     'confirmations': '8147295',
+     'contractAddress': '',
+     'cumulativeGasUsed': '21000',
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'gas': '100000',
+     'gasPrice': '60000000000',
+     'gasUsed': '21000',
+     'hash': (
+        '0x0d26b1539304a214a6517b529a027f9'
+        '87cd52e70afd8fdc4244569a93121f144'
+      ),
+     'input': '0x',
+     'isError': '0',
+     'nonce': '0',
+     'timeStamp': '1441801303',
+     'to': '0x3535353535353535353535353535353535353535',
+     'transactionIndex': '0',
+     'txreceipt_status': '',
+     'value': '100',
+    },
+    # cropped the transactions for readability
+    {
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'nonce': '1',
+     'timeStamp': '1442333072',
+     'to': '0x4646464646464646464646464646464646464646',
+     'value': '10000000000000000',
+    },
+    {
+     'from': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'nonce': '2',
+     'timeStamp': '1448005935',
+     'to': '0x7272727272727272727272727272727272727272',
+     'value': '30000000000000000'},
+    # this is not an out transaction so it won't be on the list
+    {
+     'from': '0x5ed8cee6b63b1c6afce3ad7c92f4fd7e1b8fad9f',
+     'nonce': '23',
+     'timeStamp': '1448005945',
+     'to': '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+     'value': '0',
+    },
+]
+
+
+def patch_requests_get():
+    return mock.patch('pywalib.requests.get')
+
+
+class PywalibModuleTestCase(unittest.TestCase):
+    def test_handle_etherscan_response_json(self):
+        """
+        Checks handle_etherscan_response_json() error handling.
+        """
+        # no transaction found
+        response_json = {
+            'message': 'No transactions found', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(NoTransactionFoundException):
+            handle_etherscan_response_json(response_json)
+        # unknown error
+        response_json = {
+            'message': 'Unknown error', 'result': [], 'status': '0'
+        }
+        with self.assertRaises(UnknownEtherscanException) as e:
+            handle_etherscan_response_json(response_json)
+        self.assertEqual(e.exception.args[0], response_json)
+        # no error
+        response_json = {
+            'message': 'OK', 'result': [], 'status': '1'
+        }
+        self.assertEqual(
+            handle_etherscan_response_json(response_json), None)
 
 
 class PywalibTestCase(unittest.TestCase):
@@ -58,6 +144,53 @@ class PywalibTestCase(unittest.TestCase):
         self.assertTrue(account.locked)
         account.unlock(password)
         self.assertFalse(account.locked)
+
+    def helper_test_new_account_security_ratio_ok(self, security_ratio):
+        """
+        Helper method to unit test `new_account()` security_ratio parameter on
+        happy scenarios.
+        """
+        pywalib = self.pywalib
+        password = PASSWORD
+        with mock.patch.object(
+                pywalib.account_utils, 'new_account') as m_new_account:
+            self.assertIsNotNone(pywalib.new_account(password, security_ratio))
+        self.assertEqual(
+            m_new_account.call_args_list,
+            [mock.call(iterations=mock.ANY, password='password')]
+        )
+
+    def helper_test_new_account_security_ratio_error(self, security_ratio):
+        """
+        Helper method to unit test `new_account()` security_ratio parameter on
+        rainy scenarios.
+        """
+        password = PASSWORD
+        with self.assertRaises(ValueError) as ex_info:
+            self.pywalib.new_account(password, security_ratio)
+        self.assertEqual(
+            ex_info.exception.args[0],
+            'security_ratio must be within 1 and 100')
+
+    def test_new_account_security_ratio(self):
+        """
+        Checks the security_ratio parameter behave as expected.
+        Possible value are:
+            - security_ratio == None
+            - security_ratio >= 1
+            - security_ratio <= 100
+        """
+        security_ratio = None
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        security_ratio = 1
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        security_ratio = 100
+        self.helper_test_new_account_security_ratio_ok(security_ratio)
+        # anything else would fail
+        security_ratio = 0
+        self.helper_test_new_account_security_ratio_error(security_ratio)
+        security_ratio = 101
+        self.helper_test_new_account_security_ratio_error(security_ratio)
 
     def test_update_account_password(self):
         """
@@ -153,39 +286,25 @@ class PywalibTestCase(unittest.TestCase):
         pywalib.delete_account(account)
         self.assertEqual(len(pywalib.get_account_list()), 0)
 
-    def test_handle_etherscan_error(self):
-        """
-        Checks handle_etherscan_error() error handling.
-        """
-        # no transaction found
-        response_json = {
-            'message': 'No transactions found', 'result': [], 'status': '0'
-        }
-        with self.assertRaises(NoTransactionFoundException):
-            PyWalib.handle_etherscan_error(response_json)
-        # unknown error
-        response_json = {
-            'message': 'Unknown error', 'result': [], 'status': '0'
-        }
-        with self.assertRaises(UnknownEtherscanException) as e:
-            PyWalib.handle_etherscan_error(response_json)
-        self.assertEqual(e.exception.args[0], response_json)
-        # no error
-        response_json = {
-            'message': 'OK', 'result': [], 'status': '1'
-        }
-        self.assertEqual(
-            PyWalib.handle_etherscan_error(response_json),
-            None)
-
     def test_get_balance(self):
         """
         Checks get_balance() returns a float.
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance(address)
-        self.assertTrue(type(balance_eth), float)
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': '350003576885437676061958',
+            }
+            balance_eth = pywalib.get_balance(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
+        self.assertEqual(balance_eth, 350003.577)
 
     def test_get_balance_web3(self):
         """
@@ -193,10 +312,16 @@ class PywalibTestCase(unittest.TestCase):
         """
         pywalib = self.pywalib
         address = ADDRESS
-        balance_eth = pywalib.get_balance_web3(address)
+        with mock.patch('web3.eth.Eth.getBalance') as m_getBalance:
+            m_getBalance.return_value = 350003576885437676061958
+            balance_eth = pywalib.get_balance_web3(address)
+        checksum_address = to_checksum_address(address)
+        self.assertEqual(
+            m_getBalance.call_args_list, [mock.call(checksum_address)])
         self.assertTrue(type(balance_eth), float)
+        self.assertEqual(balance_eth, 350003.577)
 
-    def helper_get_history(self, transactions):
+    def helper_test_get_history(self, transactions):
         """
         Helper method to test history related methods.
         """
@@ -221,15 +346,27 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_transaction_history() works as expected.
         """
         address = ADDRESS
-        transactions = PyWalib.get_transaction_history(address)
-        self.helper_get_history(transactions)
+        m_transactions = M_TRANSACTIONS
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': m_transactions,
+            }
+            transactions = PyWalib.get_transaction_history(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
+        self.helper_test_get_history(transactions)
         # value is stored in Wei
-        self.assertEqual(transactions[1]['value'], '200000000000000000')
+        self.assertEqual(transactions[1]['value'], '10000000000000000')
         # but converted to Ether is also accessible
-        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.2)
+        self.assertEqual(transactions[1]['extra_dict']['value_eth'], 0.01)
         # history contains all send or received transactions
-        self.assertEqual(transactions[1]['extra_dict']['sent'], False)
-        self.assertEqual(transactions[1]['extra_dict']['received'], True)
+        self.assertEqual(transactions[1]['extra_dict']['sent'], True)
+        self.assertEqual(transactions[1]['extra_dict']['received'], False)
         self.assertEqual(transactions[2]['extra_dict']['sent'], True)
         self.assertEqual(transactions[2]['extra_dict']['received'], False)
 
@@ -238,8 +375,23 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_out_transaction_history() works as expected.
         """
         address = ADDRESS
-        transactions = PyWalib.get_out_transaction_history(address)
-        self.helper_get_history(transactions)
+        m_transactions = M_TRANSACTIONS
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': m_transactions,
+            }
+            transactions = PyWalib.get_out_transaction_history(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
+        self.helper_test_get_history(transactions)
+        # 4 transactions including 3 out transactions
+        self.assertEquals(len(m_transactions), 4)
+        self.assertEquals(len(transactions), 3)
         for i in range(len(transactions)):
             transaction = transactions[i]
             extra_dict = transaction['extra_dict']
@@ -254,8 +406,20 @@ class PywalibTestCase(unittest.TestCase):
         Checks get_nonce() returns the next nonce, i.e. transaction count.
         """
         address = ADDRESS
-        nonce = PyWalib.get_nonce(address)
-        transactions = PyWalib.get_out_transaction_history(address)
+        m_transactions = M_TRANSACTIONS
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': m_transactions,
+            }
+            nonce = PyWalib.get_nonce(address)
+            transactions = PyWalib.get_out_transaction_history(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, 2 * [mock.call(url, headers=headers)])
         last_transaction = transactions[-1]
         last_nonce = int(last_transaction['nonce'])
         self.assertEqual(nonce, last_nonce + 1)
@@ -268,7 +432,29 @@ class PywalibTestCase(unittest.TestCase):
         # the VOID_ADDRESS has a lot of in transactions,
         # but no out ones, so the nonce should be 0
         address = VOID_ADDRESS
-        nonce = PyWalib.get_nonce(address)
+        # truncated for readability
+        transactions = [
+            {'blockHash': (
+                '0x7e5a9336dd82efff0bfe8c25ccb0e8c'
+                'f44b4c6f781b25b3fc3578f004f60b872'
+             ),
+             'from': '0x22f2dcff5ad78c3eb6850b5cb951127b659522e6',
+             'timeStamp': '1438922865',
+             'to': '0x0000000000000000000000000000000000000000',
+             'value': '0'}
+        ]
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '1',
+                'message': 'OK',
+                'result': transactions,
+            }
+            nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.assertEqual(nonce, 0)
 
     def test_get_nonce_no_transaction(self):
@@ -279,7 +465,18 @@ class PywalibTestCase(unittest.TestCase):
         # the newly created address has no in or out transaction history
         account = self.helper_new_account()
         address = account.address
-        nonce = PyWalib.get_nonce(address)
+        with patch_requests_get() as m_get:
+            m_get.return_value.status_code = http.HTTPStatus.OK
+            m_get.return_value.json.return_value = {
+                'status': '0',
+                'message': 'No transactions found',
+                'result': [],
+            }
+            nonce = PyWalib.get_nonce(address)
+        url = mock.ANY
+        headers = REQUESTS_HEADERS
+        self.assertEqual(
+            m_get.call_args_list, [mock.call(url, headers=headers)])
         self.assertEqual(nonce, 0)
 
     def test_handle_web3_exception(self):

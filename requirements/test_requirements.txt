@@ -1,6 +1,0 @@
-# inconsistencies between Travis and dev environment
-# https://github.com/timothycrosley/isort/issues/541
-isort==4.2.5
-flake8==3.3.0
-coverage==4.4.1
-kivyunittest==0.1.8

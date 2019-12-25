@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
-
 import kivy
 from kivy.app import App
 from kivy.logger import LOG_LEVELS, Logger
