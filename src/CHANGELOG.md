@@ -3,8 +3,10 @@
 ## [Unreleased]
 
   - Fix configurable pbkdf2 iterations
-  - Mocks `test_get_transaction_history()`, refs #141
-  - Mocks `test_get_nonce_no_out_transaction()`, refs #153
+  - Bump buildozer and p4a releases
+  - Check Etherscan response status
+  - Set Etherscan API key and user agent
+  - Mock network calls in tests refs #135, #141, #153
 
 ## [v20190812]
 
