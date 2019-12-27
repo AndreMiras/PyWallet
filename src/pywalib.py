@@ -7,11 +7,10 @@ from enum import Enum
 from os.path import expanduser
 
 import requests
+from eth_accounts.account_utils import AccountUtils
 from eth_keyfile import keyfile
 from eth_utils import to_checksum_address
 from web3 import HTTPProvider, Web3
-
-from ethereum_utils import AccountUtils
 
 ETHERSCAN_API_KEY = "R796P9T31MEA24P8FNDZBCA88UHW8YCNVW"
 ROUND_DIGITS = 3

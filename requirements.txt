@@ -2,6 +2,7 @@ coverage==4.4.1
 flake8==3.3.0
 isort==4.2.5
 kivyunittest==0.1.8
+eth-accounts==20191227
 eth-hash==0.1.1
 eth-utils==1.4.1
 https://github.com/AndreMiras/garden.layoutmargin/archive/20180517.tar.gz#egg=layoutmargin
@@ -11,4 +12,4 @@ Kivy==1.11.1
 Pillow==5.2.0
 qrcode==5.3
 raven==6.1.0
-web3==4.8.1
+web3==5.2.0
