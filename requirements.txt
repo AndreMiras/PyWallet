@@ -5,10 +5,10 @@ kivyunittest==0.1.8
 eth-accounts==20191227
 eth-hash==0.1.1
 eth-utils==1.4.1
-https://github.com/AndreMiras/garden.layoutmargin/archive/20180517.tar.gz#egg=layoutmargin
-https://github.com/AndreMiras/garden.zbarcam/archive/20190303.zip#egg=zbarcam
-https://github.com/AndreMiras/KivyMD/archive/20181106.tar.gz#egg=kivymd
 Kivy==1.11.1
+kivy-garden.kivymd==2019.910
+kivy-garden.zbarcam==2019.1020
+layoutmargin==20190911
 Pillow==5.2.0
 qrcode==5.3
 raven==6.1.0
