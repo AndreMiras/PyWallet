@@ -590,10 +590,11 @@ class Test(unittest.TestCase):
             thread.join()
         self.assertEqual(len(Dialog.dialogs), 1)
         dialog = Dialog.dialogs[0]
-        self.assertEqual(dialog.title, 'Decode error')
+        self.assertEqual(dialog.title, 'Unknown error')
         Dialog.dismiss_all_dialogs()
         # the error should be logged
-        mock_logger.error.assert_called_with('ValueError', exc_info=True)
+        mock_logger.error.assert_called_with(
+            'UnknownEtherscanException', exc_info=True)
         # 4) UnknownEtherscanException should be handled
         self.assertEqual(len(Dialog.dialogs), 0)
         with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \
