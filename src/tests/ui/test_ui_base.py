@@ -250,20 +250,11 @@ class Test(unittest.TestCase):
         # verifies clicking send button doesn't crash the application
         send_button_id.dispatch('on_release')
         dialogs = Dialog.dialogs
-        # but it would still raise some popups since the form is invalid
-        self.assertEqual(len(dialogs), 2)
+        # but it would still raise a popup since the form is invalid
+        self.assertEqual(len(dialogs), 1)
         self.assertEqual(dialogs[0].title, 'Input error')
-        self.assertEqual(dialogs[1].title, 'Invalid form')
         Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
-        # also checks for the amount field, refs #152
-        send_amount_id = send.ids.send_amount_id
-        send_amount_id.text = '0.1'
-        # the send_amount property should get updated from the input
-        self.assertEqual(send.send_amount, 0.1)
-        # blank amount shouldn't crash the app, just get ignored
-        send_amount_id.text = ''
-        self.assertEqual(send.send_amount, 0.1)
 
     def helper_test_send(self, app):
         """
@@ -590,10 +581,11 @@ class Test(unittest.TestCase):
             thread.join()
         self.assertEqual(len(Dialog.dialogs), 1)
         dialog = Dialog.dialogs[0]
-        self.assertEqual(dialog.title, 'Decode error')
+        self.assertEqual(dialog.title, 'Unknown error')
         Dialog.dismiss_all_dialogs()
         # the error should be logged
-        mock_logger.error.assert_called_with('ValueError', exc_info=True)
+        mock_logger.error.assert_called_with(
+            'UnknownEtherscanException', exc_info=True)
         # 4) UnknownEtherscanException should be handled
         self.assertEqual(len(Dialog.dialogs), 0)
         with mock.patch('pywalib.PyWalib.get_balance') as mock_get_balance, \

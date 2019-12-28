@@ -1,5 +1,12 @@
 # Change Log
 
+## [v20191228]
+
+  - Bump to API level 28 as required by Play Store
+  - Use the eth-accounts library
+  - Bump kivymd, zbarcam and layoutmargin versions
+  - Improve the send UX and receiver bug
+
 ## [v20191225]
 
   - Fix configurable pbkdf2 iterations

@@ -1,5 +1,9 @@
 # OpenCV
 
+As in OpenCV 4 the method below is deprecated as OpenCV is available from PyPI.
+Itwould be compiled automatically for both Linux and Android.
+
+
 ## Linux Camera support
 In order to be able to use the camera on Linux, you need to compile OpenCV.
 Simply installing `opencv-python` from pypi is not enough.

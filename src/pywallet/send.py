@@ -1,11 +1,13 @@
+import re
+
 from eth_utils import to_checksum_address
 from kivy.app import App
 from kivy.logger import Logger
-from kivy.properties import NumericProperty, StringProperty
+from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivymd.textfields import MDTextField
 
-from pywalib import (ROUND_DIGITS, InsufficientFundsException,
-                     UnknownEtherscanException)
+from pywalib import InsufficientFundsException, UnknownEtherscanException
 from pywallet.passwordform import PasswordForm
 from pywallet.settings import Settings
 from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
@@ -13,11 +15,31 @@ from pywallet.utils import Dialog, load_kv_from_py, run_in_thread
 load_kv_from_py(__file__)
 
 
+def is_number(s):
+    try:
+        float(s)
+    except ValueError:
+        return False
+    return True
+
+
+class MDFloatInput(MDTextField):
+
+    pat = re.compile('[^0-9]')
+
+    def insert_text(self, substring, from_undo=False):
+        pat = self.pat
+        if '.' in self.text:
+            s = re.sub(pat, '', substring)
+        else:
+            s = '.'.join([re.sub(pat, '', s) for s in substring.split('.', 1)])
+        return super().insert_text(s, from_undo=from_undo)
+
+
 class Send(BoxLayout):
 
     password = StringProperty("")
     send_to_address = StringProperty("")
-    send_amount = NumericProperty(0)
 
     def verify_to_address_field(self):
         title = "Input error"
@@ -29,22 +51,6 @@ class Send(BoxLayout):
             dialog.open()
             return False
         return True
-
-    def verify_amount_field(self):
-        title = "Input error"
-        body = "Invalid amount field"
-        if self.send_amount == 0:
-            dialog = Dialog.create_dialog(title, body)
-            dialog.open()
-            return False
-        return True
-
-    def verify_fields(self):
-        """
-        Verifies address and amount fields are valid.
-        """
-        return self.verify_to_address_field() \
-            and self.verify_amount_field()
 
     def on_unlock_clicked(self, dialog, password):
         self.password = password
@@ -67,16 +73,8 @@ class Send(BoxLayout):
                 dialog, content.password))
         return dialog
 
-    def on_send_amount_text(self, instance, value):
-        try:
-            self.send_amount = float(value)
-        except ValueError:
-            # e.g. value is empty, refs #152
-            pass
-
     def on_send_click(self):
-        if not self.verify_fields():
-            Dialog.show_invalid_form_dialog()
+        if not self.verify_to_address_field():
             return
         dialog = self.prompt_password_dialog()
         dialog.open()
@@ -90,11 +88,10 @@ class Send(BoxLayout):
         controller = App.get_running_app().controller
         pywalib = controller.pywalib
         address = to_checksum_address(self.send_to_address)
-        amount_eth = round(self.send_amount, ROUND_DIGITS)
+        amount_eth = float(self.ids.send_amount_id.text)
         amount_wei = int(amount_eth * pow(10, 18))
         gas_price_gwei = Settings.get_stored_gas_price()
         gas_price_wei = int(gas_price_gwei * (10 ** 9))
-        # TODO: not the main account, but the current account
         account = controller.current_account
         Dialog.snackbar_message("Unlocking account...")
         try:

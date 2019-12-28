@@ -7,11 +7,10 @@ from enum import Enum
 from os.path import expanduser
 
 import requests
+from eth_accounts.account_utils import AccountUtils
 from eth_keyfile import keyfile
 from eth_utils import to_checksum_address
 from web3 import HTTPProvider, Web3
-
-from ethereum_utils import AccountUtils
 
 ETHERSCAN_API_KEY = "R796P9T31MEA24P8FNDZBCA88UHW8YCNVW"
 ROUND_DIGITS = 3
@@ -224,12 +223,14 @@ class PyWalib:
         """
         address = sender or self.get_main_account().address
         from_address_normalized = to_checksum_address(address)
+        to_address_normalized = to_checksum_address(to)
         nonce = self.web3.eth.getTransactionCount(from_address_normalized)
         transaction = {
             'chainId': self.chain_id.value,
             'gas': gas,
             'gasPrice': gasprice,
             'nonce': nonce,
+            'to': to_address_normalized,
             'value': value,
         }
         account = self.account_utils.get_by_address(address)

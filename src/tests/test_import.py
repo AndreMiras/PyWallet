@@ -11,7 +11,7 @@ class ModulesImportTestCase(unittest.TestCase):
         self.assertIsNotNone(hashlib.sha3_512())
 
     def test_zbarcam(self):
-        from zbarcam import zbarcam
+        from kivy_garden.zbarcam import zbarcam
         # zbarcam imports PIL and monkey patches it so it has
         # the same interfaces as Pillow
         self.assertTrue(hasattr(zbarcam, 'PIL'))

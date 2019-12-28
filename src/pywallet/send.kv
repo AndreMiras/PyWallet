@@ -1,5 +1,4 @@
-#:import ROUND_DIGITS pywalib.ROUND_DIGITS
-#:import FloatInput pywallet.textfields.FloatInput
+#:import send pywallet.send
 
 
 <Send>:
@@ -17,13 +16,12 @@
     MDRaisedButton:
         text: "Flash QR Code"
         on_release: app.controller.load_flash_qr_code()
-    FloatInput:
+    MDFloatInput:
         id: send_amount_id
         hint_text: "Amount ETH (e.g. 1.10)"
         required: True
         write_tab: False
-        text: str(round(root.send_amount, ROUND_DIGITS))
-        on_text: root.on_send_amount_text(*args)
+        on_text: send_button_id.disabled = not send.is_number(self.text)
     AnchorLayout:
         MDRaisedButton:
             id: send_button_id
