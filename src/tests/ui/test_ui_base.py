@@ -250,20 +250,11 @@ class Test(unittest.TestCase):
         # verifies clicking send button doesn't crash the application
         send_button_id.dispatch('on_release')
         dialogs = Dialog.dialogs
-        # but it would still raise some popups since the form is invalid
-        self.assertEqual(len(dialogs), 2)
+        # but it would still raise a popup since the form is invalid
+        self.assertEqual(len(dialogs), 1)
         self.assertEqual(dialogs[0].title, 'Input error')
-        self.assertEqual(dialogs[1].title, 'Invalid form')
         Dialog.dismiss_all_dialogs()
         self.assertEqual(len(dialogs), 0)
-        # also checks for the amount field, refs #152
-        send_amount_id = send.ids.send_amount_id
-        send_amount_id.text = '0.1'
-        # the send_amount property should get updated from the input
-        self.assertEqual(send.send_amount, 0.1)
-        # blank amount shouldn't crash the app, just get ignored
-        send_amount_id.text = ''
-        self.assertEqual(send.send_amount, 0.1)
 
     def helper_test_send(self, app):
         """
