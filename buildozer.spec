@@ -44,7 +44,7 @@ requirements =
     cffi==1.11.5,
     chardet==3.0.4,
     cytoolz==0.9.0,
-    eth-abi==1.2.2,
+    eth-abi==2.0.0,
     eth-account==0.4.0,
     eth-accounts==20191227,
     eth-hash==0.1.1,
@@ -57,6 +57,8 @@ requirements =
     idna==2.7,
     Kivy==1.11.1,
     kivy-garden.kivymd==2019.910,
+    kivy-garden.qrcode==2019.914,
+    kivy-garden.xcamera==2019.928,
     kivy-garden.zbarcam==2019.1020,
     layoutmargin==20190911,
     libzbar==0.10,
@@ -74,7 +76,7 @@ requirements =
     setuptools==40.9.0,
     toolz==0.9.0,
     urllib3==1.24.1,
-    web3==4.8.1
+    web3==5.2.0
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -82,7 +84,6 @@ requirements =
 
 # (list) Garden requirements
 #garden_requirements =
-garden_requirements = qrcode, xcamera
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png

@@ -7,6 +7,7 @@ eth-hash==0.1.1
 eth-utils==1.4.1
 Kivy==1.11.1
 kivy-garden.kivymd==2019.910
+kivy-garden.qrcode==2019.914
 kivy-garden.zbarcam==2019.1020
 layoutmargin==20190911
 Pillow==5.2.0
