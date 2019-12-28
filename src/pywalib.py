@@ -223,12 +223,14 @@ class PyWalib:
         """
         address = sender or self.get_main_account().address
         from_address_normalized = to_checksum_address(address)
+        to_address_normalized = to_checksum_address(to)
         nonce = self.web3.eth.getTransactionCount(from_address_normalized)
         transaction = {
             'chainId': self.chain_id.value,
             'gas': gas,
             'gasPrice': gasprice,
             'nonce': nonce,
+            'to': to_address_normalized,
             'value': value,
         }
         account = self.account_utils.get_by_address(address)

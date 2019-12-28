@@ -542,6 +542,7 @@ class PywalibTestCase(unittest.TestCase):
             'gas': 25000,
             'gasPrice': 4000000000,
             'nonce': 0,
+            'to': to_checksum_address(to),
             'value': value_wei,
         }
         expected_call = mock.call(transaction, account.privkey)
