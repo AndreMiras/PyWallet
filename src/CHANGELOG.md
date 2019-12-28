@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [v20191228]
 
   - Bump to API level 28 as required by Play Store
   - Use the eth-accounts library
