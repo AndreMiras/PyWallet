@@ -2,7 +2,7 @@ VIRTUAL_ENV ?= venv
 ACTIVATE_PATH=$(VIRTUAL_ENV)/bin/activate
 PIP=$(VIRTUAL_ENV)/bin/pip
 PYTHON_MAJOR_VERSION=3
-PYTHON_MINOR_VERSION=7
+PYTHON_MINOR_VERSION=8
 PYTHON_VERSION=$(PYTHON_MAJOR_VERSION).$(PYTHON_MINOR_VERSION)
 PYTHON_MAJOR_MINOR=$(PYTHON_MAJOR_VERSION)$(PYTHON_MINOR_VERSION)
 PYTHON_WITH_VERSION=python$(PYTHON_VERSION)
@@ -77,7 +77,7 @@ pytest: virtualenv
 test: pytest lint
 	@if test -n "$$CI"; then make uitest; fi; \
 
-uitest:
+uitest: virtualenv
 	. $(ACTIVATE_PATH) && \
 	$(PYTHON) -m kivyunittest --folder src/tests/ui/ --pythonpath src/
 

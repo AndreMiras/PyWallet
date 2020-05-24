@@ -5,17 +5,17 @@
 # docker run pywallet-linux 'make test'
 # Or for interactive shell:
 # docker run -it --rm pywallet-linux
-# TODO:
-#	- delete archives to keep small the container small
-#	- setup caching (for apt, and pip)
-FROM ubuntu:18.04
+# You may need to allow X Server access:
+# xhost +si:localuser:$USER
+FROM ubuntu:20.04
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV WORK_DIR="${HOME_DIR}/app"
 
 # configure locale
-RUN apt update -qq > /dev/null && apt install -qq --yes --no-install-recommends \
+RUN apt update -qq > /dev/null \
+    && DEBIAN_FRONTEND=noninteractive apt install -qq --yes --no-install-recommends \
     locales && \
     locale-gen en_US.UTF-8 && \
     rm -rf /var/lib/apt/lists/*
@@ -24,7 +24,8 @@ ENV LANG="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
 
 # install minimal system dependencies
-RUN apt update -qq > /dev/null && apt install -qq --yes --no-install-recommends \
+RUN apt update -qq > /dev/null \
+    && DEBIAN_FRONTEND=noninteractive apt install -qq --yes --no-install-recommends \
     make \
     sudo \
     && rm -rf /var/lib/apt/lists/*
