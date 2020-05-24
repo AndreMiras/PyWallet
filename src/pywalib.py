@@ -13,6 +13,7 @@ from eth_utils import to_checksum_address
 from web3 import HTTPProvider, Web3
 
 ETHERSCAN_API_KEY = "R796P9T31MEA24P8FNDZBCA88UHW8YCNVW"
+INFURA_PROJECT_ID = "529cca6c4c9d4dfb99464c92f4a25689"
 ROUND_DIGITS = 3
 KEYSTORE_DIR_PREFIX = expanduser("~")
 # default pyethapp keystore path
@@ -45,9 +46,9 @@ class HTTPProviderFactory:
 
     PROVIDER_URLS = {
         # ChainID.MAINNET: 'https://api.myetherapi.com/eth',
-        ChainID.MAINNET: 'https://mainnet.infura.io',
+        ChainID.MAINNET: f"https://mainnet.infura.io/v3/{INFURA_PROJECT_ID}",
         # ChainID.ROPSTEN: 'https://api.myetherapi.com/rop',
-        ChainID.ROPSTEN: 'https://ropsten.infura.io',
+        ChainID.ROPSTEN: f"https://ropsten.infura.io/v3/{INFURA_PROJECT_ID}",
     }
 
     @classmethod
