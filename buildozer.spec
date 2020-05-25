@@ -41,7 +41,7 @@ requirements =
     android,
     attrdict==2.0.0,
     certifi==2018.10.15,
-    cffi==1.11.5,
+    cffi==1.13.2,
     chardet==3.0.4,
     cytoolz==0.9.0,
     eth-abi==2.0.0,
@@ -55,7 +55,7 @@ requirements =
     eth-typing==2.0.0,
     hexbytes==0.1.0,
     idna==2.7,
-    Kivy==1.11.1,
+    Kivy==58e70b1,
     kivy-garden.kivymd==2019.910,
     kivy-garden.qrcode==2019.914,
     kivy-garden.xcamera==2019.928,
@@ -65,7 +65,7 @@ requirements =
     lru-dict==1.1.5,
     openssl,
     parsimonious==0.8.1,
-    Pillow==5.2.0,
+    Pillow==7.0.0,
     pycryptodome==3.4.6,
     python3,
     pyzbar==0.1.8,
@@ -243,7 +243,7 @@ android.arch = armeabi-v7a
 p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = v2019.10.06
+p4a.branch = v2020.04.29
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #p4a.source_dir =
