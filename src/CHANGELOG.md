@@ -1,5 +1,10 @@
 # Change Log
 
+## [v20200524]
+
+  - Bumps dependencies
+  - Infura API key is now mandatory, fixes #158
+
 ## [v20191228]
 
   - Bump to API level 28 as required by Play Store
