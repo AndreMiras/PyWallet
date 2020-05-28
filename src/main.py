@@ -89,9 +89,8 @@ def configure_sentry(in_debug=False):
 
 
 if __name__ == '__main__':
-    # when the -d/--debug flag is set, Kivy sets log level to debug
-    level = Logger.getEffectiveLevel()
-    in_debug = level == LOG_LEVELS.get('debug')
+    # only send Android errors to Sentry
+    in_debug = platform != "android"
     client = configure_sentry(in_debug)
     try:
         PyWalletApp().run()
