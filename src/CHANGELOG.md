@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+  - Custom APK versionCode
+
 ## [v20200524]
 
   - Bumps dependencies
