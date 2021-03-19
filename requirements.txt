@@ -10,7 +10,7 @@ kivy-garden.kivymd==2019.910
 kivy-garden.qrcode==2019.914
 kivy-garden.zbarcam==2019.1020
 layoutmargin==20190911
-Pillow==7.0.0
+Pillow==8.1.1
 qrcode==5.3
 raven==6.1.0
 web3==5.2.0
